@@ -21,6 +21,9 @@ CMakeFiles/
 cmake_install.cmake
 Makefile
 
+# bear compile database
+compile_commands.json
+
 # ==============================
 # IDE / Editor
 # ==============================
