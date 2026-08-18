@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '{print $9, $5}')",
+      "Bash(docker exec strange_villani bash -c ' *)",
+      "Read(//c/neurosys/nurosys/**)",
+      "Read(//c/neurosys/nurosys/app/src/main/java/com/example/tubroair/uart/**)",
+      "Read(//c/neurosys/nurosys/app/src/main/java/com/example/tubroair/**)",
+      "Read(//c/Users/ADMINI~1/AppData/Local/Temp/claude/c--neurosys-bk-avdk-smp706/5b5d7730-7392-4bb0-98f4-2b51220ee2f6/scratchpad/**)",
+      "Bash(/c/Python313/python.exe -c ' *)"
+    ]
+  }
+}
