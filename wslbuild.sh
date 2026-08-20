@@ -4,20 +4,21 @@
 # project will be built in the wsl environment and output will be copied to the windows host to burn
 # 2026 08 20 BYuM @ 연구개발부
 # tgkim@neurosys.co.kr
-# 
+# version 26.08.20.03
 
 set -e
 
-FULL_PROJECT="lvgl/korea_test"
+FULL_PROJECT=""
 NOCLEAN=false
 
 while [ $# -gt 0 ]; do
     case "$1" in
         --help)
-            echo "Usage: $0 [--noclean] [--project <project_name>]"
+            echo "Usage: $0 --project <project_name> [--noclean] [--lfsSize <size>] [--output <directory>]"
             echo "  --noclean : Do not clean build artifacts after build"
             echo "  --project <project_name> : Specify the project name to build"
-            echo "  --lfsSize <size> : Specify the size of the littleFS partition"
+            echo "  --lfsSize <size> : Specify the size of the littleFS partition in bytes [default: calculated from source files]"
+            echo "  --output <directory> : Specify the output directory for build artifacts [default: /mnt/c/build_output/<project_name>]"
             exit 0
             ;;
 
@@ -46,6 +47,16 @@ while [ $# -gt 0 ]; do
             shift 2
             ;;
 
+        --output)
+            if [ -z "$2" ]; then
+                echo "Error: --output option requires a directory path"
+                exit 1
+            fi
+
+            OUTPUT_DIR="$2"
+            shift 2
+            ;;
+
         *)
             echo "Error: Unknown option: $1"
             exit 1
@@ -53,7 +64,14 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-OUTPUT_DIR="/mnt/c/workspace/2026/beken/output"
+if [ -z "$FULL_PROJECT" ]; then
+    echo "Error: --project option is required"
+    exit 1
+fi
+
+if [ -z "$OUTPUT_DIR" ]; then
+    OUTPUT_DIR="/mnt/c/build_output/${FULL_PROJECT}"
+fi
 PROJECT="${FULL_PROJECT##*/}"
 PARTITION_TABLE="build/bk7258/${PROJECT}/partitions/partitions.csv"
 BUILD_OUTPUT="build/bk7258/${PROJECT}/package/all-app.bin"
@@ -84,8 +102,9 @@ while true; do
         -s "${SIZE}" \
         "${LITTLEFS_OUTPUT}" 2>&1
     )
-
-    if echo "$LITTLEFS_TRY" | grep -q "error adding file!" || echo "$LITTLEFS_TRY" | grep -q "No more free space"; then # 나도 이러고싶진 않았어. done message가 없는데 어캄.
+    
+    # i don't want to validate the size like this but mklittlefs does not provide return codes.
+    if echo "$LITTLEFS_TRY" | grep -q "error adding file!" || echo "$LITTLEFS_TRY" | grep -q "No more free space"; then 
         SIZE=$((SIZE + 4096))
         if [ "$NOTICED" = false ]; then
         NOTICED=true
