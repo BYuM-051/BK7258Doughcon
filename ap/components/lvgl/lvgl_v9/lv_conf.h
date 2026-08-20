@@ -185,7 +185,11 @@
     /** Set number of draw units.
      *  - > 1 requires operating system to be enabled in `LV_USE_OS`.
      *  - > 1 means multiple threads will render the screen in parallel. */
-    #define LV_DRAW_SW_DRAW_UNIT_CNT    1
+    /*  [NOTE]
+    *   sw draw unit을 늘려보려 했으나 heap corruption으로 인한 문제 발생으로, 우선 이 부분은 단일스레드 렌더링으로 갑니다.
+    *   check log 0820_1422 + 0820_1444
+    **/ 
+    #define LV_DRAW_SW_DRAW_UNIT_CNT    1   //#define LV_DRAW_SW_DRAW_UNIT_CNT    2
 
     /** Use Arm-2D to accelerate software (sw) rendering. */
     #define LV_USE_DRAW_ARM2D_SYNC      0
