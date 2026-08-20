@@ -29,7 +29,6 @@ void lvgl_vfs_init_flash_quick(void)
     int ret = mount("SOURCE_NONE", "/", "littlefs", 0, &partition);
     if (ret < 0)
         bk_printf("[lvgl_vfs] quick flash mount fail:%d\r\n", ret);
-    else
         bk_printf("[lvgl_vfs] quick flash mount OK\r\n");
 
     bk_flash_set_protect_type(type);

@@ -167,7 +167,13 @@
  *    자동설정/메모리모드/기능설정 오브젝트는 warmup 후에도 destroy하지 않고
  *    살려둔 채 main으로 복귀 — 이후 실제 진입 시 재생성 없이 그대로 재사용됨.
  * 0: 워밍업 없이 기존처럼 부팅 후 바로 main 표시 (각 화면 첫 진입이 느림). */
-#define UI_BOOT_WARMUP_ENABLE   0
+    /*  [NOTE]
+    *   WARMUP을 ENABLE해도, 바로 drop해서인지 아니면 소스부가 달라서인지 딱히 변화가 없다.
+    *   그러나 cache drop을 disable하면 warmup시 기하급수적으로 빨라진다. 그러나 힙 부족으로 죽을 가능성이 크니까
+    *   일단 ram region을 확보하고 warmup위치를 fix하고 cache drop을 enable하는게 맞을 것.
+    *   check log before + 0820_1541 + 0820_1552
+    **/ 
+#define UI_BOOT_WARMUP_ENABLE   1
 
 /* 1: password_popup.jpg canvas(~602KB)를 settingmode를 나갈 때 free하지 않고
  *    계속 유지 — settingmode 1차/2차 진입이 매번 똑같이 느렸던 원인(매번

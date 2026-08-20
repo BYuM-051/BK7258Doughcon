@@ -32,6 +32,8 @@
 /*Display being refreshed*/
 #define disp_refr LV_GLOBAL_DEFAULT()->disp_refresh
 
+#define TAG "[lv_refr.c] "
+
 /**********************
  *      TYPEDEFS
  **********************/
@@ -82,6 +84,7 @@ void lv_refr_deinit(void)
 
 void lv_refr_now(lv_display_t * disp)
 {
+    bk_printf(TAG "lv_refr_now() called\n");
     lv_anim_refr_now();
 
     if(disp) {
@@ -95,6 +98,7 @@ void lv_refr_now(lv_display_t * disp)
             d = lv_display_get_next(d);
         }
     }
+    bk_printf(TAG "lv_refr_now() done\n");
 }
 
 void lv_obj_redraw(lv_layer_t * layer, lv_obj_t * obj)
