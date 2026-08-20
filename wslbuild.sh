@@ -10,6 +10,7 @@ set -e
 
 FULL_PROJECT=""
 NOCLEAN=false
+LFSBUILD=true
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -17,7 +18,7 @@ while [ $# -gt 0 ]; do
             echo "Usage: $0 --project <project_path> [--noclean] [--lfsSize <size>] [--output <directory>]"
             echo "  --noclean : Do not clean build artifacts after build"
             echo "  --project <project_path> : Specify the project path to build"
-            echo "  --lfsSize <size> : Specify the size of the littleFS partition in bytes [default: calculated from source files]"
+            echo "  --lfsSize <size> : Specify the size of the littleFS partition in bytes [0 to skip littleFS build]"
             echo "  --output <directory> : Specify the output directory for build artifacts [default: /mnt/c/build_output/<project_name>]"
             exit 0
             ;;
@@ -44,6 +45,14 @@ while [ $# -gt 0 ]; do
             fi
 
             SIZE="$2"
+
+            if
+                ! [[ "$SIZE" =~ ^[0-9]+$ ]]; then
+                echo "Error: --lfsSize value must be a positive integer"
+                exit 1
+                elif [ "$SIZE" == "0" ]; then
+                LFSBUILD=false
+            fi
             shift 2
             ;;
 
@@ -72,7 +81,6 @@ fi
 if [ -z "$OUTPUT_DIR" ]; then
     OUTPUT_DIR="/mnt/c/build_output/${FULL_PROJECT}"
 fi
-OUTPUT_DIR="${OUTPUT_DIR}/${FULL_PROJECT}"
 PROJECT="${FULL_PROJECT##*/}"
 PARTITION_TABLE="build/bk7258/${PROJECT}/partitions/partitions.csv"
 BUILD_OUTPUT="build/bk7258/${PROJECT}/package/all-app.bin"
@@ -86,6 +94,7 @@ echo "[SHELL]===========================[BUILD] PROJECT=${PROJECT}"
 make bk7258 PROJECT="${FULL_PROJECT}" > /dev/null 2>&1
 echo "[SHELL]===========================[BUILD_DONE]"
 
+if [ "$LFSBUILD" = true ]; then
 echo "[SHELL]===========================[Make littleFS]"
 #validate littleFS size
 #check the file source directory and match -s option in mklittlefs command
@@ -122,12 +131,14 @@ while true; do
     fi
 done
 echo "[SHELL]===========================[Make littleFS Done]"
-
+fi
 echo "[SHELL]===========================[COPY OUTPUT] ${OUTPUT_DIR}/"
 mkdir -p "${OUTPUT_DIR}"
 cp "${BUILD_OUTPUT}" "${OUTPUT_DIR}/"
 cp "${PARTITION_TABLE}" "${OUTPUT_DIR}/"
+if [ "$LFSBUILD" = true ]; then
 cp "${LITTLEFS_OUTPUT}" "${OUTPUT_DIR}/"
+fi
 echo "[SHELL]===========================[COPY_OUTPUT_DONE]"
 
 if [ "$NOCLEAN" = false ]; then
@@ -143,5 +154,7 @@ fi
 echo "[SHELL]===========================[BUILD_COMPLETE]"
 echo "[SHELL]===========================[ALL_APP] ${OUTPUT_DIR}/all-app.bin"
 echo "[SHELL]===========================[PARTITIONS] ${OUTPUT_DIR}/partitions.csv"
+if [ "$LFSBUILD" = true ]; then
 echo "[SHELL]===========================[LITTLEFS] ${OUTPUT_DIR}/littlefs.bin"
 echo "[SHELL]===========================[LITTLEFS_SIZE] ${SIZE}"
+fi
