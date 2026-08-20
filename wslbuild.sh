@@ -4,7 +4,7 @@
 # project will be built in the wsl environment and output will be copied to the windows host to burn
 # 2026 08 20 BYuM @ 연구개발부
 # tgkim@neurosys.co.kr
-# version 26.08.20.03
+# version 26.08.20.04
 
 set -e
 
@@ -53,7 +53,7 @@ while [ $# -gt 0 ]; do
                 exit 1
             fi
 
-            OUTPUT_DIR="$2"
+            OUTPUT_DIR="/mnt/c/${2}/"
             shift 2
             ;;
 
@@ -72,6 +72,7 @@ fi
 if [ -z "$OUTPUT_DIR" ]; then
     OUTPUT_DIR="/mnt/c/build_output/${FULL_PROJECT}"
 fi
+OUTPUT_DIR="${OUTPUT_DIR}/${FULL_PROJECT}"
 PROJECT="${FULL_PROJECT##*/}"
 PARTITION_TABLE="build/bk7258/${PROJECT}/partitions/partitions.csv"
 BUILD_OUTPUT="build/bk7258/${PROJECT}/package/all-app.bin"
