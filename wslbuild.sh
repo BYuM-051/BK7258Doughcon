@@ -14,9 +14,9 @@ NOCLEAN=false
 while [ $# -gt 0 ]; do
     case "$1" in
         --help)
-            echo "Usage: $0 --project <project_name> [--noclean] [--lfsSize <size>] [--output <directory>]"
+            echo "Usage: $0 --project <project_path> [--noclean] [--lfsSize <size>] [--output <directory>]"
             echo "  --noclean : Do not clean build artifacts after build"
-            echo "  --project <project_name> : Specify the project name to build"
+            echo "  --project <project_path> : Specify the project path to build"
             echo "  --lfsSize <size> : Specify the size of the littleFS partition in bytes [default: calculated from source files]"
             echo "  --output <directory> : Specify the output directory for build artifacts [default: /mnt/c/build_output/<project_name>]"
             exit 0
@@ -24,7 +24,7 @@ while [ $# -gt 0 ]; do
 
         --project)
             if [ -z "$2" ]; then
-                echo "Error: --project option requires a project name"
+                echo "Error: --project option requires a project path"
                 exit 1
             fi
 
@@ -102,7 +102,7 @@ while true; do
         -s "${SIZE}" \
         "${LITTLEFS_OUTPUT}" 2>&1
     )
-    
+
     # i don't want to validate the size like this but mklittlefs does not provide return codes.
     if echo "$LITTLEFS_TRY" | grep -q "error adding file!" || echo "$LITTLEFS_TRY" | grep -q "No more free space"; then 
         SIZE=$((SIZE + 4096))
