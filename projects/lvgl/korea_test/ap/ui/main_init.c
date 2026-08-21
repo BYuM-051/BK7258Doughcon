@@ -7,6 +7,8 @@
 #include <string.h>
 
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
+
 extern void lv_digital_clock_register(lv_obj_t *label, int show_second, int use_ampm, int hour, int minute, int second);
 extern void lv_digital_date_register(lv_obj_t *label);
 extern void lv_digital_clock_unregister(lv_obj_t *label);
@@ -58,7 +60,7 @@ void init_page_main(bk_lv_ui_t * bk_ui) {
      * 2024-06-19: 근데 이거 unregister() 해주고 destroy_page_main() 호출하면, digital clock/date 오브젝트가 unregister() 되면서, digital clock/date 오브젝트가 화면에서 사라짐. 그래서 destroy_page_main() 호출 전에 unregister() 해주면 안 되고, destroy_page_main() 호출 후에 unregister() 해주도록 함
      */
     ui_lang_reset_main_cache();
-    bk_ui->main = lv_obj_create(NULL);
+    bk_ui->main = lv_obj_create(preRenderRoot);
     lv_obj_set_size(bk_ui->main, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->main, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->main, main_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);

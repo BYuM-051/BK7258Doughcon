@@ -13,6 +13,8 @@
 #define TAG "[main_cb.c] "
 
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
+
 extern void destroy_page_main(bk_lv_ui_t *bk_ui);
 extern void destroy_page_manualmode(bk_lv_ui_t *bk_ui);
 extern int settings_get_int(const char *key);
@@ -186,10 +188,18 @@ void main_automode_event_cb(lv_event_t *e)
     uint32_t _t0 = lv_tick_get();
     bk_printf(TAG "[SCREEN] ── main→automode ──────────────────\n");
     if (bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))
+    {
         init_page_automode(bk_ui);
-    bk_printf(TAG "[SCREEN] init_page_automode: %lu ms\n", lv_tick_elaps(_t0));
+        bk_printf(TAG "[SCREEN] init_page_automode: %lu ms\n", lv_tick_elaps(_t0));
+    }
+    else
+    {
+        bk_printf(TAG "[SCREEN] automode already exists, skipping init\n");
+    }
     _t0 = lv_tick_get();
-    lv_scr_load(bk_ui->automode);
+    // lv_scr_load(bk_ui->automode); //여기를 어떻게 잘 조지면 모든게 완벽하게 될것같은데 말이야.
+    lv_obj_move_to_index(bk_ui->automode, -1);
+    lv_obj_invalidate(preRenderRoot);
     bk_printf(TAG "[SCREEN] lv_scr_load       : %lu ms\n", lv_tick_elaps(_t0));
     /* lv_scr_load는 화면 포인터만 바꾸고 실제 렌더링/플러시는 다음 lv_timer_handler
      * 틱에서 일어남 — 여기서 강제로 즉시 그려서 "실제 화면이 보이는 시점"을 측정. */
