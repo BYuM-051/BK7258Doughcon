@@ -167,12 +167,12 @@
  *    자동설정/메모리모드/기능설정 오브젝트는 warmup 후에도 destroy하지 않고
  *    살려둔 채 main으로 복귀 — 이후 실제 진입 시 재생성 없이 그대로 재사용됨.
  * 0: 워밍업 없이 기존처럼 부팅 후 바로 main 표시 (각 화면 첫 진입이 느림). */
-    /*  [NOTE]
-    *   WARMUP을 ENABLE해도, 바로 drop해서인지 아니면 소스부가 달라서인지 딱히 변화가 없다.
-    *   그러나 cache drop을 disable하면 warmup시 기하급수적으로 빨라진다. 그러나 힙 부족으로 죽을 가능성이 크니까
-    *   일단 ram region을 확보하고 warmup위치를 fix하고 cache drop을 enable하는게 맞을 것.
-    *   check log before + 0820_1541 + 0820_1552
-    **/ 
+/*  [NOTE]
+ *   WARMUP을 ENABLE해도, 바로 drop해서인지 아니면 소스부가 달라서인지 딱히 변화가 없다.
+ *   그러나 cache drop을 disable하면 warmup시 기하급수적으로 빨라진다. 그러나 힙 부족으로 죽을 가능성이 크니까
+ *   일단 ram region을 확보하고 warmup위치를 fix하고 cache drop을 enable하는게 맞을 것.
+ *   check log before + 0820_1541 + 0820_1552
+ **/ 
 #define UI_BOOT_WARMUP_ENABLE   1
 
 /* 1: password_popup.jpg canvas(~602KB)를 settingmode를 나갈 때 free하지 않고
@@ -230,5 +230,14 @@
 #define UI_CACHE_DROP_LOW_MEM_ENABLE          1
 #define UI_CACHE_DROP_LOW_MEM_THRESHOLD_BYTES (2 * 1024 * 1024)
 #define UI_CACHE_DROP_LOW_MEM_COOLDOWN_MS     (20 * 1000)
+
+/* 1 : PSRAM에 littleFS를 마운트하여, flash에 접근하는 레이턴시를 줄인다. (lvgl_vfs_init.c)
+ * 0 : PSRAM에 littleFS를 마운트하지 않아서, littleFS가 잡아먹던 자리를 Pre-rendering에 사용한다.
+ **/
+#define UI_LFS_PSRAM_CACHE_ENABLE 0
+
+#if !(UI_LFS_PSRAM_CACHE_ENABLE)
+#define UI_PRENDERING_ENABLE 1
+#endif
 
 #endif /* UI_CONFIG_H */

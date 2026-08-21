@@ -2,7 +2,7 @@
 #include "beken_ui.h"
 #include "custom_func.h"
 #include "event_runtime.h"
-// #include <stdio.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "beken_ui.h"
@@ -19,7 +19,8 @@ extern int settings_get_int(const char *key);
 extern void automode_mm_prewarm_start(void);
 extern void automode_mm_prewarm_cancel(void);
 
-static uint32_t last_click/* ── 공유 이미지 캐시(LV_CACHE_DEF_SIZE) 주기적 강제 정리 ─────────────────
+static uint32_t last_click_time = 0;
+/* ── 공유 이미지 캐시(LV_CACHE_DEF_SIZE) 주기적 강제 정리 ─────────────────
  * lodepng/JPEG 디코더가 내부적으로 realloc하며 커지는 임시 버퍼는 우리가 소유한
  * 고정 크기 캔버스가 아니라서 미리 선점해둘 수 없다 — 대신 장시간 사용 시
  * PSRAM 단편화가 누적되면서 이 임시 realloc 자체가 실패해 하드크래시로 이어짐

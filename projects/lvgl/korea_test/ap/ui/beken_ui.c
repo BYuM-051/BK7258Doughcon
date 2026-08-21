@@ -155,16 +155,20 @@ static void _uart_comm_task(beken_thread_arg_t arg)
     rtc_sync_init();
     printf("[BOOT] rtc_sync_init: %lu ms\n", lv_tick_elaps(_boot_t));
 
+#if UI_LFS_PSRAM_CACHE_ENABLE // follow the preprocessor directives and check ui_config.h
     /* Phase 2: flash→PSRAM 복사 + 재마운트 (~12s, LVGL lock 상태).
      * (한때 이 복사를 생략해 3.85MB를 아껴보려 했으나, 실측 결과 free PSRAM이
      * 전혀 늘지 않고 crash도 동일하게 재현됨 — LFS_PSRAM_ADDR 영역은 heap과
      * 별도로 정적 예약된 주소범위라 복사를 생략해도 힙에 반환되지 않는 것으로
-     * 보임. 속도만 느려지므로 원복.) */
+     * 보임. 속도만 느려지므로 원복.) (나는 그렇게 생각 안합니다 :/) */
     printf("[BOOT] VFS copy flash->PSRAM start\n");
     lv_vendor_disp_lock();
     _boot_t = lv_tick_get();
     lvgl_vfs_copy_and_remount_psram();
     printf("[BOOT] VFS copy+remount: %lu ms\n", lv_tick_elaps(_boot_t));
+#else
+    lv_vendor_disp_lock();
+#endif /*UI_LFS_PSRAM_CACHE_ENABLE*/
 
     /* Phase 3: UI 초기화 (PSRAM VFS 기반) */
     _boot_t = lv_tick_get();
@@ -179,6 +183,8 @@ static void _uart_comm_task(beken_thread_arg_t arg)
     init_page_timebar(&bk_lv_tool_ui);
     ui_lang_apply_timebar(&bk_lv_tool_ui);
     printf("[BOOT] init_page_timebar: %lu ms\n", lv_tick_elaps(_boot_t));
+
+
 
     if (!g_device_state.black_out_checking) {
 #if UI_BOOT_WARMUP_ENABLE

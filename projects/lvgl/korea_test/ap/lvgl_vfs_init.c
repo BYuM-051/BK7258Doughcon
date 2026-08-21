@@ -3,6 +3,7 @@
 #include "os/mem.h"
 #include "os/str.h"
 #include "bk_posix.h"
+#include "ui_config.h"
 
 #if CONFIG_LITTLEFS
 #include "driver/flash_partition.h"
@@ -28,12 +29,19 @@ void lvgl_vfs_init_flash_quick(void)
 
     int ret = mount("SOURCE_NONE", "/", "littlefs", 0, &partition);
     if (ret < 0)
+    {
         bk_printf("[lvgl_vfs] quick flash mount fail:%d\r\n", ret);
+    }
+    else
+    {
         bk_printf("[lvgl_vfs] quick flash mount OK\r\n");
+    }
 
     bk_flash_set_protect_type(type);
 }
 
+// LFS_MEM으로 마운트 되어있는 자리에 lvgl을 pre-render할 계획이므로, PSRAM을 마운트 하지 않는다. 이자리는 내거야
+#if UI_LFS_PSRAM_CACHE_ENABLE
 /* flash→PSRAM 복사 후 LFS_MEM 으로 재마운트 (~12s, LVGL lock 상태에서 호출) */
 void lvgl_vfs_copy_and_remount_psram(void)
 {
@@ -63,6 +71,7 @@ void lvgl_vfs_copy_and_remount_psram(void)
     else
         bk_printf("[lvgl_vfs] PSRAM remount OK\r\n");
 }
+#endif
 
 void lvgl_vfs_init_flash(void)
 {
