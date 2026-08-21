@@ -110,7 +110,7 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
     ts = lv_tick_get();
     init_page_automode(bk_ui);
     lv_scr_load(bk_ui->automode);
-    // lv_obj_add_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN); // hidden으로 하면 실제로 render가 안됨.
+    // lv_obj_add_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN); // hidden으로 하면 실제로 render가 안됨. 이거 이런식으로 하는게 아니라 screen을 하나 두고 child만 계속 바꿔끼는 식으로 해야겠는데?
     lv_refr_now(NULL); // 아 이거 안하면 ㅅㅂ 안되는데
     printf("[BOOT] warmup automode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 

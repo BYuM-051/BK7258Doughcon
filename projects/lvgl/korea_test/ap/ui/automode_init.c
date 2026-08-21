@@ -647,6 +647,7 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
         LV_EVENT_SCREEN_LOADED, 
         (void*) bk_ui->automode
     ); // pre-renderer wrapper는 이곳에 있어야 ui가 모두 생성된 이후에 호출되어서 null pointer dereference가 발생하지 않음.
+    //아냐 여기도 아냐. pre-renderer는 화면 전환시에 호출되어야해. 여기는 생성부라서 안맞아.
 #endif /* UI_PRENDERING_ENABLE */
     bk_printf(TAG "[IMGTIME] ===== automode init total: %lu ms =====\n", lv_tick_elaps(_t_start));
 }
