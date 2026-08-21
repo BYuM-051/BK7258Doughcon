@@ -32,6 +32,7 @@ static uint32_t last_click_time = 0;
 static uint32_t s_last_cache_drop_tick = 0;
 static bool     s_cache_drop_done_once = false;
 
+#if !(UI_PRENDERING_ENABLE)
 static void _periodic_cache_drop_if_due(void)
 {
     if (!s_cache_drop_done_once || lv_tick_elaps(s_last_cache_drop_tick) >= _CACHE_DROP_INTERVAL_MS) {
@@ -41,6 +42,7 @@ static void _periodic_cache_drop_if_due(void)
         bk_printf(TAG "[MEM] shared image cache dropped (periodic defrag)\n");
     }
 }
+#endif /* NOT UI_PRENDERING_ENABLE */
 
 /* Settingmode image prewarm — loads image(s) one per tick while user is on main screen.
  * UI_SETTINGMODE_COMBINED_BG_ENABLE=1: settingmode is now a single combined
@@ -325,7 +327,9 @@ void main_load_event_cb(lv_event_t *e)
         return;
     }
     if (code == LV_EVENT_SCREEN_LOADED) {
+#if !(UI_PRENDERING_ENABLE)
         _periodic_cache_drop_if_due();
+#endif /* NOT UI_PRENDERING_ENABLE */
         _sm_prewarm_start();
         automode_mm_prewarm_start();
         _am_prewarm_start();

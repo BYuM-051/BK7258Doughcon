@@ -48,8 +48,17 @@ void init_page_main(bk_lv_ui_t * bk_ui) {
     // lv_obj_set_style_bg_color(bk_ui->main, lv_color_hex(0xD5D5D5), 0);
     // lv_obj_set_style_bg_opa(bk_ui->main, LV_OPA_COVER, 0);
     // lv_obj_add_event_cb(bk_ui->main, main_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
+    /* 느낌 쎄한데?
+     * 이거 이렇게 재사용 안 하고 마구 root에서 새로 만들면, 기존에 오브젝트들 garbage collection 안 될것 같은데.
+     * 그래서 main_init.c에서 init_page_main() 호출할 때, 기존에 main 오브젝트 있으면 destroy_page_main() 호출해서 지우고 새로 만들도록 함.
+     * 근데 이거 destroy_page_main() 호출하면, main 오브젝트 안에 있는 digital clock/date 오브젝트도 같이 지워지는데, 이거는 destroy_page_main() 호출 전에
+     * digital clock/date 오브젝트 unregister() 해줘야 함. 안 그러면 unregister() 안 된 오브젝트가 남아서, 나중에 다시 init_page_main() 호출하면
+     * digital clock/date 오브젝트가 새로 만들어지는데, 기존에 unregister() 안 된 오브젝트가 남아있어서, digital clock/date 오브젝트가 2개가 되어버림. 
+     * 그래서 destroy_page_main() 호출 전에 digital clock/date 오브젝트 unregister() 해주도록 함.
+     * 2024-06-19: 근데 이거 unregister() 해주고 destroy_page_main() 호출하면, digital clock/date 오브젝트가 unregister() 되면서, digital clock/date 오브젝트가 화면에서 사라짐. 그래서 destroy_page_main() 호출 전에 unregister() 해주면 안 되고, destroy_page_main() 호출 후에 unregister() 해주도록 함
+     */
     ui_lang_reset_main_cache();
-      bk_ui->main = lv_obj_create(NULL);
+    bk_ui->main = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->main, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->main, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->main, main_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);

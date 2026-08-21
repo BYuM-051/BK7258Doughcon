@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "preRenderer.h"
+
+#define TAG "[automode_init.c] "
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 // void init_keypad_group(bk_lv_ui_t *bk_ui);
 extern void automode_backbt_event_cb(lv_event_t *e);
@@ -72,11 +76,14 @@ void destroy_page_automode(bk_lv_ui_t *bk_ui)
     bk_ui->automode_AutoModeFermentation2TimeMinUnderBarIm   = NULL;
 }
 
-void init_page_automode(bk_lv_ui_t * bk_ui) {
+void init_page_automode(bk_lv_ui_t * bk_ui) 
+{
     uint32_t _t_start = lv_tick_get();
-    printf("[IMGTIME] ===== automode init start =====\n");
 
-    if (bk_ui->automode != NULL && lv_obj_is_valid(bk_ui->automode)) {
+    bk_printf(TAG "[IMGTIME] ===== automode init start =====\n");
+    
+    if (bk_ui->automode != NULL && lv_obj_is_valid(bk_ui->automode)) 
+    {
         destroy_page_automode(bk_ui);
     }
 
@@ -630,10 +637,18 @@ void init_page_automode(bk_lv_ui_t * bk_ui) {
     lv_obj_set_pos(bk_ui->automode_AutoModeFermentation2TimeCheckBoxIm, 854, 320);
     lv_obj_set_size(bk_ui->automode_AutoModeFermentation2TimeCheckBoxIm, 142, 99);
     // keypadbaseim + KeyPad: lazy-created in _keypad_on_automode on first use
-
     // auto_f1~f4: lazy-created in automode_load_event_cb only when °F mode active
 
-    printf("[IMGTIME] ===== automode init total: %lu ms =====\n", lv_tick_elaps(_t_start));
+#if UI_PRENDERING_ENABLE
+    lv_obj_add_event_cb
+    (
+        bk_ui->automode, 
+        preRendererWrapper, 
+        LV_EVENT_SCREEN_LOADED, 
+        (void*) bk_ui->automode
+    ); // pre-renderer wrapper는 이곳에 있어야 ui가 모두 생성된 이후에 호출되어서 null pointer dereference가 발생하지 않음.
+#endif /* UI_PRENDERING_ENABLE */
+    bk_printf(TAG "[IMGTIME] ===== automode init total: %lu ms =====\n", lv_tick_elaps(_t_start));
 }
 
 void init_keypad_group(bk_lv_ui_t *bk_ui) {
