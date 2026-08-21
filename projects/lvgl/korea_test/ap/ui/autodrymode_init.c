@@ -7,6 +7,7 @@
 #include <string.h>
 
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 extern void autodrymode_backbt_event_cb(lv_event_t *e);
 extern void autodrymode_auto_dry_temp_bt_event_cb(lv_event_t *e);
 extern void autodrymode_auto_dry_humidity_bt_event_cb(lv_event_t *e);
@@ -49,7 +50,8 @@ void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
     }
 
     ui_lang_reset_autodrymode_cache();
-    bk_ui->autodrymode = lv_obj_create(NULL);
+    // bk_ui->autodrymode = lv_obj_create(NULL);
+    bk_ui->autodrymode = lv_obj_create(preRenderRoot);
     lv_obj_set_size(bk_ui->autodrymode, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->autodrymode, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_load_event_cb, LV_EVENT_ALL, NULL);

@@ -30,6 +30,8 @@
 #include "ui_lang.h"
 
 bk_lv_ui_t bk_lv_tool_ui = {0};
+lv_obj_t *preRenderRoot = NULL;
+
 
 /**
  * @brief Get the configured screen width
@@ -129,6 +131,8 @@ static void _uart_comm_task(beken_thread_arg_t arg)
 {
     (void)arg;
     uint32_t _boot_t;
+
+    preRenderRoot = lv_obj_create(NULL);
 
     /* 크래시 로그를 코드 상태와 정확히 매칭하기 위한 빌드 마커.
      * PSRAM 조각화 크래시(psram_malloc_cm:722) 대응 진행 상황을 여기 반영:

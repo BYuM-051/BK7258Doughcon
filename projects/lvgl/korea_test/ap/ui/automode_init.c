@@ -11,6 +11,7 @@
 #define TAG "[automode_init.c] "
 
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 // void init_keypad_group(bk_lv_ui_t *bk_ui);
 extern void automode_backbt_event_cb(lv_event_t *e);
 extern void automode_startbt_event_cb(lv_event_t *e);
@@ -90,8 +91,17 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
     /* 오브젝트를 새로 만드므로 ui_lang 캐시를 무효화 — 다음 SCREEN_LOAD_START의
      * ui_lang_apply_automode()가 언어 변경 여부와 무관하게 반드시 새 이미지를 채우게 함 */
     ui_lang_reset_automode_cache();
+    bk_printf(TAG "still alive before create under preRenderRoot: %p\n", preRenderRoot);
 
-    bk_ui->automode = lv_obj_create(NULL);
+    if(lv_obj_is_valid(preRenderRoot))
+    {
+        bk_printf(TAG "preRenderRoot is valid\n");
+    }
+    else
+    {
+        bk_printf(TAG "preRenderRoot is NOT valid\n");
+    }
+    bk_ui->automode = lv_obj_create(preRenderRoot);
     lv_obj_set_size(bk_ui->automode, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->automode, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->automode, automode_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);

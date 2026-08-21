@@ -7,6 +7,7 @@
 #include <string.h>
 
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 extern void manualmode_backbt_event_cb(lv_event_t *e);
 extern void manualmode_manual_freezebt_event_cb(lv_event_t *e);
 extern void manualmode_manual_defrostbt_event_cb(lv_event_t *e);
@@ -30,7 +31,7 @@ void init_page_manualmode(bk_lv_ui_t * bk_ui) {
     }
 
     ui_lang_reset_manualmode_cache();
-    bk_ui->manualmode = lv_obj_create(NULL);
+    bk_ui->manualmode = lv_obj_create(preRenderRoot);
     lv_obj_set_size(bk_ui->manualmode, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->manualmode, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->manualmode, manualmode_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
