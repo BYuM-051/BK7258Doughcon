@@ -111,14 +111,14 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
 
     ts = lv_tick_get();
     init_page_automode(bk_ui);
-    lv_scr_load(bk_ui->automode);
+    // lv_scr_load(bk_ui->automode);
     // lv_obj_add_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN); // hidden으로 하면 실제로 render가 안됨. 이거 이런식으로 하는게 아니라 screen을 하나 두고 child만 계속 바꿔끼는 식으로 해야겠는데?
     lv_refr_now(NULL); // 아 이거 안하면 ㅅㅂ 안되는데
     printf("[BOOT] warmup automode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
     /* main으로 최종 전환 — automode 오브젝트는 destroy하지 않고 그대로 둠:
      * 실제 진입 시 재생성 없이 재사용된다. */
-    lv_scr_load(bk_ui->main);
+    lv_scr_load(preRenderRoot);
     lv_refr_now(NULL);
     lv_obj_del(cover);
     lv_refr_now(NULL);
@@ -132,14 +132,12 @@ static void _uart_comm_task(beken_thread_arg_t arg)
     (void)arg;
     uint32_t _boot_t;
 
+    // preRenderRoot를 screen으로 만들어서 셋팅빼고는 전부 preRenderRoot의 child로 만들면. z offset만 바꿔서 빠르게 전환되지 않을까
     preRenderRoot = lv_obj_create(NULL);
-    lv_obj_set_size(preRenderRoot, 1024, 600);
-    lv_obj_set_pos(preRenderRoot, 0, 0);
     lv_obj_set_scrollbar_mode(preRenderRoot, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_style_border_width(preRenderRoot, 0, 0);
     lv_obj_set_style_radius(preRenderRoot, 0, 0);
     lv_obj_set_style_pad_all(preRenderRoot, 0, 0);
-    lv_obj_set_style_bg_opa(preRenderRoot, LV_OPA_TRANSP, 0);
 
     /* 크래시 로그를 코드 상태와 정확히 매칭하기 위한 빌드 마커.
      * PSRAM 조각화 크래시(psram_malloc_cm:722) 대응 진행 상황을 여기 반영:
@@ -196,7 +194,7 @@ static void _uart_comm_task(beken_thread_arg_t arg)
     ui_lang_apply_timebar(&bk_lv_tool_ui);
     printf("[BOOT] init_page_timebar: %lu ms\n", lv_tick_elaps(_boot_t));
 
-
+    g_device_state.black_out_checking = false; // blackout check가 계속 enable되는데 조건을 아직 모르겠으니까 일단 강제로 blackout recovery 없앰
 
     if (!g_device_state.black_out_checking) {
 #if UI_BOOT_WARMUP_ENABLE
