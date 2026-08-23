@@ -7,12 +7,12 @@ __pycache__/
 
 *.o
 *.obj
-*.a
+#*.a # static library should be included
 *.so
 
 # Firmware outputs
 *.elf
-*.bin
+#*.bin # standard bootloader binary should be included
 *.hex
 *.map
 
@@ -20,7 +20,7 @@ __pycache__/
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
-Makefile
+# Makefile # static library makefile
 
 # bear compile database
 compile_commands.json
@@ -39,3 +39,8 @@ compile_commands.json
 *.bak
 *.swp
 *~
+
+# ==============================
+# python cache
+# ==============================
+__pycache__/
