@@ -31,6 +31,11 @@ while [ $# -gt 0 ]; do
 
             FULL_PROJECT="$2"
             shift 2
+
+            if [ ! -d "projects/${FULL_PROJECT}" ]; then
+                echo "Error: Project path 'projects/${FULL_PROJECT}' does not exist"
+                exit 1
+            fi
             ;;
 
         --noclean)
