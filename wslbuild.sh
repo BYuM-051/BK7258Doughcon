@@ -92,7 +92,7 @@ echo "[BUILDER] PROJECT_PATH=${FULL_PROJECT}"
 
 echo "[BUILDER]=[BUILD]==========================="
 echo "[BUILDER] [BUILD] PROJECT=${PROJECT}"
-make bk7258 PROJECT="${FULL_PROJECT}" > /dev/null 2>&1
+make bk7258 PROJECT="${FULL_PROJECT}"
 echo "[BUILDER]=[BUILD_DONE]==========================="
 
 if [ "$LFSBUILD" = true ]; then
