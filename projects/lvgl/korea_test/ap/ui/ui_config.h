@@ -240,6 +240,6 @@
 #define UI_PRENDERING_ENABLE 1
 #endif
 
-#define _BUZZER_ENABLED 0
+#define _BUZZER_ENABLED 1
 
 #endif /* UI_CONFIG_H */
