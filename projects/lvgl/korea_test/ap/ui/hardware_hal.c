@@ -17,6 +17,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "hardware_hal.h"
+#include "ui_config.h"
 
 /* ================================================================
  * EMULATOR — PC simulator / loopback (HAL_USE_EMULATOR)
@@ -498,6 +499,10 @@ static void _bz_timer_cb(void *arg)
     rtos_stop_timer(&s_bz_timer);   /* prevent periodic re-fire */
 }
 
+/*주말에 카페에서 코딩하는데
+* 버저 삒삒거리면 눈치보입니다
+* 고로 잠깐 닫아두기*/
+#if _BUZZER_ENABLED
 void hal_buzzer_start(int freq_hz, int duration_ms)
 {
     if (freq_hz <= 0) return;
@@ -540,6 +545,11 @@ void hal_buzzer_beep(void)
     if (g_device_state.mute) return;
     hal_buzzer_start(3000,60);
 }
+#else /* _BUZZER_ENABLED */
+void hal_buzzer_start(int freq_hz, int duration_ms) { (void)freq_hz; (void)duration_ms; }
+void hal_buzzer_stop(void) {}
+void hal_buzzer_beep(void) {}
+#endif /* _BUZZER_ENABLED */
 
 /* 완료 부저: 250ms ON + 750ms OFF × 10회 (Android BuzzerCompleteRunnable 동일)
  * LVGL 타이머로 비동기 시퀀싱 — LVGL 태스크 블로킹 없음. */
