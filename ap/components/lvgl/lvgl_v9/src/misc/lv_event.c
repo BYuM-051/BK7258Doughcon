@@ -54,6 +54,7 @@ static lv_event_dsc_t ** event_array_at(lv_event_list_t * list, uint32_t index);
  *   GLOBAL FUNCTIONS
  **********************/
 
+#if 1 // disable default flush to debug event corruption
 void lv_event_push(lv_event_t * e)
 {
     /*Build a simple linked list from the objects used in the events
@@ -68,7 +69,29 @@ void lv_event_pop(lv_event_t * e)
 {
     event_head = e->prev;
 }
+#else
+void lv_event_push(lv_event_t * e)
+{
+    e->prev = event_head;
 
+    bk_printf("[EV_PUSH] e=%p prev=%p\n", e, e->prev);
+
+    event_head = e;
+}
+
+void lv_event_pop(lv_event_t * e)
+{
+    bk_printf("[EV_POP] e=%p head=%p prev=%p\n",
+           e, event_head, e->prev);
+
+    if(e->prev == (lv_event_t *)0x10f38330) {
+        bk_printf("[EV_CORRUPTED] e=%p\n", e);
+        while(1);
+    }
+
+    event_head = e->prev;
+}
+#endif
 lv_result_t lv_event_send(lv_event_list_t * list, lv_event_t * e, bool preprocess)
 {
     if(list == NULL) return LV_RESULT_OK;
