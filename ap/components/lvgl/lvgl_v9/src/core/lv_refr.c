@@ -352,7 +352,7 @@ void lv_refr_set_disp_refreshing(lv_display_t * disp)
     disp_refr = disp;
 }
 
-#if 1 // disable default refresh timer to monitor performance
+#if 0 // disable default refresh timer to monitor performance
 void lv_display_refr_timer(lv_timer_t * tmr)
 {
     LV_PROFILER_REFR_BEGIN;
@@ -753,7 +753,7 @@ static void refr_sync_areas(void)
 /**
  * Refresh the joined areas
  */
-#if 1 //disable default refresh to monitor performance
+#if 0 //disable default refresh to monitor performance
 static void refr_invalid_areas(void)
 {
     if(disp_refr->inv_p == 0) return;
@@ -1259,6 +1259,7 @@ static void refr_configured_layer(lv_layer_t * layer)
  * @param obj the first object to start the searching (typically a screen)
  * @return
  */
+#if 0 // disable default refresh to debug
 static lv_obj_t * lv_refr_get_top_obj(const lv_area_t * area_p, lv_obj_t * obj)
 {
     lv_obj_t * found_p = NULL;
@@ -1294,6 +1295,177 @@ static lv_obj_t * lv_refr_get_top_obj(const lv_area_t * area_p, lv_obj_t * obj)
 
     return found_p;
 }
+#else
+extern lv_obj_t *preRenderRoot;
+
+static lv_obj_t * lv_refr_get_top_obj(const lv_area_t * area_p, lv_obj_t * obj)
+{
+    bool in_area = lv_area_is_in(area_p, &obj->coords, 0);
+
+    /*
+     * DEBUG:
+     * preRenderRoot 자체가 검사될 때
+     * 바로 아래 page root들을 직접 확인한다.
+     */
+    if(preRenderRoot != NULL && obj == preRenderRoot)
+    {
+        uint32_t child_cnt = lv_obj_get_child_count(preRenderRoot);
+
+        bk_printf(
+            TAG
+            "[TOPCHK] ROOT=%p children=%lu "
+            "area=(%ld,%ld)-(%ld,%ld)\n",
+            preRenderRoot,
+            (unsigned long)child_cnt,
+            (long)area_p->x1,
+            (long)area_p->y1,
+            (long)area_p->x2,
+            (long)area_p->y2
+        );
+
+        for(uint32_t i = 0; i < child_cnt; i++)
+        {
+            lv_obj_t * child = lv_obj_get_child(preRenderRoot, i);
+
+            if(child == NULL)
+            {
+                continue;
+            }
+
+            bool child_in_area =
+                lv_area_is_in(area_p, &child->coords, 0);
+
+            bool hidden =
+                lv_obj_has_flag(child, LV_OBJ_FLAG_HIDDEN);
+
+            lv_layer_type_t layer_type =
+                lv_obj_get_layer_type(child);
+
+            lv_opa_t opa =
+                lv_obj_get_style_opa(child, LV_PART_MAIN);
+
+            lv_opa_t bg_opa =
+                lv_obj_get_style_bg_opa(child, LV_PART_MAIN);
+
+            int32_t radius =
+                lv_obj_get_style_radius(child, LV_PART_MAIN);
+
+            int cover_res = -1;
+
+            /*
+             * 원래 lv_refr_get_top_obj()가 COVER_CHECK를 할 수 있는
+             * 기본 조건을 만족할 때만 실제 COVER_CHECK를 날린다.
+             */
+            if(child_in_area &&
+               !hidden &&
+               layer_type == LV_LAYER_TYPE_NONE &&
+               opa >= LV_OPA_MAX)
+            {
+                lv_cover_check_info_t child_info;
+
+                child_info.res = LV_COVER_RES_COVER;
+                child_info.area = area_p;
+
+                lv_obj_send_event(
+                    child,
+                    LV_EVENT_COVER_CHECK,
+                    &child_info
+                );
+
+                cover_res = (int)child_info.res;
+            }
+
+            bk_printf(
+                TAG
+                "[TOPCHK] child[%lu]=%p idx=%ld "
+                "coords=(%ld,%ld)-(%ld,%ld) "
+                "in=%d hidden=%d layer=%d "
+                "opa=%d bg_opa=%d radius=%ld "
+                "cover=%d\n",
+                (unsigned long)i,
+                child,
+                (long)lv_obj_get_index(child),
+
+                (long)child->coords.x1,
+                (long)child->coords.y1,
+                (long)child->coords.x2,
+                (long)child->coords.y2,
+
+                (int)child_in_area,
+                (int)hidden,
+                (int)layer_type,
+
+                (int)opa,
+                (int)bg_opa,
+                (long)radius,
+
+                cover_res
+            );
+        }
+    }
+
+    /*
+     * 이하 기존 lv_refr_get_top_obj() 동작
+     */
+    if(in_area == false)
+    {
+        return NULL;
+    }
+
+    if(lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN))
+    {
+        return NULL;
+    }
+
+    if(lv_obj_get_layer_type(obj) != LV_LAYER_TYPE_NONE)
+    {
+        return NULL;
+    }
+
+    if(lv_obj_get_style_opa(obj, LV_PART_MAIN) < LV_OPA_MAX)
+    {
+        return NULL;
+    }
+
+    lv_cover_check_info_t info;
+
+    info.res = LV_COVER_RES_COVER;
+    info.area = area_p;
+
+    lv_obj_send_event(
+        obj,
+        LV_EVENT_COVER_CHECK,
+        &info
+    );
+
+    if(preRenderRoot != NULL && obj == preRenderRoot)
+    {
+        bk_printf(
+            TAG
+            "[TOPCHK] ROOT=%p "
+            "bg_opa=%d cover_res=%d\n",
+            obj,
+            (int)lv_obj_get_style_bg_opa(
+                obj,
+                LV_PART_MAIN
+            ),
+            (int)info.res
+        );
+    }
+
+    if(info.res == LV_COVER_RES_MASKED)
+    {
+        return NULL;
+    }
+
+    if(info.res == LV_COVER_RES_COVER)
+    {
+        return obj;
+    }
+
+    return NULL;
+}
+#endif
 
 /**
  * Make the refreshing from an object. Draw all its children and the youngers too.
@@ -1695,7 +1867,7 @@ static uint32_t get_max_row(lv_display_t * disp, int32_t area_w, int32_t area_h)
 /**
  * Flush the content of the draw buffer
  */
-#if 1//disable default flush to monitor performance
+#if 0//disable default flush to monitor performance
 static void draw_buf_flush(lv_display_t * disp)
 {
     /*Flush the rendered content to the display*/

@@ -382,6 +382,8 @@ static void render_thread_cb(void * ptr)
 
 static void execute_drawing(lv_draw_task_t * t)
 {
+    uint32_t start_time = lv_tick_get();
+
     LV_PROFILER_DRAW_BEGIN;
     /*Render the draw task*/
     switch(t->type) {
@@ -426,7 +428,54 @@ static void execute_drawing(lv_draw_task_t * t)
         default:
             break;
     }
+    uint32_t elapsed_time = lv_tick_elaps(start_time);
 
+    if(elapsed_time >= 20)
+    {
+        if(t->type == LV_DRAW_TASK_TYPE_IMAGE)
+        {
+            lv_draw_image_dsc_t *img = (lv_draw_image_dsc_t *)t->draw_dsc;
+            lv_image_src_t src_type = lv_image_src_get_type(img->src);
+
+            if(src_type == LV_IMAGE_SRC_FILE)
+            {
+                bk_printf(
+                    "[IMG_TASK] %lu ms src=%s "
+                    "img=%ux%u cf=%d flags=0x%lx "
+                    "area=(%ld,%ld)-(%ld,%ld)\n",
+                    (unsigned long)elapsed_time,
+                    (const char *)img->src,
+                    (unsigned)img->header.w,
+                    (unsigned)img->header.h,
+                    (int)img->header.cf,
+                    (unsigned long)img->header.flags,
+                    (long)t->area.x1,
+                    (long)t->area.y1,
+                    (long)t->area.x2,
+                    (long)t->area.y2
+                );
+            }
+            else
+            {
+                bk_printf(
+                    "[IMG_TASK] %lu ms src=%p type=%d "
+                    "img=%ux%u cf=%d flags=0x%lx "
+                    "area=(%ld,%ld)-(%ld,%ld)\n",
+                    (unsigned long)elapsed_time,
+                    img->src,
+                    (int)src_type,
+                    (unsigned)img->header.w,
+                    (unsigned)img->header.h,
+                    (int)img->header.cf,
+                    (unsigned long)img->header.flags,
+                    (long)t->area.x1,
+                    (long)t->area.y1,
+                    (long)t->area.x2,
+                    (long)t->area.y2
+                );
+            }
+        }
+    }
 
     LV_PROFILER_DRAW_END;
 }

@@ -283,8 +283,8 @@ void main_manualmode_event_cb(lv_event_t *e)
         init_page_manualmode(bk_ui);
     bk_printf(TAG "[SCREEN] init_page_manualmode: %lu ms\n", lv_tick_elaps(_t0));
     _t0 = lv_tick_get();
-    lv_scr_load(bk_ui->manualmode);
-    bk_printf(TAG "[SCREEN] lv_scr_load          : %lu ms\n", lv_tick_elaps(_t0));
+    lv_obj_move_to_index(bk_ui->manualmode, -1);
+    bk_printf(TAG "[SCREEN] move_to_index     : %lu ms\n", lv_tick_elaps(_t0));
     _t0 = lv_tick_get();
     lv_refr_now(NULL);
     bk_printf(TAG "[SCREEN] lv_refr_now(render)  : %lu ms\n", lv_tick_elaps(_t0));
@@ -307,12 +307,15 @@ void main_autodrymode_event_cb(lv_event_t *e)
     bk_printf(TAG "[SCREEN] ── main→autodrymode ───────────────\n");
     init_page_autodrymode(bk_ui);
     bk_printf(TAG "[SCREEN] init_page_autodrymode: %lu ms\n", lv_tick_elaps(_t0));
+    
     _t0 = lv_tick_get();
-    lv_scr_load(bk_ui->autodrymode);
-    bk_printf(TAG "[SCREEN] lv_scr_load          : %lu ms\n", lv_tick_elaps(_t0));
+    lv_obj_move_to_index(bk_ui->autodrymode, -1);
+    bk_printf(TAG "[SCREEN] move_to_index     : %lu ms\n", lv_tick_elaps(_t0));
+
     _t0 = lv_tick_get();
     lv_refr_now(NULL);
     bk_printf(TAG "[SCREEN] lv_refr_now(render)  : %lu ms\n", lv_tick_elaps(_t0));
+
     _t0 = lv_tick_get();
     destroy_page_main(bk_ui);
     bk_printf(TAG "[SCREEN] destroy_page_main    : %lu ms\n", lv_tick_elaps(_t0));

@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 
 static uint32_t s_last_click_autodrymode = 0;
 static uint32_t s_last_click_hide_adm   = 0;
@@ -650,7 +651,8 @@ void autodrymode_backbt_event_cb(lv_event_t *e)
 
     if (s_ui_timer_adm) { lv_timer_delete(s_ui_timer_adm); s_ui_timer_adm = NULL; }
     init_page_main(bk_ui);
-    lv_scr_load(bk_ui->main);
+    lv_scr_load(preRenderRoot);
+    lv_refr_now(NULL);
 }
 
 void autodrymode_auto_dry_temp_bt_event_cb(lv_event_t *e)

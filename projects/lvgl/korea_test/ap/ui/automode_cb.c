@@ -21,6 +21,7 @@
 #include <driver/aon_rtc.h>
 
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 extern void init_keypad_group();
 extern void memory_save_to_slot(int slot);
 
@@ -863,7 +864,8 @@ void automode_backbt_event_cb(lv_event_t *e)
 
     settings_save_dirty();
     init_page_main(bk_ui);
-    lv_scr_load(bk_ui->main);
+    lv_scr_load(preRenderRoot);
+    lv_refr_now(NULL);
     settings_set_str("saveChecking", "0");
     settings_save_dirty();
 }

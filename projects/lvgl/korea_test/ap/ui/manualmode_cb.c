@@ -12,6 +12,7 @@
 #include "hardware_hal.h"
 
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 
 static uint32_t last_click_time = 0;
 
@@ -31,7 +32,8 @@ void manualmode_backbt_event_cb(lv_event_t *e)
     hal_buzzer_beep();
 
     init_page_main(bk_ui);
-    lv_scr_load(bk_ui->main);
+    lv_scr_load(preRenderRoot);
+    lv_refr_now(NULL);
     state->manual_current_mode = 0;
 }
 

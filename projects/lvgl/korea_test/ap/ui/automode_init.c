@@ -40,11 +40,13 @@ extern void automode_load_event_cb(lv_event_t *e);
 
 void destroy_page_automode(bk_lv_ui_t *bk_ui)
 {
+    bk_printf(TAG "[SCREEN] destroy_page_automode() called\n");
     if (bk_ui == NULL) return;
     if (bk_ui->automode != NULL) {
         lv_obj_del(bk_ui->automode);
         bk_ui->automode = NULL;
     }
+    bk_printf(TAG "[SCREEN] destroyed\n");
     /* Reset lazily-initialized child pointers. lv_obj_del() deletes all children,
      * leaving these as dangling pointers. If not cleared, lazy-create guards like
      * "if (!bk_ui->automode_auto_f1)" skip recreation on next visit. */
@@ -82,10 +84,17 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
     uint32_t _t_start = lv_tick_get();
 
     bk_printf(TAG "[IMGTIME] ===== automode init start =====\n");
-    
+    //bk_ui->main != NULL ? lv_obj_add_flag(bk_ui->main, LV_OBJ_FLAG_HIDDEN) : (void)0;
+    bk_ui->manualmode != NULL ? lv_obj_add_flag(bk_ui->manualmode, LV_OBJ_FLAG_HIDDEN) : (void)0;
+    bk_ui->autodrymode != NULL ? lv_obj_add_flag(bk_ui->autodrymode, LV_OBJ_FLAG_HIDDEN) : (void)0;
+
     if (bk_ui->automode != NULL && lv_obj_is_valid(bk_ui->automode)) 
     {
-        destroy_page_automode(bk_ui);
+        lv_obj_move_to_index(bk_ui->automode, -1);
+        lv_obj_clear_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN);
+        lv_refr_now(NULL);
+        return;
+        // destroy_page_automode(bk_ui);
     }
 
     /* 오브젝트를 새로 만드므로 ui_lang 캐시를 무효화 — 다음 SCREEN_LOAD_START의
@@ -103,6 +112,10 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
     }
     bk_ui->automode = lv_obj_create(preRenderRoot);
     lv_obj_set_size(bk_ui->automode, 1024, 600);
+    lv_obj_set_style_radius(bk_ui->automode, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_width(bk_ui->automode, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(bk_ui->automode, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_pos(bk_ui->automode, 0, 0);
     lv_obj_set_scrollbar_mode(bk_ui->automode, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->automode, automode_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
     lv_obj_add_event_cb(bk_ui->automode, automode_load_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);

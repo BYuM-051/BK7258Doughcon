@@ -12,6 +12,7 @@
 #include "device_state.h"
 
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 extern void timebar_timebar_error_checkbt_event_cb(lv_event_t *e);
 extern void timebar_sound_checkbt_event_cb(lv_event_t *e);
 extern void timebar_load_event_cb(lv_event_t *e);
@@ -45,10 +46,10 @@ void init_page_timebar(bk_lv_ui_t * bk_ui) {
     // lv_obj_add_event_cb(bk_ui->timebar, timebar_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
     // 2. 디스플레이의 최상위 레이어(Top Layer) 가져오기
    // 2. 디스플레이의 최상위 레이어(Top Layer) 가져오기
-    lv_obj_t * top_layer = lv_display_get_layer_top(lv_display_get_default());
+    // lv_obj_t * top_layer = lv_display_get_layer_top(lv_display_get_default());
 
     // 3. 최상위 레이어를 부모로 하여 타임바 컨테이너 생성
-    bk_ui->timebar = lv_obj_create(top_layer);
+    bk_ui->timebar = lv_obj_create(preRenderRoot);
     
     // 4. 하단 고정 좌표 및 크기 설정 (1024x600 해상도 기준)
     lv_obj_set_size(bk_ui->timebar, 1024, 60);

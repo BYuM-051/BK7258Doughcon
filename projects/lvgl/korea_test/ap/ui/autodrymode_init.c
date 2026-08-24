@@ -30,8 +30,11 @@ void destroy_page_autodrymode(bk_lv_ui_t *bk_ui)
 }
 
 void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
-    if (bk_ui->autodrymode != NULL && lv_obj_is_valid(bk_ui->autodrymode)) {
-        destroy_page_autodrymode(bk_ui);
+    if (bk_ui->autodrymode != NULL && lv_obj_is_valid(bk_ui->autodrymode)) 
+    {
+        lv_obj_move_to_index(bk_ui->autodrymode, -1);
+        return;
+        //destroy_page_autodrymode(bk_ui);
     }
 
     // Clear lazily-created child pointers (stale after destroy+re-init)
@@ -61,6 +64,9 @@ void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
     // lv_obj_set_style_bg_color(bk_ui->autodrymode, lv_color_hex(0x4DA212), 0);
     // lv_obj_set_pos(bk_ui->autodrymode_bg, 0, 0);
     lv_obj_set_style_bg_color(bk_ui->autodrymode, lv_color_hex(0x49b206), 0);
+    lv_obj_set_style_radius(bk_ui->autodrymode, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_width(bk_ui->autodrymode, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(bk_ui->autodrymode, LV_OPA_COVER, LV_PART_MAIN);
 
 
     // ImageView: title

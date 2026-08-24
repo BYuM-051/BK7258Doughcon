@@ -26,8 +26,11 @@ void destroy_page_manualmode(bk_lv_ui_t *bk_ui)
 }
 
 void init_page_manualmode(bk_lv_ui_t * bk_ui) {
-    if (bk_ui->manualmode != NULL && lv_obj_is_valid(bk_ui->manualmode)) {
-        destroy_page_manualmode(bk_ui);
+    if (bk_ui->manualmode != NULL && lv_obj_is_valid(bk_ui->manualmode)) 
+    {
+        lv_obj_move_to_index(bk_ui->manualmode, -1);
+        return;
+        // destroy_page_manualmode(bk_ui);
     }
 
     ui_lang_reset_manualmode_cache();
@@ -37,6 +40,9 @@ void init_page_manualmode(bk_lv_ui_t * bk_ui) {
     lv_obj_add_event_cb(bk_ui->manualmode, manualmode_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
     lv_obj_add_event_cb(bk_ui->manualmode, manualmode_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
     lv_obj_set_style_bg_color(bk_ui->manualmode, lv_color_hex(0xD9D9D9), 0);
+    lv_obj_set_style_radius(bk_ui->manualmode, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_width(bk_ui->manualmode, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(bk_ui->manualmode, LV_OPA_COVER, LV_PART_MAIN);
 
     // bk_ui->manualmode_bg = lv_image_create(bk_ui->manualmode);
     // _img_set_src_timed(bk_ui->manualmode_bg, "/images/manual_bg.jpg");

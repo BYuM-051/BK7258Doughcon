@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#define TAG "[main_init.c] "
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 
@@ -31,17 +33,21 @@ extern void main_load_event_cb(lv_event_t *e);
 //     }
 // }
 void destroy_page_main(bk_lv_ui_t *bk_ui) {
+    bk_printf(TAG "[SCREEN] destroy_page_main() called\n");
     if (bk_ui->main != NULL) {
         lv_digital_clock_unregister(bk_ui->main_dclock_1);
         lv_digital_date_unregister(bk_ui->main_timebar_date);
         lv_obj_del(bk_ui->main);
         bk_ui->main = NULL;
     }
+    bk_printf(TAG "[SCREEN] destroyed\n");
 }
 
 void init_page_main(bk_lv_ui_t * bk_ui) {
     if (bk_ui->main != NULL && lv_obj_is_valid(bk_ui->main)) {
-        destroy_page_main(bk_ui);
+        lv_obj_move_to_index(bk_ui->main, -1);
+        return;
+        // destroy_page_main(bk_ui);
     }
 
     // bk_ui->main = lv_obj_create(NULL);
@@ -57,12 +63,13 @@ void init_page_main(bk_lv_ui_t * bk_ui) {
      * digital clock/date 오브젝트 unregister() 해줘야 함. 안 그러면 unregister() 안 된 오브젝트가 남아서, 나중에 다시 init_page_main() 호출하면
      * digital clock/date 오브젝트가 새로 만들어지는데, 기존에 unregister() 안 된 오브젝트가 남아있어서, digital clock/date 오브젝트가 2개가 되어버림. 
      * 그래서 destroy_page_main() 호출 전에 digital clock/date 오브젝트 unregister() 해주도록 함.
-     * 2024-06-19: 근데 이거 unregister() 해주고 destroy_page_main() 호출하면, digital clock/date 오브젝트가 unregister() 되면서, digital clock/date 오브젝트가 화면에서 사라짐. 그래서 destroy_page_main() 호출 전에 unregister() 해주면 안 되고, destroy_page_main() 호출 후에 unregister() 해주도록 함
+     * 근데 이거 unregister() 해주고 destroy_page_main() 호출하면, digital clock/date 오브젝트가 unregister() 되면서, digital clock/date 오브젝트가 화면에서 사라짐. 그래서 destroy_page_main() 호출 전에 unregister() 해주면 안 되고, destroy_page_main() 호출 후에 unregister() 해주도록 함
      */
     ui_lang_reset_main_cache();
     bk_ui->main = lv_obj_create(preRenderRoot);
     lv_obj_move_to_index(bk_ui->main, -1);
     lv_obj_set_size(bk_ui->main, 1024, 600);
+    lv_obj_set_pos(bk_ui->main, 0, 0);
     lv_obj_set_scrollbar_mode(bk_ui->main, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->main, main_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
     lv_obj_add_event_cb(bk_ui->main, main_load_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
