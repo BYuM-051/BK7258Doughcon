@@ -99,6 +99,9 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
         elapsed = lv_tick_get() - _t_start;
         bk_printf(TAG "[SCREEN] preRenderCleared elapsed: %u\n", elapsed);
         lv_obj_move_to_index(bk_ui->automode, -1);
+        lv_obj_remove_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN);
+        elapsed = lv_tick_get() - _t_start;
+        bk_printf(TAG "[SCREEN] automode unhidden elapsed: %u\n", elapsed);
         lv_refr_now(NULL);
         elapsed = lv_tick_get() - _t_start;
         bk_printf(TAG "[SCREEN] automode moved to top elapsed: %u\n", elapsed);

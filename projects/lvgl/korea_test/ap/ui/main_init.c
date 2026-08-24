@@ -43,11 +43,28 @@ void destroy_page_main(bk_lv_ui_t *bk_ui) {
     bk_printf(TAG "[SCREEN] destroyed\n");
 }
 
-void init_page_main(bk_lv_ui_t * bk_ui) {
-    if (bk_ui->main != NULL && lv_obj_is_valid(bk_ui->main)) {
+void init_page_main(bk_lv_ui_t * bk_ui) 
+{
+    uint32_t _t_start = lv_tick_get();
+    bk_printf(TAG "[SCREEN] init_page_main() called\n");
+
+    if (bk_ui->main != NULL && lv_obj_is_valid(bk_ui->main)) 
+    {
+        uint32_t elapsed;
+        bk_printf(TAG "[SCREEN] main already exists, moving to top\n");
+        bk_ui->automode != NULL ? lv_obj_add_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN) : (void)0;
+        bk_ui->manualmode != NULL ? lv_obj_add_flag(bk_ui->manualmode, LV_OBJ_FLAG_HIDDEN) : (void)0;
+        bk_ui->autodrymode != NULL ? lv_obj_add_flag(bk_ui->autodrymode, LV_OBJ_FLAG_HIDDEN) : (void)0;
+        elapsed = lv_tick_get() - _t_start;
+        bk_printf(TAG "[SCREEN] preRenderCleared elapsed: %u\n", elapsed);
+        lv_obj_remove_flag(bk_ui->main, LV_OBJ_FLAG_HIDDEN);
+        elapsed = lv_tick_get() - _t_start;
+        bk_printf(TAG "[SCREEN] main unhidden elapsed: %u\n", elapsed);
         lv_obj_move_to_index(bk_ui->main, -1);
+        lv_refr_now(NULL);
+        elapsed = lv_tick_get() - _t_start;
+        bk_printf(TAG "[SCREEN] main moved to top elapsed: %u\n", elapsed);
         return;
-        // destroy_page_main(bk_ui);
     }
 
     // bk_ui->main = lv_obj_create(NULL);

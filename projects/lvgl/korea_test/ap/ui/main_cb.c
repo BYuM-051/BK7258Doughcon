@@ -254,20 +254,20 @@ void main_automode_event_cb(lv_event_t *e)
         bk_printf(TAG "[SCREEN] automode already exists, skipping init\n");
     }
 #else
-    init_page_automode(bk_ui);
+    init_page_automode(bk_ui); // 지금은 init에서 죄다 끝내버림. prewarm 되어있는 경우에는 init에서 바로 페이지 전환과 쓰지 않는 페이지 삭제까지 끝냄. 근데 destroy는 좀 손대야돼. 지금은 hidden만 하거든.
 #endif
 
     // _t0 = lv_tick_get();
     // lv_obj_move_to_index(bk_ui->automode, -1);
     // bk_printf(TAG "[SCREEN] move_to_index     : %lu ms\n", lv_tick_elaps(_t0));
 
-    _t0 = lv_tick_get();
-    lv_refr_now(NULL);
-    bk_printf(TAG "[SCREEN] lv_refr_now(render): %lu ms\n", lv_tick_elaps(_t0));
+    // _t0 = lv_tick_get();
+    // lv_refr_now(NULL);
+    // bk_printf(TAG "[SCREEN] lv_refr_now(render): %lu ms\n", lv_tick_elaps(_t0));
 
-    _t0 = lv_tick_get();
-    destroy_page_main(bk_ui);
-    bk_printf(TAG "[SCREEN] destroy_page_main : %lu ms\n", lv_tick_elaps(_t0));
+    // _t0 = lv_tick_get();
+    // destroy_page_main(bk_ui);
+    // bk_printf(TAG "[SCREEN] destroy_page_main : %lu ms\n", lv_tick_elaps(_t0));
 }
 #endif
 

@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-
 #include "beken_ui.h"
 #include "ui_animations.h"
 #include "ui_lang.h"
@@ -864,8 +863,8 @@ void automode_backbt_event_cb(lv_event_t *e)
 
     settings_save_dirty();
     init_page_main(bk_ui);
-    lv_scr_load(preRenderRoot);
-    lv_refr_now(NULL);
+    // lv_scr_load(preRenderRoot);
+    // lv_refr_now(NULL);
     settings_set_str("saveChecking", "0");
     settings_save_dirty();
 }
