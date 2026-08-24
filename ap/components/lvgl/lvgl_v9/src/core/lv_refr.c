@@ -352,6 +352,7 @@ void lv_refr_set_disp_refreshing(lv_display_t * disp)
     disp_refr = disp;
 }
 
+#if 1 // disable default refresh timer to monitor performance
 void lv_display_refr_timer(lv_timer_t * tmr)
 {
     LV_PROFILER_REFR_BEGIN;
@@ -435,6 +436,174 @@ refr_finish:
     LV_TRACE_REFR("finished");
     LV_PROFILER_REFR_END;
 }
+#else
+void lv_display_refr_timer(lv_timer_t * tmr)
+{
+    uint32_t t_total = lv_tick_get();
+    uint32_t t = 0;
+
+    uint32_t t_layout = 0;
+    uint32_t t_join = 0;
+    uint32_t t_sync = 0;
+    uint32_t t_redraw = 0;
+
+    uint32_t inv_p_before = 0;
+
+    LV_PROFILER_REFR_BEGIN;
+    LV_TRACE_REFR("begin");
+
+    if(tmr) {
+        disp_refr = tmr->user_data;
+
+        /* Ensure the timer does not run again automatically.
+         * This is done before refreshing in case refreshing invalidates something else.
+         * However if the performance monitor is enabled keep the timer running to count the FPS. */
+#if !LV_USE_PERF_MONITOR
+        lv_timer_pause(tmr);
+#endif
+    }
+    else {
+        disp_refr = lv_display_get_default();
+    }
+
+    if(disp_refr == NULL) {
+        LV_LOG_WARN("No display registered");
+        LV_PROFILER_REFR_END;
+        return;
+    }
+
+    lv_draw_buf_t * buf_act = disp_refr->buf_act;
+
+    if(!(buf_act && buf_act->data && buf_act->data_size)) {
+        LV_LOG_WARN("No draw buffer");
+        LV_PROFILER_REFR_END;
+        return;
+    }
+
+    lv_display_send_event(disp_refr, LV_EVENT_REFR_START, NULL);
+
+    /* ---------------------------------------------------------
+     * Layout
+     * --------------------------------------------------------- */
+    t = lv_tick_get();
+
+    LV_PROFILER_LAYOUT_BEGIN_TAG("layout");
+
+    lv_obj_update_layout(disp_refr->act_scr);
+
+    if(disp_refr->prev_scr) {
+        lv_obj_update_layout(disp_refr->prev_scr);
+    }
+
+    lv_obj_update_layout(disp_refr->bottom_layer);
+    lv_obj_update_layout(disp_refr->top_layer);
+    lv_obj_update_layout(disp_refr->sys_layer);
+
+    LV_PROFILER_LAYOUT_END_TAG("layout");
+
+    t_layout = lv_tick_elaps(t);
+
+    /* Do nothing if there is no active screen */
+    if(disp_refr->act_scr == NULL) {
+        disp_refr->inv_p = 0;
+        LV_LOG_WARN("there is no active screen");
+        goto refr_finish;
+    }
+
+    inv_p_before = disp_refr->inv_p;
+
+    /* ---------------------------------------------------------
+     * Join invalid areas
+     * --------------------------------------------------------- */
+    t = lv_tick_get();
+
+    lv_refr_join_area();
+
+    t_join = lv_tick_elaps(t);
+
+    /* ---------------------------------------------------------
+     * DIRECT double-buffer synchronization
+     * --------------------------------------------------------- */
+    t = lv_tick_get();
+
+    refr_sync_areas();
+
+    t_sync = lv_tick_elaps(t);
+
+    /* ---------------------------------------------------------
+     * Actual redraw + flush
+     * --------------------------------------------------------- */
+    t = lv_tick_get();
+
+    refr_invalid_areas();
+
+    t_redraw = lv_tick_elaps(t);
+
+    if(disp_refr->inv_p == 0) {
+        goto refr_finish;
+    }
+
+    /* ---------------------------------------------------------
+     * In double buffered direct mode save the updated areas.
+     * They will be used on the next call to synchronize buffers.
+     * --------------------------------------------------------- */
+    if(lv_display_is_double_buffered(disp_refr) &&
+       disp_refr->render_mode == LV_DISPLAY_RENDER_MODE_DIRECT) {
+
+        uint32_t i;
+
+        for(i = 0; i < disp_refr->inv_p; i++) {
+            if(disp_refr->inv_area_joined[i]) {
+                continue;
+            }
+
+            lv_area_t * sync_area =
+                lv_ll_ins_tail(&disp_refr->sync_areas);
+
+            *sync_area = disp_refr->inv_areas[i];
+        }
+    }
+
+    lv_memzero(disp_refr->inv_areas,
+               sizeof(disp_refr->inv_areas));
+
+    lv_memzero(disp_refr->inv_area_joined,
+               sizeof(disp_refr->inv_area_joined));
+
+    disp_refr->inv_p = 0;
+
+refr_finish:
+
+#if LV_DRAW_SW_COMPLEX == 1
+    lv_draw_sw_mask_cleanup();
+#endif
+
+    lv_display_send_event(disp_refr,
+                          LV_EVENT_REFR_READY,
+                          NULL);
+
+    uint32_t t_elapsed = lv_tick_elaps(t_total);
+
+    /*
+     * 짧은 평상시 refresh는 출력하지 않고
+     * 병목으로 볼 만한 refresh만 한 줄로 출력
+     */
+    if(t_elapsed >= 50) {
+        bk_printf(TAG
+                  "[REFR_PERF] total=%lu layout=%lu join=%lu sync=%lu redraw=%lu inv=%lu mode=%d\n",
+                  (unsigned long)t_elapsed,
+                  (unsigned long)t_layout,
+                  (unsigned long)t_join,
+                  (unsigned long)t_sync,
+                  (unsigned long)t_redraw,
+                  (unsigned long)inv_p_before,
+                  (int)disp_refr->render_mode);
+    }
+
+    LV_TRACE_REFR("finished");
+    LV_PROFILER_REFR_END;
+}
+#endif
 
 /**********************
  *   STATIC FUNCTIONS
@@ -584,6 +753,7 @@ static void refr_sync_areas(void)
 /**
  * Refresh the joined areas
  */
+#if 1 //disable default refresh to monitor performance
 static void refr_invalid_areas(void)
 {
     if(disp_refr->inv_p == 0) return;
@@ -662,6 +832,173 @@ static void refr_invalid_areas(void)
     disp_refr->rendering_in_progress = false;
     LV_PROFILER_REFR_END;
 }
+#else
+static void refr_invalid_areas(void)
+{
+    if(disp_refr->inv_p == 0) return;
+
+    LV_PROFILER_REFR_BEGIN;
+
+    /* Find the last area which will be drawn */
+    int32_t i;
+    int32_t last_i = 0;
+
+    for(i = disp_refr->inv_p - 1; i >= 0; i--) {
+        if(disp_refr->inv_area_joined[i] == 0) {
+            last_i = i;
+            break;
+        }
+    }
+
+    /* Notify the display driven rendering has started */
+    lv_display_send_event(disp_refr, LV_EVENT_RENDER_START, NULL);
+
+    disp_refr->last_area = 0;
+    disp_refr->last_part = 0;
+    disp_refr->rendering_in_progress = true;
+
+    for(i = 0; i < (int32_t)disp_refr->inv_p; i++) {
+
+        /* Refresh the unjoined areas */
+        if(disp_refr->inv_area_joined[i]) {
+            continue;
+        }
+
+        if(i == last_i) {
+            disp_refr->last_area = 1;
+        }
+
+        disp_refr->last_part = 0;
+
+        lv_area_t inv_a = disp_refr->inv_areas[i];
+
+        /*
+         * PARTIAL MODE
+         */
+        if(disp_refr->render_mode == LV_DISPLAY_RENDER_MODE_PARTIAL) {
+
+            /* Calculate the max row num */
+            int32_t w = lv_area_get_width(&inv_a);
+            int32_t h = lv_area_get_height(&inv_a);
+
+            int32_t max_row = get_max_row(disp_refr, w, h);
+
+            int32_t row;
+            int32_t row_last = 0;
+
+            lv_area_t sub_area;
+
+            sub_area.x1 = inv_a.x1;
+            sub_area.x2 = inv_a.x2;
+
+            int32_t y_off = 0;
+
+            for(row = inv_a.y1;
+                row + max_row - 1 <= inv_a.y2;
+                row += max_row) {
+
+                /* Calc. the next y coordinates of draw_buf */
+                sub_area.y1 = row;
+                sub_area.y2 = row + max_row - 1;
+
+                if(sub_area.y2 > inv_a.y2) {
+                    sub_area.y2 = inv_a.y2;
+                }
+
+                row_last = sub_area.y2;
+
+                if(inv_a.y2 == row_last) {
+                    disp_refr->last_part = 1;
+                }
+
+                refr_area(&sub_area, y_off);
+
+                y_off += lv_area_get_height(&sub_area);
+
+                draw_buf_flush(disp_refr);
+            }
+
+            /* If the last y coordinates are not handled yet ... */
+            if(inv_a.y2 != row_last) {
+
+                /* Calc. the next y coordinates of draw_buf */
+                sub_area.y1 = row;
+                sub_area.y2 = inv_a.y2;
+
+                disp_refr->last_part = 1;
+
+                refr_area(&sub_area, y_off);
+
+                y_off += lv_area_get_height(&sub_area);
+
+                draw_buf_flush(disp_refr);
+            }
+        }
+
+        /*
+         * FULL / DIRECT MODE
+         */
+        else if(disp_refr->render_mode == LV_DISPLAY_RENDER_MODE_FULL ||
+                disp_refr->render_mode == LV_DISPLAY_RENDER_MODE_DIRECT) {
+
+            disp_refr->last_part = 1;
+
+            uint32_t t_area;
+            uint32_t t_flush;
+            uint32_t area_ms;
+            uint32_t flush_ms;
+            uint32_t total_ms;
+
+            /*
+             * Measure actual LVGL redraw preparation / rendering.
+             */
+            t_area = lv_tick_get();
+
+            refr_area(&disp_refr->inv_areas[i], 0);
+
+            area_ms = lv_tick_elaps(t_area);
+
+            /*
+             * Measure draw task dispatch / wait / display flush.
+             */
+            t_flush = lv_tick_get();
+
+            draw_buf_flush(disp_refr);
+
+            flush_ms = lv_tick_elaps(t_flush);
+
+            total_ms = area_ms + flush_ms;
+
+            /*
+             * Keep UART output readable.
+             * Only print expensive draw areas.
+             */
+            if(total_ms >= 50) {
+                bk_printf(
+                    TAG
+                    "[DRAW_PERF] area=%lu flush=%lu total=%lu "
+                    "rect=(%ld,%ld)-(%ld,%ld) %ldx%ld\n",
+                    (unsigned long)area_ms,
+                    (unsigned long)flush_ms,
+                    (unsigned long)total_ms,
+                    (long)inv_a.x1,
+                    (long)inv_a.y1,
+                    (long)inv_a.x2,
+                    (long)inv_a.y2,
+                    (long)lv_area_get_width(&inv_a),
+                    (long)lv_area_get_height(&inv_a)
+                );
+            }
+        }
+    }
+
+    lv_display_send_event(disp_refr, LV_EVENT_RENDER_READY, NULL);
+
+    disp_refr->rendering_in_progress = false;
+
+    LV_PROFILER_REFR_END;
+}
+#endif
 
 /**
  * Reshape the draw buffer if required
@@ -1358,6 +1695,7 @@ static uint32_t get_max_row(lv_display_t * disp, int32_t area_w, int32_t area_h)
 /**
  * Flush the content of the draw buffer
  */
+#if 1//disable default flush to monitor performance
 static void draw_buf_flush(lv_display_t * disp)
 {
     /*Flush the rendered content to the display*/
@@ -1399,7 +1737,123 @@ static void draw_buf_flush(lv_display_t * disp)
         }
     }
 }
+#else
+static void draw_buf_flush(lv_display_t * disp)
+{
+    lv_layer_t * layer = disp->layer_head;
 
+    uint32_t t;
+
+    uint32_t wait_for_dispatch_ms = 0;
+    uint32_t dispatch_ms = 0;
+    uint32_t wait_ms = 0;
+    uint32_t flush_cb_ms = 0;
+
+    /*
+     * Execute queued draw tasks
+     *
+     * lv_draw_dispatch_wait_for_request()
+     * lv_draw_dispatch()
+     *
+     * 각각의 실제 소요 시간을 따로 누적한다.
+     */
+    while(layer->draw_task_head) {
+
+        t = lv_tick_get();
+
+        lv_draw_dispatch_wait_for_request();
+
+        wait_for_dispatch_ms += lv_tick_elaps(t);
+
+
+        t = lv_tick_get();
+
+        lv_draw_dispatch();
+
+        dispatch_ms += lv_tick_elaps(t);
+    }
+
+    /*
+     * Wait for previous framebuffer transfer
+     */
+    t = lv_tick_get();
+
+    if(lv_display_is_double_buffered(disp)) {
+        wait_for_flushing(disp_refr);
+    }
+
+    wait_ms = lv_tick_elaps(t);
+
+
+    disp->flushing = 1;
+
+    if(disp->last_area && disp->last_part) {
+        disp->flushing_last = 1;
+    }
+    else {
+        disp->flushing_last = 0;
+    }
+
+    bool flushing_last = disp->flushing_last;
+
+
+    /*
+     * Actual display flush callback
+     */
+    t = lv_tick_get();
+
+    if(disp->flush_cb) {
+        call_flush_cb(
+            disp,
+            &disp->refreshed_area,
+            layer->draw_buf->data
+        );
+    }
+
+    flush_cb_ms = lv_tick_elaps(t);
+
+
+    /*
+     * Performance log
+     */
+    uint32_t total_ms =
+        wait_for_dispatch_ms +
+        dispatch_ms +
+        wait_ms +
+        flush_cb_ms;
+
+    if(total_ms >= 50) {
+        bk_printf(
+            TAG
+            "[FLUSH_PERF] wait_req=%lu dispatch=%lu wait_fb=%lu cb=%lu total=%lu\n",
+            (unsigned long)wait_for_dispatch_ms,
+            (unsigned long)dispatch_ms,
+            (unsigned long)wait_ms,
+            (unsigned long)flush_cb_ms,
+            (unsigned long)total_ms
+        );
+    }
+
+
+    /*
+     * Swap buffers
+     */
+    if(lv_display_is_double_buffered(disp) &&
+       (disp->render_mode != LV_DISPLAY_RENDER_MODE_DIRECT || flushing_last)) {
+
+        if(disp->buf_act == disp->buf_1) {
+            disp->buf_act = disp->buf_2;
+        }
+        else if(disp->buf_act == disp->buf_2) {
+            disp->buf_act =
+                disp->buf_3 ? disp->buf_3 : disp->buf_1;
+        }
+        else {
+            disp->buf_act = disp->buf_1;
+        }
+    }
+}
+#endif
 static void call_flush_cb(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
 {
     LV_PROFILER_REFR_BEGIN;
