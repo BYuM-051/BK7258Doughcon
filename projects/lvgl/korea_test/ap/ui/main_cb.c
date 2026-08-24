@@ -175,6 +175,7 @@ void main_memorymode_event_cb(lv_event_t *e);
 void main_settingmode_event_cb(lv_event_t *e);
 void main_load_event_cb(lv_event_t *e);
 
+#if 0 // 0 : beep음 앞으로 땡겨오기 1 : beep음을 auto init과 함께
 void main_automode_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
@@ -199,7 +200,7 @@ void main_automode_event_cb(lv_event_t *e)
     _t0 = lv_tick_get();
     // lv_scr_load(bk_ui->automode); //여기를 어떻게 잘 조지면 모든게 완벽하게 될것같은데 말이야.
     lv_obj_move_to_index(bk_ui->automode, -1);
-    lv_obj_invalidate(preRenderRoot);
+    // lv_obj_invalidate(preRenderRoot);
     bk_printf(TAG "[SCREEN] lv_scr_load       : %lu ms\n", lv_tick_elaps(_t0));
     /* lv_scr_load는 화면 포인터만 바꾸고 실제 렌더링/플러시는 다음 lv_timer_handler
      * 틱에서 일어남 — 여기서 강제로 즉시 그려서 "실제 화면이 보이는 시점"을 측정. */
@@ -210,6 +211,61 @@ void main_automode_event_cb(lv_event_t *e)
     destroy_page_main(bk_ui);
     bk_printf(TAG "[SCREEN] destroy_page_main : %lu ms\n", lv_tick_elaps(_t0));
 }
+#else
+void main_automode_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+    device_state_t *state = &g_device_state;
+
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_PRESSED)
+    {
+        bk_printf(TAG "[TOUCH] PRESSED t=%lu\n", (unsigned long)lv_tick_get());
+        hal_buzzer_beep();
+        //return;
+    }
+    else if(code != LV_EVENT_CLICKED)
+    {
+        // bk_printf(TAG "[TOUCH] event=%d target=%p current=%p\n",
+        // lv_event_get_code(e),
+        // lv_event_get_target(e),
+        // lv_event_get_current_target(e));
+        return;
+    }
+
+    if(state->lock || state->hard_lock)
+    {return;}
+    if(lv_tick_elaps(last_click_time) < 250) // software debounce
+    {return;}
+
+    last_click_time = lv_tick_get();
+    uint32_t _t0 = lv_tick_get();
+    bk_printf(TAG "[SCREEN] ── main→automode ──────────────────\n");
+
+    if(bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))
+    {
+        init_page_automode(bk_ui);
+
+        bk_printf(TAG "[SCREEN] init_page_automode: %lu ms\n", lv_tick_elaps(_t0));
+    }
+    else
+    {
+        bk_printf(TAG "[SCREEN] automode already exists, skipping init\n");
+    }
+
+    _t0 = lv_tick_get();
+    lv_obj_move_to_index(bk_ui->automode, -1);
+    bk_printf(TAG "[SCREEN] move_to_index     : %lu ms\n", lv_tick_elaps(_t0));
+
+    _t0 = lv_tick_get();
+    lv_refr_now(NULL);
+    bk_printf(TAG "[SCREEN] lv_refr_now(render): %lu ms\n", lv_tick_elaps(_t0));
+
+    _t0 = lv_tick_get();
+    destroy_page_main(bk_ui);
+    bk_printf(TAG "[SCREEN] destroy_page_main : %lu ms\n", lv_tick_elaps(_t0));
+}
+#endif
 
 void main_manualmode_event_cb(lv_event_t *e)
 {
