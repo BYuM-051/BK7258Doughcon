@@ -84,17 +84,25 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
     uint32_t _t_start = lv_tick_get();
 
     bk_printf(TAG "[IMGTIME] ===== automode init start =====\n");
-    //bk_ui->main != NULL ? lv_obj_add_flag(bk_ui->main, LV_OBJ_FLAG_HIDDEN) : (void)0;
-    bk_ui->manualmode != NULL ? lv_obj_add_flag(bk_ui->manualmode, LV_OBJ_FLAG_HIDDEN) : (void)0;
-    bk_ui->autodrymode != NULL ? lv_obj_add_flag(bk_ui->autodrymode, LV_OBJ_FLAG_HIDDEN) : (void)0;
+
 
     if (bk_ui->automode != NULL && lv_obj_is_valid(bk_ui->automode)) 
-    {
+    {   
+        uint32_t elapsed;
+        bk_printf(TAG "[SCREEN] automode already exists, moving to top\n");
+        /*
+        * 여기는 프리힛이 이미 됐다는 소리잖아. 프리힛 된거에 다시 init했다는거는 다른애들 지우고 refresh하면 되는거잖아
+        */
+        bk_ui->main != NULL ? lv_obj_add_flag(bk_ui->main, LV_OBJ_FLAG_HIDDEN) : (void)0;
+        bk_ui->manualmode != NULL ? lv_obj_add_flag(bk_ui->manualmode, LV_OBJ_FLAG_HIDDEN) : (void)0;
+        bk_ui->autodrymode != NULL ? lv_obj_add_flag(bk_ui->autodrymode, LV_OBJ_FLAG_HIDDEN) : (void)0;
+        elapsed = lv_tick_get() - _t_start;
+        bk_printf(TAG "[SCREEN] preRenderCleared elapsed: %u\n", elapsed);
         lv_obj_move_to_index(bk_ui->automode, -1);
-        lv_obj_clear_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN);
         lv_refr_now(NULL);
+        elapsed = lv_tick_get() - _t_start;
+        bk_printf(TAG "[SCREEN] automode moved to top elapsed: %u\n", elapsed);
         return;
-        // destroy_page_automode(bk_ui);
     }
 
     /* 오브젝트를 새로 만드므로 ui_lang 캐시를 무효화 — 다음 SCREEN_LOAD_START의

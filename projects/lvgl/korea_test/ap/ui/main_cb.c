@@ -242,6 +242,7 @@ void main_automode_event_cb(lv_event_t *e)
     uint32_t _t0 = lv_tick_get();
     bk_printf(TAG "[SCREEN] ── main→automode ──────────────────\n");
 
+#if 0
     if(bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))
     {
         init_page_automode(bk_ui);
@@ -252,10 +253,13 @@ void main_automode_event_cb(lv_event_t *e)
     {
         bk_printf(TAG "[SCREEN] automode already exists, skipping init\n");
     }
+#else
+    init_page_automode(bk_ui);
+#endif
 
-    _t0 = lv_tick_get();
-    lv_obj_move_to_index(bk_ui->automode, -1);
-    bk_printf(TAG "[SCREEN] move_to_index     : %lu ms\n", lv_tick_elaps(_t0));
+    // _t0 = lv_tick_get();
+    // lv_obj_move_to_index(bk_ui->automode, -1);
+    // bk_printf(TAG "[SCREEN] move_to_index     : %lu ms\n", lv_tick_elaps(_t0));
 
     _t0 = lv_tick_get();
     lv_refr_now(NULL);
