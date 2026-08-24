@@ -352,7 +352,7 @@ void lv_refr_set_disp_refreshing(lv_display_t * disp)
     disp_refr = disp;
 }
 
-#if 0 // disable default refresh timer to monitor performance
+#if 1 // disable default refresh timer to monitor performance
 void lv_display_refr_timer(lv_timer_t * tmr)
 {
     LV_PROFILER_REFR_BEGIN;
@@ -753,7 +753,7 @@ static void refr_sync_areas(void)
 /**
  * Refresh the joined areas
  */
-#if 0 //disable default refresh to monitor performance
+#if 1 //disable default refresh to monitor performance
 static void refr_invalid_areas(void)
 {
     if(disp_refr->inv_p == 0) return;
@@ -1259,7 +1259,7 @@ static void refr_configured_layer(lv_layer_t * layer)
  * @param obj the first object to start the searching (typically a screen)
  * @return
  */
-#if 0 // disable default refresh to debug
+#if 1 // disable default refresh to debug
 static lv_obj_t * lv_refr_get_top_obj(const lv_area_t * area_p, lv_obj_t * obj)
 {
     lv_obj_t * found_p = NULL;
@@ -1867,7 +1867,7 @@ static uint32_t get_max_row(lv_display_t * disp, int32_t area_w, int32_t area_h)
 /**
  * Flush the content of the draw buffer
  */
-#if 0//disable default flush to monitor performance
+#if 1 //disable default flush to monitor performance
 static void draw_buf_flush(lv_display_t * disp)
 {
     /*Flush the rendered content to the display*/
