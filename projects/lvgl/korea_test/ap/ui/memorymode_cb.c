@@ -13,6 +13,9 @@
 #include "settings.h"
 #include "hardware_hal.h"
 
+#define TAG "[memorymode_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern double degree_basic_change(double ch);
 
@@ -255,11 +258,11 @@ static void _refresh_display(bk_lv_ui_t *bk_ui)
 void memory_save_to_slot(int slot)
 {
     char k[40];
-    printf("[MEM] SAVE → slot %d\n", slot);
+    bk_printf(TAG "[MEM] SAVE → slot %d\n", slot);
     for (int i = 0; i < 15; i++) {
         snprintf(k, sizeof(k), "%s%d", g_mem_keys[i], slot);
         settings_set_str(k, g_device_state.memory_auto_save[i]);
-        printf("[MEM]   [%d] %s = \"%s\"\n", i, k, g_device_state.memory_auto_save[i]);
+        bk_printf(TAG "[MEM]   [%d] %s = \"%s\"\n", i, k, g_device_state.memory_auto_save[i]);
     }
 }
 
@@ -267,7 +270,7 @@ void memory_load_from_slot(int slot)
 {
     char k[40];
     int is_f = (strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0);
-    printf("[MEM] LOAD ← slot %d (is_f=%d)\n", slot, is_f);
+    bk_printf(TAG "[MEM] LOAD ← slot %d (is_f=%d)\n", slot, is_f);
     for (int i = 0; i < 15; i++) {
         snprintf(k, sizeof(k), "%s%d", g_mem_keys[i], slot);
         const char *val = settings_get_str(k);
@@ -278,10 +281,10 @@ void memory_load_from_slot(int slot)
             char fbuf[16];
             snprintf(fbuf, sizeof(fbuf), "%.0f", degree_basic_change(atof(val)));
             settings_set_str(g_mem_cur_keys[i], fbuf);
-            printf("[MEM]   [%d] %s = \"%s\" -> %s (F: %s)\n", i, k, val, g_mem_cur_keys[i], fbuf);
+            bk_printf(TAG "[MEM]   [%d] %s = \"%s\" -> %s (F: %s)\n", i, k, val, g_mem_cur_keys[i], fbuf);
         } else {
             settings_set_str(g_mem_cur_keys[i], val);
-            printf("[MEM]   [%d] %s = \"%s\" -> %s\n", i, k, val, g_mem_cur_keys[i]);
+            bk_printf(TAG "[MEM]   [%d] %s = \"%s\" -> %s\n", i, k, val, g_mem_cur_keys[i]);
         }
     }
 }
@@ -298,7 +301,7 @@ void memorymode_backbt_event_cb(lv_event_t *e)
     hal_buzzer_beep();
 
     int mode = state->memory_mode_check;
-    printf("[MEM] BACK btn: mode=%d -> automode\n", mode);
+    bk_printf(TAG "[MEM] BACK btn: mode=%d -> automode\n", mode);
     state->memory_mode_check = MEMORY_MODE_NONE;
     if (mode == MEMORY_MODE_SAVE || mode == MEMORY_MODE_LOAD) {
         if (bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))
@@ -319,7 +322,7 @@ void memorymode_memory_check1bt_event_cb(lv_event_t *e)
     s_check_t[0] = lv_tick_get();
     hal_buzzer_beep();
     s_checking = 1;
-    printf("[MEM] check1 -> slot=%d\n", memorymode_get_selected_slot());
+    bk_printf(TAG "[MEM] check1 -> slot=%d\n", memorymode_get_selected_slot());
     _refresh_display(bk_ui);
 }
 
@@ -331,7 +334,7 @@ void memorymode_memory_check2bt_event_cb(lv_event_t *e)
     s_check_t[1] = lv_tick_get();
     hal_buzzer_beep();
     s_checking = 2;
-    printf("[MEM] check2 -> slot=%d\n", memorymode_get_selected_slot());
+    bk_printf(TAG "[MEM] check2 -> slot=%d\n", memorymode_get_selected_slot());
     _refresh_display(bk_ui);
 }
 
@@ -343,7 +346,7 @@ void memorymode_memory_check3bt_event_cb(lv_event_t *e)
     s_check_t[2] = lv_tick_get();
     hal_buzzer_beep();
     s_checking = 3;
-    printf("[MEM] check3 -> slot=%d\n", memorymode_get_selected_slot());
+    bk_printf(TAG "[MEM] check3 -> slot=%d\n", memorymode_get_selected_slot());
     _refresh_display(bk_ui);
 }
 
@@ -355,7 +358,7 @@ void memorymode_memory_check4bt_event_cb(lv_event_t *e)
     s_check_t[3] = lv_tick_get();
     hal_buzzer_beep();
     s_checking = 4;
-    printf("[MEM] check4 -> slot=%d\n", memorymode_get_selected_slot());
+    bk_printf(TAG "[MEM] check4 -> slot=%d\n", memorymode_get_selected_slot());
     _refresh_display(bk_ui);
 }
 
@@ -368,7 +371,7 @@ void memorymode_memoryleftbt_event_cb(lv_event_t *e)
     hal_buzzer_beep();
     s_page = (s_page > 0) ? s_page - 1 : 2;  /* 0->2 순환 */
     s_checking = 0;
-    printf("[MEM] page LEFT -> page=%d slot=%d\n", s_page, memorymode_get_selected_slot());
+    bk_printf(TAG "[MEM] page LEFT -> page=%d slot=%d\n", s_page, memorymode_get_selected_slot());
     _refresh_display(bk_ui);
 }
 
@@ -380,7 +383,7 @@ void memorymode_memory1bt_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
     s_page = 0; s_checking = 0;
-    printf("[MEM] page 1 -> page=%d slot=%d\n", s_page, memorymode_get_selected_slot());
+    bk_printf(TAG "[MEM] page 1 -> page=%d slot=%d\n", s_page, memorymode_get_selected_slot());
     _refresh_display(bk_ui);
 }
 
@@ -392,7 +395,7 @@ void memorymode_memory2bt_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
     s_page = 1; s_checking = 0;
-    printf("[MEM] page 2 -> page=%d slot=%d\n", s_page, memorymode_get_selected_slot());
+    bk_printf(TAG "[MEM] page 2 -> page=%d slot=%d\n", s_page, memorymode_get_selected_slot());
     _refresh_display(bk_ui);
 }
 
@@ -404,7 +407,7 @@ void memorymode_memory3bt_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
     s_page = 2; s_checking = 0;
-    printf("[MEM] page 3 -> page=%d slot=%d\n", s_page, memorymode_get_selected_slot());
+    bk_printf(TAG "[MEM] page 3 -> page=%d slot=%d\n", s_page, memorymode_get_selected_slot());
     _refresh_display(bk_ui);
 }
 
@@ -417,7 +420,7 @@ void memorymode_memoryrightbt_event_cb(lv_event_t *e)
     hal_buzzer_beep();
     s_page = (s_page < 2) ? s_page + 1 : 0;  /* 2->0 순환 */
     s_checking = 0;
-    printf("[MEM] page RIGHT -> page=%d slot=%d\n", s_page, memorymode_get_selected_slot());
+    bk_printf(TAG "[MEM] page RIGHT -> page=%d slot=%d\n", s_page, memorymode_get_selected_slot());
     _refresh_display(bk_ui);
 }
 
@@ -431,33 +434,33 @@ void memorymode_okbt_event_cb(lv_event_t *e)
     hal_buzzer_beep();
 
     if (s_checking == 0) {
-        printf("[MEM] OK: no slot selected (mode=%d)\n", state->memory_mode_check);
+        bk_printf(TAG "[MEM] OK: no slot selected (mode=%d)\n", state->memory_mode_check);
         return;
     }
     int slot = memorymode_get_selected_slot();
-    printf("[MEM] OK btn: mode=%d slot=%d (page=%d checking=%d)\n",
+    bk_printf(TAG "[MEM] OK btn: mode=%d slot=%d (page=%d checking=%d)\n",
            state->memory_mode_check, slot, s_page, s_checking);
     if (state->memory_mode_check == MEMORY_MODE_SAVE) {
         if (!settings_is_loaded()) {
-            printf("[MEM] SAVE blocked — settings not loaded yet\n");
+            bk_printf(TAG "[MEM] SAVE blocked — settings not loaded yet\n");
             return;
         }
         memory_save_to_slot(slot);
         settings_save_all_sync();
-        printf("[MEM] save complete, display refreshed\n");
+        bk_printf(TAG "[MEM] save complete, display refreshed\n");
         /* 저장 후 다음 빈 칸으로 자동 선택 이동하던 로직 제거 — ON 체크박스는
          * 사용자가 명시적으로 항목을 탭했을 때만 나타나야 함 */
         s_checking = 0;
         _refresh_display(bk_ui);
     } else if (state->memory_mode_check == MEMORY_MODE_LOAD) {
         if (!_slot_is_used(slot)) {
-            printf("[MEM] LOAD: slot %d empty — caution popup\n", slot);
+            bk_printf(TAG "[MEM] LOAD: slot %d empty — caution popup\n", slot);
             init_page_popupcaution(bk_ui);
             return;
         }
         memory_load_from_slot(slot);
         settings_save_dirty();
-        printf("[MEM] load complete, navigate to automode\n");
+        bk_printf(TAG "[MEM] load complete, navigate to automode\n");
         /* memory_mode_check는 automode_load_event_cb 진입 후 클리어 — 메모리 불러오기 판별용 */
         if (bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))
             init_page_automode(bk_ui);
@@ -465,13 +468,13 @@ void memorymode_okbt_event_cb(lv_event_t *e)
     } else {
         /* Accessed from main page (MEMORY_MODE_NONE): load selected slot → automode */
         if (!_slot_is_used(slot)) {
-            printf("[MEM] OK: NONE mode, slot %d is empty — caution popup\n", slot);
+            bk_printf(TAG "[MEM] OK: NONE mode, slot %d is empty — caution popup\n", slot);
             init_page_popupcaution(bk_ui);
             return;
         }
         memory_load_from_slot(slot);
         settings_save_dirty();
-        printf("[MEM] NONE mode load complete (slot %d), navigate to automode\n", slot);
+        bk_printf(TAG "[MEM] NONE mode load complete (slot %d), navigate to automode\n", slot);
         state->memory_mode_check = MEMORY_MODE_LOAD;  /* automode_load_event_cb에서 클리어 */
         if (bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))
             init_page_automode(bk_ui);
@@ -489,7 +492,7 @@ void memorymode_deletebt_event_cb(lv_event_t *e)
 
     if (s_checking < 1 || s_checking > 4) return;   /* 선택 없으면 무시 */
     s_slot_to_delete = s_page * 4 + (s_checking - 1);
-    printf("[DEL] pending slot=%d (page=%d checking=%d)\n",
+    bk_printf(TAG "[DEL] pending slot=%d (page=%d checking=%d)\n",
            s_slot_to_delete, s_page, s_checking);
     init_page_popupdelete(bk_ui);   /* memorymode 위에 오버레이 — 화면 전환 없음 */
 }
@@ -555,6 +558,6 @@ void memorymode_load_event_cb(lv_event_t *e)
      * s_checking은 device_state에 저장되어 화면을 나갔다 다시 들어와도
      * 이전 선택값(1~4)이 유효 범위라 그대로 남아있었음 → 무조건 0으로 리셋. */
     s_checking = 0;
-    printf("[MEM] screen load: mode=%d page=%d checking=%d\n",
+    bk_printf(TAG "[MEM] screen load: mode=%d page=%d checking=%d\n",
            g_device_state.memory_mode_check, s_page, s_checking);
 }

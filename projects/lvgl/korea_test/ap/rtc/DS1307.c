@@ -9,6 +9,9 @@
 #include <time.h>
 #include "Mydefine.h"
 
+#define TAG "[DS1307.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 unsigned char gabDC1307_rbuf[64] = {0,};
 unsigned char gabDC1307_wbuf[64] = {0,};
 
@@ -200,9 +203,9 @@ S32 DS1307_SetTime(struct tm* pDT)
 	int i;
 	for( i = 0; i< 8; i++)
 	{
-		printf("%x ", gabDC1307_wbuf[7-i] );
+		bk_printf(TAG "%x ", gabDC1307_wbuf[7-i] );
 	}
-	printf("\r\n");
+	bk_printf(TAG "\r\n");
 	if(DS1307_Write(0, gabDC1307_wbuf, 8) == 0)
 	{
 		debugstring("Set fault DS1307 RTC time\r\n");
@@ -237,7 +240,7 @@ void DS1307_GetTime_callback()
 	
 	
 	/*
-	printf("%04d-%02d-%02d %02d:%02d:%02d\r\n", ( ( gabDC1307_rbuf[6] & 0xf ) %10 ) + ( ( gabDC1307_rbuf[6] >> 4 ) * 10 ) + 2000
+	bk_printf(TAG "%04d-%02d-%02d %02d:%02d:%02d\r\n", ( ( gabDC1307_rbuf[6] & 0xf ) %10 ) + ( ( gabDC1307_rbuf[6] >> 4 ) * 10 ) + 2000
 											  , ( ( gabDC1307_rbuf[5] & 0xf ) %10 ) + ( ( gabDC1307_rbuf[5] >> 4 ) * 10 )
 											  , ( ( gabDC1307_rbuf[4] & 0xf ) %10 ) + ( ( gabDC1307_rbuf[4] >> 4 ) * 10 )
 											  , ( ( gabDC1307_rbuf[2] & 0xf ) %10 ) + ( ( gabDC1307_rbuf[2] >> 4 ) * 10 )

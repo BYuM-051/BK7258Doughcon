@@ -13,6 +13,9 @@
 #include "hardware_hal.h"
 #include "uart_comm.h"
 
+#define TAG "[detailsettingtime_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 
 static uint32_t last_click_time = 0;
@@ -516,20 +519,20 @@ void detailsettingtime_load_event_cb(lv_event_t *e)
     }
     if (code != LV_EVENT_SCREEN_LOAD_START) return;
     uint32_t t0 = lv_tick_get();
-    printf("[PERF] detailtime load_event start\n");
+    bk_printf(TAG "[PERF] detailtime load_event start\n");
 
     _build_img_arrays_if_changed();
-    printf("[PERF]   _build_img_arrays +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF]   _build_img_arrays +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 
     ui_lang_apply_detailsettingtime(bk_ui);
-    printf("[PERF]   ui_lang_apply +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF]   ui_lang_apply +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
     s_edit_field   = -1;
     /* s_roller_field: 언어 변경 시 _build_img_arrays_if_changed()에서 초기화됨.
      * 스크린 재진입마다 초기화하면 첫 탭 시 lv_roller_set_options 가 불필요하게 재호출됨. */
     _refresh(bk_ui);
     _update_txt_colors(bk_ui, -1);   /* 재진입 시 이전 선택 색상(검정) 잔류 방지 */
-    printf("[PERF]   _refresh +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF]   _refresh +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 
     _hide_all_rollers(bk_ui);
-    printf("[PERF] detailtime load_event end total=%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF] detailtime load_event end total=%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 }

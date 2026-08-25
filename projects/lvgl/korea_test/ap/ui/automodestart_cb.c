@@ -15,6 +15,9 @@
 #include "hardware_hal.h"
 #include "uart_comm.h"
 
+#define TAG "[automodestart_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void automodeend_save_record_and_buzzer(device_state_t *state);
@@ -78,9 +81,9 @@ void automodestart_canvas_buf_alloc(void)
     uint32_t buf_sz = LV_CANVAS_BUF_SIZE(1024, 540, 16, LV_DRAW_BUF_ALIGN);
     s_ams_canvas_buf = lv_malloc(buf_sz);
     if (s_ams_canvas_buf)
-        printf("[AMS] bg buf alloc ok (%lu B)\n", (unsigned long)buf_sz);
+        bk_printf(TAG "[AMS] bg buf alloc ok (%lu B)\n", (unsigned long)buf_sz);
     else
-        printf("[AMS] bg buf alloc FAILED\n");
+        bk_printf(TAG "[AMS] bg buf alloc FAILED\n");
 }
 
 /* ── 서클 PNG 사전 캐싱 canvas (PSRAM 힙 동적 할당 360KB — 모드 전환 시 재렌더) ─ */
@@ -479,7 +482,7 @@ static void _refresh_running_ui(bk_lv_ui_t *bk_ui)
             s_test_mode_tick = lv_tick_get();
             if (s_test_op_mode < OP_MODE_FERM2) {
                 s_test_op_mode++;
-                printf("[TEST] mode -> %d\n", s_test_op_mode);
+                bk_printf(TAG "[TEST] mode -> %d\n", s_test_op_mode);
             } else {
                 /* FERM2 완료 → automodeend */
                 _go_to_automodeend(bk_ui);
@@ -589,7 +592,7 @@ static void _refresh_running_ui(bk_lv_ui_t *bk_ui)
                  * 조건: DetailOverFermentationOnOff==ON AND day_period>1 AND over_min>0 AND 1회만 */
                 bool over_on  = (strcmp(settings_get_str("DetailOverFermentationOnOff"), "ON") == 0);
                 int  over_min = atoi(settings_get_str("DetailOverFermentation"));
-                printf("[OVER_FERM] DONE CHECK: cur_op=%d over_on=%d day=%d min=%d triggered=%d\n",
+                bk_printf(TAG "[OVER_FERM] DONE CHECK: cur_op=%d over_on=%d day=%d min=%d triggered=%d\n",
                        cur_op, over_on, state->day_period, over_min, (int)s_over_ferm_triggered);
                 if (over_on && state->day_period > 1 && over_min > 0 && !s_over_ferm_triggered) {
                     s_over_ferm_triggered   = true;
@@ -611,10 +614,10 @@ static void _refresh_running_ui(bk_lv_ui_t *bk_ui)
                         state->send_complete_day   = od;
                         state->send_complete_hour  = total_min / 60;
                         state->send_complete_min   = total_min % 60;
-                        printf("[OVER_FERM] comp_time → %04d-%02d-%02d %02d:%02d (+%dmin)\n",
+                        bk_printf(TAG "[OVER_FERM] comp_time → %04d-%02d-%02d %02d:%02d (+%dmin)\n",
                                oy, om, od, total_min/60, total_min%60, over_min);
                     }
-                    printf("[OVER_FERM] FERM2 done -> automodeend 화면 (day_period=%d, over_min=%d)\n",
+                    bk_printf(TAG "[OVER_FERM] FERM2 done -> automodeend 화면 (day_period=%d, over_min=%d)\n",
                            state->day_period, over_min);
                     /* 부저+기록저장: lv_scr_load 전에 처리 (SCREEN_LOAD_START 콜백 밖에서)
                      * uart_comm.c RX 0x34 → over_ferm_jeon_started → manualmodestart 전환 */
@@ -925,9 +928,9 @@ static void _ams_bg_load(bk_lv_ui_t *bk_ui)
      * 그 malloc 자체가 단편화 시 하드크래시의 원인이었음 — 이제 buf는 고정.) */
     size_t need = 1300 * 1024;
     size_t _free = rtos_get_psram_free_heap_size();
-    printf("[AMS] psram free = %u B (need %u B)\n", (unsigned)_free, (unsigned)need);
+    bk_printf(TAG "[AMS] psram free = %u B (need %u B)\n", (unsigned)_free, (unsigned)need);
     if (_free < need) {
-        printf("[AMS] psram low, skip bg load\n");
+        bk_printf(TAG "[AMS] psram low, skip bg load\n");
         _img_set_src_timed(bk_ui->automodestart_auto_bg, bg_path);
         return;
     }
@@ -987,7 +990,7 @@ static void _load_circle_canvas_ams(int op_mode)
     lv_draw_image(&layer, &img_dsc, &area);
     lv_canvas_finish_layer(s_cc_canvas, &layer);
     s_cc_mode = op_mode;
-    printf("[CANVAS] mode=%d %s\n", op_mode, src);
+    bk_printf(TAG "[CANVAS] mode=%d %s\n", op_mode, src);
 }
 
 /* ui_lang_invalidate_cached_screens 에서 lv_obj_del이 SCREEN_UNLOAD_START를 우회하므로
@@ -1057,7 +1060,7 @@ void automodestart_load_event_cb(lv_event_t *e)
         s_test_mode_tick = lv_tick_get();
         s_test_op_mode   = OP_MODE_FREEZE;
         g_device_state.current_op_mode = OP_MODE_FREEZE;
-        printf("[TEST] automodestart loaded, timer reset\n");
+        bk_printf(TAG "[TEST] automodestart loaded, timer reset\n");
 #endif
         _refresh_running_ui(bk_ui);
         if (s_ui_timer) { lv_timer_delete(s_ui_timer); s_ui_timer = NULL; }
@@ -1222,7 +1225,7 @@ void automodestart_load_event_cb(lv_event_t *e)
         goto clip_alloc_done;
 
 clip_alloc_failed:
-        printf("[AMS] clip alloc failed — GIF clips disabled\n");
+        bk_printf(TAG "[AMS] clip alloc failed — GIF clips disabled\n");
         s_ams_defrost_clip  = s_ams_defrost_img  = NULL;
         s_ams_ferm1_outer   = s_ams_ferm1_inner  = NULL;
         s_ams_ferm1_top     = s_ams_ferm1_btm    = s_ams_ferm1_btm_img = NULL;

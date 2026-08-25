@@ -29,6 +29,9 @@
 #include "lv_vendor.h"
 #include "ui_lang.h"
 
+#define TAG "[beken_ui.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 bk_lv_ui_t bk_lv_tool_ui = {0};
 lv_obj_t *preRenderRoot = NULL;
 
@@ -115,19 +118,19 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
     // lv_scr_load(bk_ui->automode);
     // lv_obj_add_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN); // hidden으로 하면 실제로 render가 안됨. 이거 이런식으로 하는게 아니라 screen을 하나 두고 child만 계속 바꿔끼는 식으로 해야겠는데?
     lv_refr_now(NULL);
-    printf("[BOOT] warmup automode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+    bk_printf(TAG "[BOOT] warmup automode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
     ts = lv_tick_get();
     init_page_manualmode(bk_ui);
     lv_obj_move_to_index(bk_ui->manualmode, -1);
     lv_refr_now(NULL);
-    printf("[BOOT] warmup manualmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+    bk_printf(TAG "[BOOT] warmup manualmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
     ts = lv_tick_get();
     init_page_autodrymode(bk_ui);
     lv_obj_move_to_index(bk_ui->autodrymode, -1);
     lv_refr_now(NULL);
-    printf("[BOOT] warmup autodrymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+    bk_printf(TAG "[BOOT] warmup autodrymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
     /* main으로 최종 전환 — automode 오브젝트는 destroy하지 않고 그대로 둠:
      * 실제 진입 시 재생성 없이 재사용된다. */
@@ -137,7 +140,7 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
     lv_obj_del(cover);
     lv_refr_now(NULL);
 
-    printf("[BOOT] warmup total: %lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[BOOT] warmup total: %lu ms\n", (unsigned long)lv_tick_elaps(t0));
 }
 #endif /* UI_BOOT_WARMUP_ENABLE */
 
@@ -153,24 +156,24 @@ static void _uart_comm_task(beken_thread_arg_t arg)
      *                        디코드 실패 시 깨진 상태가 고정되어 되돌림.
      *   pw_popup=rgb565    : password_popup canvas RGB565(602KB), 모서리는
      *                        에셋에 배경색 미리 합성(알파 불필요) */
-    printf("[BUILD] ams_bg=per-visit pw_popup=rgb565 built=%s %s\n", __DATE__, __TIME__);
+    bk_printf(TAG "[BUILD] ams_bg=per-visit pw_popup=rgb565 built=%s %s\n", __DATE__, __TIME__);
 
     /* Phase 1: 설정/RTC — flash VFS 마운트 상태에서 즉시 읽기 가능 */
     _boot_t = lv_tick_get();
     settings_init();
-    printf("[BOOT] settings_init: %lu ms\n", lv_tick_elaps(_boot_t));
+    bk_printf(TAG "[BOOT] settings_init: %lu ms\n", lv_tick_elaps(_boot_t));
 
     _boot_t = lv_tick_get();
     settings_load_from_flash();
-    printf("[BOOT] settings_load_from_flash: %lu ms\n", lv_tick_elaps(_boot_t));
+    bk_printf(TAG "[BOOT] settings_load_from_flash: %lu ms\n", lv_tick_elaps(_boot_t));
 
     _boot_t = lv_tick_get();
     device_state_init();
-    printf("[BOOT] device_state_init: %lu ms\n", lv_tick_elaps(_boot_t));
+    bk_printf(TAG "[BOOT] device_state_init: %lu ms\n", lv_tick_elaps(_boot_t));
 
     _boot_t = lv_tick_get();
     rtc_sync_init();
-    printf("[BOOT] rtc_sync_init: %lu ms\n", lv_tick_elaps(_boot_t));
+    bk_printf(TAG "[BOOT] rtc_sync_init: %lu ms\n", lv_tick_elaps(_boot_t));
 
 #if UI_LFS_PSRAM_CACHE_ENABLE // follow the preprocessor directives and check ui_config.h
     /* Phase 2: flash→PSRAM 복사 + 재마운트 (~12s, LVGL lock 상태).
@@ -178,11 +181,11 @@ static void _uart_comm_task(beken_thread_arg_t arg)
      * 전혀 늘지 않고 crash도 동일하게 재현됨 — LFS_PSRAM_ADDR 영역은 heap과
      * 별도로 정적 예약된 주소범위라 복사를 생략해도 힙에 반환되지 않는 것으로
      * 보임. 속도만 느려지므로 원복.) (나는 그렇게 생각 안합니다 :/) */
-    printf("[BOOT] VFS copy flash->PSRAM start\n");
+    bk_printf(TAG "[BOOT] VFS copy flash->PSRAM start\n");
     lv_vendor_disp_lock();
     _boot_t = lv_tick_get();
     lvgl_vfs_copy_and_remount_psram();
-    printf("[BOOT] VFS copy+remount: %lu ms\n", lv_tick_elaps(_boot_t));
+    bk_printf(TAG "[BOOT] VFS copy+remount: %lu ms\n", lv_tick_elaps(_boot_t));
 #else
     lv_vendor_disp_lock();
 #endif /*UI_LFS_PSRAM_CACHE_ENABLE*/
@@ -199,16 +202,16 @@ static void _uart_comm_task(beken_thread_arg_t arg)
     lv_obj_set_style_bg_opa(preRenderRoot, LV_OPA_TRANSP, 0); // 배경 투명
 
     main_activity_on_create();
-    printf("[BOOT] main_activity_on_create: %lu ms\n", lv_tick_elaps(_boot_t));
+    bk_printf(TAG "[BOOT] main_activity_on_create: %lu ms\n", lv_tick_elaps(_boot_t));
 
     _boot_t = lv_tick_get();
     init_page_main(&bk_lv_tool_ui);
-    printf("[BOOT] init_page_main: %lu ms\n", lv_tick_elaps(_boot_t));
+    bk_printf(TAG "[BOOT] init_page_main: %lu ms\n", lv_tick_elaps(_boot_t));
 
     _boot_t = lv_tick_get();
     init_page_timebar(&bk_lv_tool_ui);
     ui_lang_apply_timebar(&bk_lv_tool_ui);
-    printf("[BOOT] init_page_timebar: %lu ms\n", lv_tick_elaps(_boot_t));
+    bk_printf(TAG "[BOOT] init_page_timebar: %lu ms\n", lv_tick_elaps(_boot_t));
 
     g_device_state.black_out_checking = false; // blackout check가 계속 enable되는데 조건을 아직 모르겠으니까 일단 강제로 blackout recovery 없앰
 
@@ -221,9 +224,9 @@ static void _uart_comm_task(beken_thread_arg_t arg)
 #else
         lv_scr_load(bk_lv_tool_ui.main);
 #endif
-        printf("[BOOT] main screen loaded\n");
+        bk_printf(TAG "[BOOT] main screen loaded\n");
     } else {
-        printf("[BOOT] blackout recovery screen active\n");
+        bk_printf(TAG "[BOOT] blackout recovery screen active\n");
     }
     destroy_page_introactivity(&bk_lv_tool_ui);
     lv_vendor_disp_unlock();
@@ -259,7 +262,7 @@ void beken_ui_init(void)
     /* 부팅 화면 표시 */
     init_page_introactivity(&bk_lv_tool_ui);
     lv_scr_load(bk_lv_tool_ui.introactivity);
-    printf("[BOOT] boot screen displayed\n");
+    bk_printf(TAG "[BOOT] boot screen displayed\n");
 
 #ifdef HAL_USE_EMULATOR
     settings_init();

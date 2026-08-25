@@ -13,6 +13,9 @@
 #include "hardware_hal.h"
 #include "uart_comm.h"
 
+#define TAG "[detailsettinghumidity_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 
 static uint32_t last_click_time = 0;
@@ -240,10 +243,10 @@ void detailsettinghumidity_load_event_cb(lv_event_t *e)
     }
     if (code != LV_EVENT_SCREEN_LOAD_START) return;
     uint32_t t0 = lv_tick_get();
-    printf("[PERF] detailhumidity load_event start\n");
+    bk_printf(TAG "[PERF] detailhumidity load_event start\n");
 
     _build_img_arrays_if_changed();
-    printf("[PERF]   _build_img_arrays +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF]   _build_img_arrays +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 
     ui_lang_apply_detailsettinghumidity(bk_ui);
     s_edit_field = -1;
@@ -251,9 +254,9 @@ void detailsettinghumidity_load_event_cb(lv_event_t *e)
      * LVGL 위젯이 살아있는 한 이전에 설정한 options 가 그대로 유지된다. */
     _refresh(bk_ui);
     _update_txt_colors(bk_ui, -1);   /* 재진입 시 이전 선택 색상(검정) 잔류 방지 */
-    printf("[PERF]   _refresh +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF]   _refresh +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 
     lv_obj_add_flag(bk_ui->detailsettinghumidity_settemp_setn1, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(bk_ui->detailsettinghumidity_pickerbox,     LV_OBJ_FLAG_HIDDEN);
-    printf("[PERF] detailhumidity load_event end total=%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF] detailhumidity load_event end total=%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 }

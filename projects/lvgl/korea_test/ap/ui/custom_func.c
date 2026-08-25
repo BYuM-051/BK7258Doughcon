@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#define TAG "[custom_func.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 /* _img_set_src_timed / _img_set_src_deferred / _img_ensure_src 는
  * ui/custom/custom_func.c 에 정의됨 — 여기서 재정의하면 링커 중복 오류 발생.
  * 이 파일은 custom/ 디렉터리에 없는 새 함수만 추가한다. */
@@ -32,7 +35,7 @@ void ui_cache_drop_if_low_mem(void)
     lv_image_cache_drop(NULL);
     s_last_low_mem_drop_tick = lv_tick_get();
     s_low_mem_drop_done_once = true;
-    printf("[MEM] shared image cache dropped (low mem: free=%u B < %u B)\n",
+    bk_printf(TAG "[MEM] shared image cache dropped (low mem: free=%u B < %u B)\n",
            (unsigned)free_now, (unsigned)UI_CACHE_DROP_LOW_MEM_THRESHOLD_BYTES);
 }
 #endif /* UI_CACHE_DROP_LOW_MEM_ENABLE */
@@ -53,9 +56,9 @@ void bg_canvas_buf_alloc(void)
     uint32_t buf_sz = LV_CANVAS_BUF_SIZE(1024, 540, 16, LV_DRAW_BUF_ALIGN);
     s_bg_canvas_buf = lv_malloc(buf_sz);
     if (s_bg_canvas_buf)
-        printf("[BG] buf alloc ok (%lu B)\n", (unsigned long)buf_sz);
+        bk_printf(TAG "[BG] buf alloc ok (%lu B)\n", (unsigned long)buf_sz);
     else
-        printf("[BG] buf alloc failed\n");
+        bk_printf(TAG "[BG] buf alloc failed\n");
 }
 
 /* canvas 생성 + JPEG decode — 첫 _bg_set 시점(LVGL task 실행 중)에 호출됨.
@@ -71,15 +74,15 @@ void bg_canvas_preload(void)
         s_bg_canvas_buf = lv_malloc(buf_sz);
     }
     if (!s_bg_canvas_buf) {
-        printf("[BG] buf unavailable\n");
+        bk_printf(TAG "[BG] buf unavailable\n");
         return;
     }
 
     /* JPEG SW decode에 ~1.06 MB 임시 버퍼 필요 — PSRAM 부족 시 assert 방지 */
     size_t free_psram = rtos_get_psram_free_heap_size();
-    printf("[BG] psram free = %u B\n", (unsigned)free_psram);
+    bk_printf(TAG "[BG] psram free = %u B\n", (unsigned)free_psram);
     if (free_psram < 1300 * 1024) {
-        printf("[BG] psram low, skip canvas decode (fallback to JPEG)\n");
+        bk_printf(TAG "[BG] psram low, skip canvas decode (fallback to JPEG)\n");
         return;
     }
 
@@ -95,7 +98,7 @@ void bg_canvas_preload(void)
     lv_area_t area = {0, 0, 1023, 539};
     lv_draw_image(&layer, &img_dsc, &area);
     lv_canvas_finish_layer(s_bg_canvas, &layer);
-    printf("[BG] canvas ok\n");
+    bk_printf(TAG "[BG] canvas ok\n");
 }
 
 const lv_image_dsc_t *bg_canvas_get_dsc(void)

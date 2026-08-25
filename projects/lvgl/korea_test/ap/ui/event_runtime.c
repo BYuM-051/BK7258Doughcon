@@ -25,6 +25,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#define TAG "[event_runtime.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 extern bk_lv_ui_t bk_lv_tool_ui;
 
 
@@ -59,5 +62,5 @@ void navigate_to_screen(lv_obj_t** target, lv_screen_load_anim_t anim_type, int 
 void switch_locale(const char* locale, bool reload_page)
 {
     // i18n is not enabled
-    printf("Warning: i18n is not enabled, cannot switch language\n");
+    bk_printf(TAG "Warning: i18n is not enabled, cannot switch language\n");
 }

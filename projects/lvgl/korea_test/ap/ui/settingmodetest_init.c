@@ -7,6 +7,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#define TAG "[settingmodetest_init.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void settingmodetest_backbt_event_cb(lv_event_t *e);
 extern void settingmodetest_compbt_event_cb(lv_event_t *e);
@@ -42,9 +45,9 @@ void settingmodetest_canvas_buf_alloc(void)
     uint32_t buf_sz = LV_CANVAS_BUF_SIZE(984, 433, 16, LV_DRAW_BUF_ALIGN);
     s_tmbox_canvas_buf = lv_malloc(buf_sz);
     if (s_tmbox_canvas_buf)
-        printf("[PERF] testmode_box buf alloc ok (%lu B)\n", (unsigned long)buf_sz);
+        bk_printf(TAG "[PERF] testmode_box buf alloc ok (%lu B)\n", (unsigned long)buf_sz);
     else
-        printf("[PERF] testmode_box buf alloc FAILED\n");
+        bk_printf(TAG "[PERF] testmode_box buf alloc FAILED\n");
 }
 
 void settingmodetest_canvas_free(void)
@@ -99,7 +102,7 @@ void settingmodetest_bg_preload(void)
     lv_canvas_finish_layer(s_tmbox_canvas, &layer);
 
     s_tmbox_buf_lang = lang;
-    printf("[PERF] testmode_box preloaded: %s\n", path);
+    bk_printf(TAG "[PERF] testmode_box preloaded: %s\n", path);
 }
 
 /* settingmodetest는 keep-alive라 init_page_settingmodetest()의 1회성 src

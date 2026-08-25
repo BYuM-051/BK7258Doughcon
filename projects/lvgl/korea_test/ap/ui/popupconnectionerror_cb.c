@@ -8,6 +8,9 @@
 #include "beken_ui.h"
 #include "device_state.h"
 
+#define TAG "[popupconnectionerror_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void init_page_popupconnectionerror(bk_lv_ui_t *bk_ui);
 
@@ -53,7 +56,7 @@ void popupconnectionerror_tick(bk_lv_ui_t *bk_ui)
     state->auto_dry_mode_start = false;
 
     if (!s_conn_shown) {
-        printf("[CONN_ERR] connection error detected, showing overlay\n");
+        bk_printf(TAG "[CONN_ERR] connection error detected, showing overlay\n");
         _conn_show_overlay(bk_ui);
         return;
     }

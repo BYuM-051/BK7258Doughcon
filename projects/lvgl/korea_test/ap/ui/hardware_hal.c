@@ -19,6 +19,9 @@
 #include "hardware_hal.h"
 #include "ui_config.h"
 
+#define TAG "[hardware_hal.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 /* ================================================================
  * EMULATOR — PC simulator / loopback (HAL_USE_EMULATOR)
 //  * ================================================================*/
@@ -53,7 +56,7 @@ static int _com_open(const char *port)
     s_com = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
                         0, NULL, OPEN_EXISTING, 0, NULL);
     if (s_com == INVALID_HANDLE_VALUE) {
-        printf("[HAL PC-UART] CreateFile(%s) failed err=%lu\n", port, GetLastError());
+        bk_printf(TAG "[HAL PC-UART] CreateFile(%s) failed err=%lu\n", port, GetLastError());
         return -1;
     }
     DCB dcb = {0};
@@ -63,14 +66,14 @@ static int _com_open(const char *port)
     dcb.Parity     = NOPARITY;
     dcb.StopBits   = ONESTOPBIT;
     if (!SetCommState(s_com, &dcb)) {
-        printf("[HAL PC-UART] SetCommState failed err=%lu\n", GetLastError());
+        bk_printf(TAG "[HAL PC-UART] SetCommState failed err=%lu\n", GetLastError());
         CloseHandle(s_com); s_com = INVALID_HANDLE_VALUE; return -1;
     }
     /* Non-blocking read: return immediately with bytes available */
     COMMTIMEOUTS ct = { MAXDWORD, 0, 0, 0, 0 };
     SetCommTimeouts(s_com, &ct);
     PurgeComm(s_com, PURGE_RXCLEAR | PURGE_TXCLEAR);
-    printf("[HAL PC-UART] opened %s (9600 8N1)\n", port);
+    bk_printf(TAG "[HAL PC-UART] opened %s (9600 8N1)\n", port);
     return 0;
 }
 static void _com_close(void)
@@ -102,7 +105,7 @@ static int _com_open(const char *port)
     tio.c_cc[VMIN] = 0; tio.c_cc[VTIME] = 0;
     tcflush(s_com, TCIOFLUSH);
     tcsetattr(s_com, TCSANOW, &tio);
-    printf("[HAL PC-UART] opened %s (9600 8N1)\n", port);
+    bk_printf(TAG "[HAL PC-UART] opened %s (9600 8N1)\n", port);
     return 0;
 }
 static void _com_close(void)  { if (s_com >= 0) { close(s_com); s_com = -1; } }
@@ -191,19 +194,19 @@ void hal_uart_open(void)
     if (port) {
         s_pc_uart = (_com_open(port) == 0) ? 1 : 0;
         if (!s_pc_uart)
-            printf("[HAL PC-UART] open failed — falling back to loopback\n");
+            bk_printf(TAG "[HAL PC-UART] open failed — falling back to loopback\n");
     } else {
         s_pc_uart = 0;
-        printf("[HAL EMU] UART open (loopback)\n");
-        printf("[HAL EMU]   → real board: set HAL_UART_PORT=COM5\n");
-        printf("[HAL EMU]   → or create build/uart_port.cfg containing: COM5\n");
+        bk_printf(TAG "[HAL EMU] UART open (loopback)\n");
+        bk_printf(TAG "[HAL EMU]   → real board: set HAL_UART_PORT=COM5\n");
+        bk_printf(TAG "[HAL EMU]   → or create build/uart_port.cfg containing: COM5\n");
     }
 }
 
 void hal_uart_close(void)
 {
-    if (s_pc_uart) { _com_close(); s_pc_uart = 0; printf("[HAL PC-UART] closed\n"); }
-    else           { printf("[HAL EMU] UART close\n"); }
+    if (s_pc_uart) { _com_close(); s_pc_uart = 0; bk_printf(TAG "[HAL PC-UART] closed\n"); }
+    else           { bk_printf(TAG "[HAL EMU] UART close\n"); }
     s_rx_len = 0;
 }
 
@@ -214,7 +217,7 @@ void hal_uart_write(const uint8_t *buf, int len)
     /* Real board: send directly to USB-UART */
     if (s_pc_uart) {
         int sent = _com_write(buf, len);
-        printf("[HAL PC-UART] TX cmd=0x%02X %d/%d bytes\n", buf[2], sent, len);
+        bk_printf(TAG "[HAL PC-UART] TX cmd=0x%02X %d/%d bytes\n", buf[2], sent, len);
         return;
     }
 
@@ -267,7 +270,7 @@ void hal_uart_write(const uint8_t *buf, int len)
     }
 
     default:
-        printf("[HAL EMU] unknown TX cmd=0x%02X -- no response\n", tx_cmd);
+        bk_printf(TAG "[HAL EMU] unknown TX cmd=0x%02X -- no response\n", tx_cmd);
         break;
     }
 }
@@ -277,7 +280,7 @@ int hal_uart_read(uint8_t *buf, int max_len)
     /* Real board: read directly from USB-UART (non-blocking) */
     if (s_pc_uart) {
         int n = _com_read(buf, max_len);
-        if (n > 0) printf("[HAL PC-UART] RX %d bytes (first=0x%02X)\n", n, buf[0]);
+        if (n > 0) bk_printf(TAG "[HAL PC-UART] RX %d bytes (first=0x%02X)\n", n, buf[0]);
         return n;
     }
     /* Loopback emulator */
@@ -292,17 +295,17 @@ int hal_uart_read(uint8_t *buf, int max_len)
 
 void hal_notify_comm_error(void)
 {
-    printf("[HAL EMU] !!! comm_error threshold reached\n");
+    bk_printf(TAG "[HAL EMU] !!! comm_error threshold reached\n");
 }
 
 /* --- Buzzer (emulator: no-op with log) --- */
 void hal_buzzer_start(int freq_hz, int duration_ms)
 {
-    printf("[HAL EMU] buzzer start freq=%d ms=%d\n", freq_hz, duration_ms);
+    bk_printf(TAG "[HAL EMU] buzzer start freq=%d ms=%d\n", freq_hz, duration_ms);
 }
 void hal_buzzer_stop(void)
 {
-    printf("[HAL EMU] buzzer stop\n");
+    bk_printf(TAG "[HAL EMU] buzzer stop\n");
 }
 void hal_buzzer_beep(void)
 {
@@ -310,34 +313,34 @@ void hal_buzzer_beep(void)
 }
 void hal_buzzer_complete(void)
 {
-    printf("[HAL EMU] buzzer complete (10x 250ms ON / 750ms OFF)\n");
+    bk_printf(TAG "[HAL EMU] buzzer complete (10x 250ms ON / 750ms OFF)\n");
 }
 
 /* --- Backlight (emulator: log only) --- */
 void hal_backlight_set(int level)
 {
-    printf("[HAL EMU] backlight level=%d\n", level);
+    bk_printf(TAG "[HAL EMU] backlight level=%d\n", level);
 }
 
 /* --- System restart (emulator: log only, no real reboot) --- */
 void hal_system_restart(void)
 {
-    printf("[HAL EMU] system restart requested (no-op in emulator)\n");
+    bk_printf(TAG "[HAL EMU] system restart requested (no-op in emulator)\n");
 }
 
 /* --- Touch enable/disable (emulator: no-op, no drv_tp) --- */
 void hal_touch_set_enabled(bool enabled)
 {
-    printf("[HAL EMU] touch %s\n", enabled ? "enabled" : "disabled");
+    bk_printf(TAG "[HAL EMU] touch %s\n", enabled ? "enabled" : "disabled");
 }
 
 /* --- GPIO init (emulator: no-op) --- */
 void hal_gpio_init(void) { /* nothing needed in emulator */ }
 
 /* --- LEDs (emulator: log only) --- */
-void hal_led_lamp_set(bool on)  { printf("[HAL EMU] lamp  %s\n", on ? "ON" : "OFF"); }
-void hal_led_lock_set(bool on)  { printf("[HAL EMU] lock  %s\n", on ? "ON" : "OFF"); }
-void hal_led_power_set(bool on) { printf("[HAL EMU] power %s\n", on ? "ON" : "OFF"); }
+void hal_led_lamp_set(bool on)  { bk_printf(TAG "[HAL EMU] lamp  %s\n", on ? "ON" : "OFF"); }
+void hal_led_lock_set(bool on)  { bk_printf(TAG "[HAL EMU] lock  %s\n", on ? "ON" : "OFF"); }
+void hal_led_power_set(bool on) { bk_printf(TAG "[HAL EMU] power %s\n", on ? "ON" : "OFF"); }
 
 /* --- RTC (emulator: virtual clock with offset so get/set stay consistent) --- */
 static time_t s_emu_rtc_base   = 0; /* absolute time at last hal_rtc_set; 0 = use time(NULL) */
@@ -375,7 +378,7 @@ void hal_rtc_set(int year, int month, int day,
     t.tm_isdst = -1;
     s_emu_rtc_base   = mktime(&t);
     s_emu_rtc_set_at = time(NULL);
-    printf("[HAL EMU] rtc set %04d-%02d-%02d %02d:%02d:%02d\n",
+    bk_printf(TAG "[HAL EMU] rtc set %04d-%02d-%02d %02d:%02d:%02d\n",
            year, month, day, hour, min, sec);
 }
 
@@ -619,7 +622,7 @@ void hal_backlight_set(int level)
  * ----------------------------------------------------------------*/
 void hal_system_restart(void)
 {
-    printf("[HAL] system restart — bk_reboot()\n");
+    bk_printf(TAG "[HAL] system restart — bk_reboot()\n");
     bk_reboot();
 }
 
@@ -636,10 +639,10 @@ void hal_touch_set_enabled(bool enabled)
 {
     if (enabled) {
         drv_tp_open(LV_HOR_RES, LV_VER_RES, TP_MIRROR_NONE);
-        printf("[HAL] touch driver re-opened (enabled)\n");
+        bk_printf(TAG "[HAL] touch driver re-opened (enabled)\n");
     } else {
         drv_tp_close();
-        printf("[HAL] touch driver closed (disabled) — HW interrupt + scan thread stopped\n");
+        bk_printf(TAG "[HAL] touch driver closed (disabled) — HW interrupt + scan thread stopped\n");
     }
 }
 
@@ -662,18 +665,18 @@ static void _gpio_out(gpio_id_t id, bool on);
 void hal_gpio_init(void)
 {
     //  bk_gpio_driver_init();
-    printf("[HAL][GPIO] hal_gpio_init() enter\n");
+    bk_printf(TAG "[HAL][GPIO] hal_gpio_init() enter\n");
 
     static const gpio_id_t _led_pins[3] = { HAL_GPIO_LOCK, HAL_GPIO_POWER, HAL_GPIO_LAMP };
     static const char * const _led_names[3] = { "LOCK_LED(33)", "POWER_LED(34)", "LAMP_LED(35)" };
     for (int i = 0; i < 3; i++) {
         bk_err_t r1 = gpio_dev_unmap(_led_pins[i]);
         bk_err_t r2 = bk_gpio_enable_output(_led_pins[i]);
-        printf("[HAL][GPIO] %s unmap=%d enable_output=%d\n", _led_names[i], (int)r1, (int)r2);
+        bk_printf(TAG "[HAL][GPIO] %s unmap=%d enable_output=%d\n", _led_names[i], (int)r1, (int)r2);
         _gpio_out(_led_pins[i], false);   /* LED 기본 OFF */
     }
 
-    printf("[HAL][GPIO] hal_gpio_init() done\n");
+    bk_printf(TAG "[HAL][GPIO] hal_gpio_init() done\n");
 }
 
 /* ----------------------------------------------------------------
@@ -723,11 +726,11 @@ static bk_err_t _ds1338_init(void)
     };
     bk_err_t r = bk_i2c_init((i2c_id_t)DS1338_I2C_ID, &cfg);
     if (r != BK_OK) {
-        printf("[RTC] DS1338Z I2C init FAIL (id=%d err=%d)\n", DS1338_I2C_ID, (int)r);
+        bk_printf(TAG "[RTC] DS1338Z I2C init FAIL (id=%d err=%d)\n", DS1338_I2C_ID, (int)r);
         return r;
     }
     s_ds1338_inited = true;
-    printf("[RTC] DS1338Z I2C init OK (id=%d addr=0x%02X)\n", DS1338_I2C_ID, DS1338_ADDR);
+    bk_printf(TAG "[RTC] DS1338Z I2C init OK (id=%d addr=0x%02X)\n", DS1338_I2C_ID, DS1338_ADDR);
 
     /* SRAM write/read test (reg 0x08): checks whether I2C write path works at all.
      * DS1338Z SRAM is battery-backed static RAM — independent of timekeeping registers.
@@ -737,11 +740,11 @@ static bk_err_t _ds1338_init(void)
     bk_err_t ws = _ds1338_write(0x08, &sram_w, 1);
     bk_err_t rs = _ds1338_read(0x08, &sram_r, 1);
     if (ws != BK_OK || rs != BK_OK) {
-        printf("[RTC] DS1338Z SRAM test I/O FAIL (wr=%d rd=%d)\n", (int)ws, (int)rs);
+        bk_printf(TAG "[RTC] DS1338Z SRAM test I/O FAIL (wr=%d rd=%d)\n", (int)ws, (int)rs);
     } else if (sram_r == sram_w) {
-        printf("[RTC] DS1338Z SRAM test PASS (0x%02X OK) — write path functional\n", sram_r);
+        bk_printf(TAG "[RTC] DS1338Z SRAM test PASS (0x%02X OK) — write path functional\n", sram_r);
     } else {
-        printf("[RTC] DS1338Z SRAM test FAIL wrote=0x%02X read=0x%02X — VCC or write-protect issue\n",
+        bk_printf(TAG "[RTC] DS1338Z SRAM test FAIL wrote=0x%02X read=0x%02X — VCC or write-protect issue\n",
                sram_w, sram_r);
     }
     return BK_OK;
@@ -765,7 +768,7 @@ static bk_err_t _ds1338_read(uint8_t reg, uint8_t *buf, uint8_t len)
         };
         bk_err_t r = bk_i2c_memory_read((i2c_id_t)DS1338_I2C_ID, &p);
         if (r != BK_OK) {
-            printf("[RTC] DS1338Z read NACK byte=%d reg=0x%02X err=%d\n", i, reg + i, (int)r);
+            bk_printf(TAG "[RTC] DS1338Z read NACK byte=%d reg=0x%02X err=%d\n", i, reg + i, (int)r);
             return r;
         }
     }
@@ -785,7 +788,7 @@ static bk_err_t _ds1338_write(uint8_t reg, const uint8_t *buf, uint8_t len)
         };
         bk_err_t r = bk_i2c_memory_write((i2c_id_t)DS1338_I2C_ID, &p);
         if (r != BK_OK) {
-            printf("[RTC] DS1338Z write NACK byte=%d reg=0x%02X val=0x%02X err=%d\n",
+            bk_printf(TAG "[RTC] DS1338Z write NACK byte=%d reg=0x%02X val=0x%02X err=%d\n",
                    i, reg + i, buf[i], (int)r);
             return r;
         }
@@ -807,7 +810,7 @@ bool hal_rtc_get(int *year, int *month, int *day,
         uint8_t regs[7];
         bk_err_t rd = _ds1338_read(0x00, regs, 7);
         if (rd == BK_OK) {
-            printf("[RTC] DS1338Z raw: %02X %02X %02X %02X %02X %02X %02X  CH=%d\n",
+            bk_printf(TAG "[RTC] DS1338Z raw: %02X %02X %02X %02X %02X %02X %02X  CH=%d\n",
                    regs[0], regs[1], regs[2], regs[3], regs[4], regs[5], regs[6],
                    (regs[0] >> 7) & 1);
 
@@ -815,11 +818,11 @@ bool hal_rtc_get(int *year, int *month, int *day,
              * Try to restart: write seconds register with CH=0 then re-read. */
             if (regs[0] & 0x80) {
                 uint8_t clr = regs[0] & 0x7F;
-                printf("[RTC] DS1338Z CH=1 — clearing CH bit\n");
+                bk_printf(TAG "[RTC] DS1338Z CH=1 — clearing CH bit\n");
                 if (_ds1338_write(0x00, &clr, 1) == BK_OK) {
                     rtos_delay_milliseconds(5);
                     _ds1338_read(0x00, regs, 7);
-                    printf("[RTC] DS1338Z after CH clear: %02X CH=%d\n",
+                    bk_printf(TAG "[RTC] DS1338Z after CH clear: %02X CH=%d\n",
                            regs[0], (regs[0] >> 7) & 1);
                 }
             }
@@ -843,7 +846,7 @@ bool hal_rtc_get(int *year, int *month, int *day,
                 _bcd_ok(yr_raw, 9);             /* year:     00–99 */
 
             if (!bcd_ok) {
-                printf("[RTC] DS1338Z BCD invalid — AON fallback\n");
+                bk_printf(TAG "[RTC] DS1338Z BCD invalid — AON fallback\n");
                 /* fall through */
             } else {
                 uint8_t yr2 = _bcd2bin(yr_raw);
@@ -856,14 +859,14 @@ bool hal_rtc_get(int *year, int *month, int *day,
                     *day   = dy;
                     *month = mo;
                     *year  = yr2 + 2000;
-                    printf("[RTC] hal_rtc_get → DS1338Z: %04d-%02d-%02d %02d:%02d:%02d\n",
+                    bk_printf(TAG "[RTC] hal_rtc_get → DS1338Z: %04d-%02d-%02d %02d:%02d:%02d\n",
                            *year, *month, *day, *hour, *min, *sec);
                     return true;
                 }
-                printf("[RTC] DS1338Z year out of range: yr2=%d\n", yr2);
+                bk_printf(TAG "[RTC] DS1338Z year out of range: yr2=%d\n", yr2);
             }
         } else {
-            printf("[RTC] DS1338Z read FAIL (err=%d)\n", (int)rd);
+            bk_printf(TAG "[RTC] DS1338Z read FAIL (err=%d)\n", (int)rd);
         }
     }
 
@@ -877,7 +880,7 @@ bool hal_rtc_get(int *year, int *month, int *day,
     *hour  = t->tm_hour;
     *min   = t->tm_min;
     *sec   = t->tm_sec;
-    printf("[RTC] hal_rtc_get → AON: %04d-%02d-%02d %02d:%02d:%02d (epoch=%lu)\n",
+    bk_printf(TAG "[RTC] hal_rtc_get → AON: %04d-%02d-%02d %02d:%02d:%02d (epoch=%lu)\n",
            *year, *month, *day, *hour, *min, *sec, (unsigned long)tv.tv_sec);
     return false;
 }
@@ -885,7 +888,7 @@ bool hal_rtc_get(int *year, int *month, int *day,
 void hal_rtc_set(int year, int month, int day,
                  int hour, int min,   int sec)
 {
-    printf("[RTC] hal_rtc_set: %04d-%02d-%02d %02d:%02d:%02d\n",
+    bk_printf(TAG "[RTC] hal_rtc_set: %04d-%02d-%02d %02d:%02d:%02d\n",
            year, month, day, hour, min, sec);
 
     /* Write DS1338Z — sec BCD bit7=0 → CH=0 → oscillator starts */
@@ -899,7 +902,7 @@ void hal_rtc_set(int year, int month, int day,
         regs[5] = _bin2bcd((uint8_t)month);
         regs[6] = _bin2bcd((uint8_t)(year - 2000));
         bk_err_t wr = _ds1338_write(0x00, regs, 7);
-        printf("[RTC] DS1338Z write %s  regs: %02X %02X %02X %02X %02X %02X %02X\n",
+        bk_printf(TAG "[RTC] DS1338Z write %s  regs: %02X %02X %02X %02X %02X %02X %02X\n",
                wr == BK_OK ? "OK" : "FAIL",
                regs[0], regs[1], regs[2], regs[3], regs[4], regs[5], regs[6]);
 
@@ -916,17 +919,17 @@ void hal_rtc_set(int year, int month, int day,
                           ( rb[4]         == regs[4]) &&
                           ((rb[5] & 0x1F) == regs[5]) &&
                           ( rb[6]         == regs[6]);
-                printf("[RTC] DS1338Z readback %s  regs: %02X %02X %02X %02X %02X %02X %02X\n",
+                bk_printf(TAG "[RTC] DS1338Z readback %s  regs: %02X %02X %02X %02X %02X %02X %02X\n",
                        ok ? "OK" : "MISMATCH",
                        rb[0], rb[1], rb[2], rb[3], rb[4], rb[5], rb[6]);
                 if (!ok)
-                    printf("[RTC] DS1338Z readback MISMATCH — 배터리 불량 또는 하드웨어 이상\n");
+                    bk_printf(TAG "[RTC] DS1338Z readback MISMATCH — 배터리 불량 또는 하드웨어 이상\n");
             } else {
-                printf("[RTC] DS1338Z readback FAIL (err=%d)\n", (int)rd);
+                bk_printf(TAG "[RTC] DS1338Z readback FAIL (err=%d)\n", (int)rd);
             }
         }
     } else {
-        printf("[RTC] DS1338Z unavailable — AON only\n");
+        bk_printf(TAG "[RTC] DS1338Z unavailable — AON only\n");
     }
 
     /* Sync BK7258 AON RTC so time() stays valid */
@@ -942,7 +945,7 @@ void hal_rtc_set(int year, int month, int day,
     struct timeval  tv = { .tv_sec = epoch, .tv_usec = 0 };
     struct timezone tz = {0};
     bk_rtc_settimeofday(&tv, &tz);
-    printf("[RTC] AON sync: epoch=%lu\n", (unsigned long)epoch);
+    bk_printf(TAG "[RTC] AON sync: epoch=%lu\n", (unsigned long)epoch);
 }
 
 #endif /* HAL_USE_EMULATOR */

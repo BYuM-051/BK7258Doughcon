@@ -19,6 +19,9 @@
 #include <string.h>
 #include <stdio.h>
 
+#define TAG "[ui_lang.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 #define _DEGREE_F_STR  "\xc2\xb0""F"
 
 /* Build and apply a language+degree-aware image path.
@@ -815,7 +818,7 @@ void ui_lang_apply_picker(lv_obj_t *obj, int num)
     const char *lsuf = (lang == 1) ? "_china" : (lang == 2) ? "_english" : "";
     char path[128];
     snprintf(path, sizeof(path), "/images/picker_%d%s.png", num, lsuf);
-    printf("[PICKER] lang=%d -> %s\n", lang, path);
+    bk_printf(TAG "[PICKER] lang=%d -> %s\n", lang, path);
 #if UI_CACHE_DROP_LOW_MEM_ENABLE
     /* picker_N.png(376x376 ARGB8888 ~552KB, alpha 있는 PNG)가 want=565508 B로
      * 반복 크래시한 이력이 있는 decode 지점 — 화면 전환 시점 체크(uart_comm.c)와

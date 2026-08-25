@@ -17,6 +17,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define TAG "[manualmodestart_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 
 static uint32_t s_last_click_manualmodestart = 0;
@@ -674,9 +677,9 @@ static void _ferm2_bg_load(bk_lv_ui_t *bk_ui, const char *bg_path, int lang)
     lv_obj_t *scr = bk_ui->manualmodestart;
 
     size_t _free = rtos_get_psram_free_heap_size();
-    printf("[FERM2] psram free = %u B\n", (unsigned)_free);
+    bk_printf(TAG "[FERM2] psram free = %u B\n", (unsigned)_free);
     if (_free < 1300 * 1024) {
-        printf("[FERM2] psram low, skip bg load\n");
+        bk_printf(TAG "[FERM2] psram low, skip bg load\n");
         return;
     }
 
@@ -892,7 +895,7 @@ void manualmodestart_backbt_event_cb(lv_event_t *e)
             init_page_automode(bk_ui);
         lv_scr_load(bk_ui->automode);
         destroy_page_manualmodestart(bk_ui);
-        printf("[OVER_FERM] Stop → AutoModeOver 해제, automode 화면\n");
+        bk_printf(TAG "[OVER_FERM] Stop → AutoModeOver 해제, automode 화면\n");
         return;
     }
 

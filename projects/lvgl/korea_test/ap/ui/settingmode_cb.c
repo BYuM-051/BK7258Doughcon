@@ -14,6 +14,9 @@
 #include "device_state.h"
 #include "hardware_hal.h"
 
+#define TAG "[settingmode_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void popuppassword_open(void);
 extern void popuppassword_bg_preload(void);
@@ -64,7 +67,7 @@ static void _pp_pw_tick(lv_timer_t *t)
     if (s_pp_pw_idx >= _PP_PW_TOTAL || !s_pp_pw_dummy) {
         lv_timer_delete(t); s_pp_pw_timer = NULL;
         if (s_pp_pw_dummy) { lv_obj_del(s_pp_pw_dummy); s_pp_pw_dummy = NULL; }
-        printf("[PERF] popuppassword prewarm done (%d imgs)\n", _PP_PW_TOTAL);
+        bk_printf(TAG "[PERF] popuppassword prewarm done (%d imgs)\n", _PP_PW_TOTAL);
         return;
     }
     int lang = settings_get_int("LANGUAGE");
@@ -118,7 +121,7 @@ void settingmode_setting_detailsettingbt_event_cb(lv_event_t *e)
 
     /* canvas 버퍼 방식: lv_image_cache_drop 불필요 (canvas는 캐시 외부)
      * 팝업 열릴 때 raw 픽셀 직접 사용 → decode 없음 */
-    printf("[MEM] popup open: psram_free=%u min=%u\n",
+    bk_printf(TAG "[MEM] popup open: psram_free=%u min=%u\n",
            (unsigned)rtos_get_psram_free_heap_size(),
            (unsigned)rtos_get_psram_minimum_free_heap_size());
     popuppassword_open();
@@ -164,19 +167,19 @@ void settingmode_setting_testbt_event_cb(lv_event_t *e)
     state->test_mode = true;
     {
         uint32_t _pt = lv_tick_get();
-        printf("[SCREEN] ── settingmode→settingmodetest(고장진단) ──\n");
+        bk_printf(TAG "[SCREEN] ── settingmode→settingmodetest(고장진단) ──\n");
         if (bk_ui->settingmodetest == NULL || !lv_obj_is_valid(bk_ui->settingmodetest)) {
             init_page_settingmodetest(bk_ui);
-            printf("[SCREEN] init_page_settingmodetest: %lu ms\n", (unsigned long)lv_tick_elaps(_pt));
+            bk_printf(TAG "[SCREEN] init_page_settingmodetest: %lu ms\n", (unsigned long)lv_tick_elaps(_pt));
         } else {
-            printf("[SCREEN] settingmodetest cached (init skipped)\n");
+            bk_printf(TAG "[SCREEN] settingmodetest cached (init skipped)\n");
         }
         _pt = lv_tick_get();
         lv_scr_load(bk_ui->settingmodetest);
-        printf("[SCREEN] lv_scr_load             : %lu ms\n", (unsigned long)lv_tick_elaps(_pt));
+        bk_printf(TAG "[SCREEN] lv_scr_load             : %lu ms\n", (unsigned long)lv_tick_elaps(_pt));
         _pt = lv_tick_get();
         lv_refr_now(NULL);
-        printf("[SCREEN] lv_refr_now(render)     : %lu ms\n", (unsigned long)lv_tick_elaps(_pt));
+        bk_printf(TAG "[SCREEN] lv_refr_now(render)     : %lu ms\n", (unsigned long)lv_tick_elaps(_pt));
     }
 }
 

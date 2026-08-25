@@ -14,6 +14,9 @@
 #include "uart_comm.h"
 #include "hardware_hal.h"
 
+#define TAG "[settingmodetest_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void popuperror_toggle(bk_lv_ui_t *bk_ui);
 
@@ -175,13 +178,13 @@ static void _test_toggle(int idx)
     hal_buzzer_beep();
     device_state_t *state = &g_device_state;
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    printf("test mode %d", idx);
+    bk_printf(TAG "test mode %d", idx);
     state->savetesttest[idx] = state->savetesttest[idx] ? 0 : 1;
     {
         uint32_t _pt = lv_tick_get();
         _test_set_img(bk_ui, idx, state->savetesttest[idx]);
         uint32_t dt = lv_tick_elaps(_pt);
-        if (dt > 20) printf("[PERF] _test_set_img[%d]=%lu ms (cache miss?)\n", idx, (unsigned long)dt);
+        if (dt > 20) bk_printf(TAG "[PERF] _test_set_img[%d]=%lu ms (cache miss?)\n", idx, (unsigned long)dt);
     }
     // uart_comm_trigger_hw_test();
 }
@@ -268,7 +271,7 @@ void settingmodetest_load_event_cb(lv_event_t *e)
         ui_title_anim(bk_ui->settingmodetest_title);
         uint32_t tb = lv_tick_get();
         _restore_button_imgs(bk_ui);        /* 화면 표시 후 버튼 9개 일괄 로드 */
-        printf("[PERF] settingmodetest btn imgs (LOADED) +%lu ms\n", (unsigned long)lv_tick_elaps(tb));
+        bk_printf(TAG "[PERF] settingmodetest btn imgs (LOADED) +%lu ms\n", (unsigned long)lv_tick_elaps(tb));
         return;
     }
 
@@ -280,13 +283,13 @@ void settingmodetest_load_event_cb(lv_event_t *e)
     settingmodetest_apply_bg(bk_ui);
 
     uint32_t t0 = lv_tick_get();
-    printf("[PERF] settingmodetest load_event start\n");
+    bk_printf(TAG "[PERF] settingmodetest load_event start\n");
 
     /* 재진입 시 모든 버튼 OFF 상태로 초기화 */
     memset(g_device_state.savetesttest, 0, sizeof(g_device_state.savetesttest));
 
     ui_lang_apply_settingmodetest(bk_ui);   /* loads testmode_box.jpg, title, exit_bt */
-    printf("[PERF]   ui_lang_apply +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF]   ui_lang_apply +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 
     /* clear result labels */
     lv_label_set_text(bk_ui->settingmodetest_TestComp,              "");
@@ -310,5 +313,5 @@ void settingmodetest_load_event_cb(lv_event_t *e)
     _stop_test_timer();
     s_test_timer = lv_timer_create(_update_test_labels, 200, NULL);
     lv_timer_ready(s_test_timer);   /* 다음 lv_task_handler에서 즉시 1회 발화 */
-    printf("[PERF] settingmodetest load_event end total=%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF] settingmodetest load_event end total=%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 }

@@ -42,6 +42,9 @@
  * (=3000ms, multi_button.h)를 그대로 사용 — 기존 3초 기준과 정확히 일치. */
 #include "key_adapter.h"
 
+#define TAG "[main_activity.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 static void _toggle_lock(void);
 static void _toggle_lamp(void);
 static void _screen_toggle(void);
@@ -72,7 +75,7 @@ static void _key_event_handler(uint8_t event)
         case EVT_POWER_SHORT: _screen_toggle();      break;
         case EVT_POWER_LONG:  _power_long_reset();   break;
         case EVT_LAMP_SHORT:  _toggle_lamp();        break;
-        default: printf("[KEY] unknown key-component event: %d\n", event); break;
+        default: bk_printf(TAG "[KEY] unknown key-component event: %d\n", event); break;
     }
     lv_vendor_disp_unlock();
 }
@@ -81,7 +84,7 @@ static void _key_driver_start(void)
 {
     bk_key_register_event_handler(_key_event_handler);
     bk_key_driver_init(s_key_configs, 3);
-    printf("[KEY] bk_key_driver_init done (GPIO 27/28/29, active_level=0)\n");
+    bk_printf(TAG "[KEY] bk_key_driver_init done (GPIO 27/28/29, active_level=0)\n");
 }
 
 
@@ -126,7 +129,7 @@ static void _load_screen(int screen_id)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     uint32_t _ls_t = lv_tick_get();
-    printf("[SCREEN] _load_screen(%d) start\n", screen_id);
+    bk_printf(TAG "[SCREEN] _load_screen(%d) start\n", screen_id);
     switch (screen_id) {
         case SCR_MAIN:
             init_page_main(bk_ui);
@@ -169,7 +172,7 @@ static void _load_screen(int screen_id)
         default:
             break;
     }
-    printf("[SCREEN] _load_screen(%d) done (init+scr_load): %lu ms\n", screen_id, lv_tick_elaps(_ls_t));
+    bk_printf(TAG "[SCREEN] _load_screen(%d) done (init+scr_load): %lu ms\n", screen_id, lv_tick_elaps(_ls_t));
 }
 
 /*
@@ -197,7 +200,7 @@ static void _toggle_lamp(void)
      * SWITCH 자체 지연이 아니라 UART 주기 지연). 다음 TX를 즉시 앞당겨 체감
      * 반응속도를 개선한다. */
     uart_comm_trigger_immediate_tx();
-    printf("[KEY] LAMP  toggle -> %s\n", (ma->lamp == 0x01) ? "ON" : "OFF");
+    bk_printf(TAG "[KEY] LAMP  toggle -> %s\n", (ma->lamp == 0x01) ? "ON" : "OFF");
 }
 
 /*
@@ -244,7 +247,7 @@ static void _toggle_lock(void)
          * 한꺼번에 처리되는 문제의 근본 원인을 제거한다. */
         hal_touch_set_enabled(false);
     }
-    printf("[KEY] LOCK  toggle -> %s\n", ma->lock ? "LOCKED(터치불가)" : "UNLOCKED(터치가능)");
+    bk_printf(TAG "[KEY] LOCK  toggle -> %s\n", ma->lock ? "LOCKED(터치불가)" : "UNLOCKED(터치가능)");
 }
 
 /*
@@ -286,7 +289,7 @@ static void _screen_toggle(void)
         hal_backlight_set(100);
         ma->screen_on = true;
     }
-    printf("[KEY] POWER short-press -> screen %s\n", ma->screen_on ? "ON" : "OFF");
+    bk_printf(TAG "[KEY] POWER short-press -> screen %s\n", ma->screen_on ? "ON" : "OFF");
 }
 
 /*
@@ -296,7 +299,7 @@ static void _screen_toggle(void)
  */
 static void _power_long_reset(void)
 {
-    printf("[KEY] POWER long-press -> main screen + reboot\n");
+    bk_printf(TAG "[KEY] POWER long-press -> main screen + reboot\n");
 
     /* 먼저 메인 화면으로 전환 — 정전 재가동(_blackout_recovery) 로직과 겹치지
      * 않게 한다. */
@@ -626,7 +629,7 @@ static void _blackout_recovery(void)
                  * uart_comm_init()이 start_run2=true 로 설정하여 CONDATA부터 시작.
                  * CONDATA_ACK 후 start_run=true → STATUS X0 + payload[19/20]=cur_remain_h/m. */
                 uart_comm_trigger_start_run();  /* start_run=true; uart_comm_init()이 false로 덮어씀 */
-                printf("[BLACKOUT] auto recovery: op=0x%02x CONDATA→STATUS X0\n",
+                bk_printf(TAG "[BLACKOUT] auto recovery: op=0x%02x CONDATA→STATUS X0\n",
                        ma->first_operator_mode);
                 _load_screen(SCR_AUTOMODE_START);
             }
@@ -666,7 +669,7 @@ static void _blackout_recovery(void)
         g_device_state.auto_dry_mode_start = true;
         g_device_state.operation           = true;
         uart_comm_trigger_start_run();
-        printf("[BLACKOUT] dry recovery: remain=%dh%dm\n", bo->dry_hour, bo->dry_min);
+        bk_printf(TAG "[BLACKOUT] dry recovery: remain=%dh%dm\n", bo->dry_hour, bo->dry_min);
         _load_screen(SCR_AUTODRYMODE);
     }
 }

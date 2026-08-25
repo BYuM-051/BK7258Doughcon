@@ -13,6 +13,9 @@
 #include "ui_lang.h"
 #include "hardware_hal.h"
 
+#define TAG "[automodeend_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 
 static uint32_t   last_click_time      = 0;
@@ -56,7 +59,7 @@ static void _over_ferm_wait_timer_cb(lv_timer_t *t)
             /* over_ferm_active=true 유지: drive=0x43 계속 전송
              * MCU가 0x43 echo를 받아야 0x34로 전환함 (drive=0x42로 바꾸면 전환 안됨)
              * uart_comm.c가 0x34 수신 시 over_ferm_active=false로 해제함 */
-            printf("[OVER_FERM] 타임아웃 → FERM2 화면 강제 전환 (drive=0x43 유지, MCU 0x34 대기 중)\n");
+            bk_printf(TAG "[OVER_FERM] 타임아웃 → FERM2 화면 강제 전환 (drive=0x43 유지, MCU 0x34 대기 중)\n");
         }
     }
 
@@ -75,7 +78,7 @@ static void _over_ferm_wait_timer_cb(lv_timer_t *t)
         destroy_page_manualmodestart(bk_ui);
     init_page_manualmodestart(bk_ui);
     lv_scr_load(bk_ui->manualmodestart);
-    printf("[OVER_FERM] jeon_started → manualmodestart 발효 화면 (AutoModeOver=true)\n");
+    bk_printf(TAG "[OVER_FERM] jeon_started → manualmodestart 발효 화면 (AutoModeOver=true)\n");
 }
 
 void automodeend_stopbt_event_cb(lv_event_t *e);
@@ -194,7 +197,7 @@ void automodeend_save_record_and_buzzer(device_state_t *state)
         _p = settings_get_str("RecordFreezeTemp1"); if (_p) strncpy(s1,_p,sizeof(s1)-1);
         _p = settings_get_str("RecordFreezeTemp2"); if (_p) strncpy(s2,_p,sizeof(s2)-1);
         _p = settings_get_str("RecordFreezeTemp3"); if (_p) strncpy(s3,_p,sizeof(s3)-1);
-        printf("[OVER_FERM][REC] s0='%s' s1='%s' s2='%s' s3='%s'\n", s0,s1,s2,s3);
+        bk_printf(TAG "[OVER_FERM][REC] s0='%s' s1='%s' s2='%s' s3='%s'\n", s0,s1,s2,s3);
         if      (s0[0]=='\0') { }
         else if (s1[0]=='\0') { _record_move_save(1); }
         else if (s2[0]=='\0') { _record_move_save(2); }
@@ -202,7 +205,7 @@ void automodeend_save_record_and_buzzer(device_state_t *state)
         else                  { _record_move_save(4); }
         _record_save_slot0(state);
         settings_save_dirty();
-        printf("[OVER_FERM] 기록 저장 완료\n");
+        bk_printf(TAG "[OVER_FERM] 기록 저장 완료\n");
     }
 }
 
@@ -302,7 +305,7 @@ void automodeend_load_event_cb(lv_event_t *e)
         lv_label_set_text(bk_ui->automodeend_AutoModeCompleteMin,   settings_get_str("CurrentCompleteMin"));
         if (s_over_ferm_timer) lv_timer_delete(s_over_ferm_timer);
         s_over_ferm_timer = lv_timer_create(_over_ferm_wait_timer_cb, 500, NULL);
-        printf("[OVER_FERM] automodeend 대기 중 (over_min=%d분, MCU 0x34 대기)\n", over_min_w);
+        bk_printf(TAG "[OVER_FERM] automodeend 대기 중 (over_min=%d분, MCU 0x34 대기)\n", over_min_w);
         return;
     }
 
@@ -384,7 +387,7 @@ void automodeend_load_event_cb(lv_event_t *e)
         _p = settings_get_str("RecordFreezeTemp2"); if (_p) strncpy(s2, _p, sizeof(s2)-1);
         _p = settings_get_str("RecordFreezeTemp3"); if (_p) strncpy(s3, _p, sizeof(s3)-1);
 
-        printf("[REC] SaveWriting=0 s0='%s' s1='%s' s2='%s' s3='%s'\n", s0, s1, s2, s3);
+        bk_printf(TAG "[REC] SaveWriting=0 s0='%s' s1='%s' s2='%s' s3='%s'\n", s0, s1, s2, s3);
 
         if      (s0[0] == '\0') { /* 슬롯 0 비어있음 — 시프트 불필요 */ }
         else if (s1[0] == '\0') { _record_move_save(1); }

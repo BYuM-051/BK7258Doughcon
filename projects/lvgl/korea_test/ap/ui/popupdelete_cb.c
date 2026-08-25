@@ -10,6 +10,9 @@
 #include "hardware_hal.h"
 #include "ui_lang.h"
 
+#define TAG "[popupdelete_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern int  memorymode_get_pending_delete_slot(void);
 extern void destroy_page_popupdelete(bk_lv_ui_t *bk_ui);
@@ -31,11 +34,11 @@ void popupdelete_yesbt_event_cb(lv_event_t *e)
 
     int slot = memorymode_get_pending_delete_slot();
     if (slot < 0 || slot > 11) {
-        printf("[DEL] YES: invalid slot=%d, abort\n", slot);
+        bk_printf(TAG "[DEL] YES: invalid slot=%d, abort\n", slot);
         destroy_page_popupdelete(bk_ui);
         return;
     }
-    printf("[DEL] YES: deleting slot=%d\n", slot);
+    bk_printf(TAG "[DEL] YES: deleting slot=%d\n", slot);
     char k[40];
     const char *empty = "";
 #define _MDEL(field) do { \

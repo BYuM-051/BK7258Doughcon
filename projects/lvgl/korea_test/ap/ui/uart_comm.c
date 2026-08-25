@@ -23,7 +23,10 @@
 #include <driver/aon_rtc.h>
 #include "ui_config.h"
 #include "custom_func.h"
-  
+
+#define TAG "[uart_comm.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 #define UART_LOG(fmt, ...) do {} while(0)
 //#define UART_LOG(fmt, ...) printf("[UART] " fmt "\n", ##__VA_ARGS__)
 /* ---------------------------------------------------------------------------
@@ -381,7 +384,7 @@ static void _handle_rx(const uart_packet_t *pkt)
         /* 에러 아이콘: error_flags[2],[3] 비트 중 하나라도 set */
         st->op_error         = (err8 || err9) ? true : false;
 
-        printf("[UART] RX 0x43 STATUS op=0x%02X err=%02X%02X%02X%02X remain=%dh%dm\n",
+        bk_printf(TAG "[UART] RX 0x43 STATUS op=0x%02X err=%02X%02X%02X%02X remain=%dh%dm\n",
                  st->saveoperation[5], err6, err7, err8, err9,
                  st->saveoperation[10], st->saveoperation[11]);
 
@@ -463,7 +466,7 @@ static void _handle_rx(const uart_packet_t *pkt)
             (st->saveoperation[5] == 0x34 || st->saveoperation[5] == 0x44)) {
             st->over_ferm_active       = false;
             st->over_ferm_jeon_started = true;
-            printf("[OVER_FERM] cleared: MCU op=0x%02X → jeon_started flag set\n", st->saveoperation[5]);
+            bk_printf(TAG "[OVER_FERM] cleared: MCU op=0x%02X → jeon_started flag set\n", st->saveoperation[5]);
         }
 
         /* Remain time from saveoperation[10] and [11]
@@ -929,12 +932,12 @@ static void _write_process(void)
         }
         payload[22] = st->error_cut   ? 0x88 : 0x00;
 
-        printf("[UART] TX 0x33 payload[17/18]=%dh%dm [19/20]=%dh%dm (drive=0x%02X)\n",
+        bk_printf(TAG "[UART] TX 0x33 payload[17/18]=%dh%dm [19/20]=%dh%dm (drive=0x%02X)\n",
                  payload[17], payload[18], payload[19], payload[20], drive_mode);
         {
             int _dy, _dm, _dd, _dh, _dmn, _ds;
             bool _rtc_ok = hal_rtc_get(&_dy, &_dm, &_dd, &_dh, &_dmn, &_ds);
-            printf("[UART] TX ctx: rtc_ok=%d now=%04d-%02d-%02d %02d:%02d comp=%04d-%02d-%02d %02d:%02d "
+            bk_printf(TAG "[UART] TX ctx: rtc_ok=%d now=%04d-%02d-%02d %02d:%02d comp=%04d-%02d-%02d %02d:%02d "
                    "remain=%dh%dm send_freeze=%dh%dm send_defreeze=%dh%dm send_ferm1=%dh%dm send_ferm2=%dh%dm\n",
                    (int)_rtc_ok, _dy, _dm, _dd, _dh, _dmn,
                    st->send_complete_year, st->send_complete_month, st->send_complete_day,
@@ -1023,7 +1026,7 @@ void uart_comm_tick(void)
     if (_cur_scr != s_last_scr) {
         s_last_scr = _cur_scr;
         uint32_t _free_now = (uint32_t)rtos_get_psram_free_heap_size();
-        printf("[PSRAM] screen_change  free=%u B  min=%u B  t=%lu ms\n",
+        bk_printf(TAG "[PSRAM] screen_change  free=%u B  min=%u B  t=%lu ms\n",
                (unsigned)_free_now,
                (unsigned)rtos_get_psram_minimum_free_heap_size(),
                (unsigned long)lv_tick_get());

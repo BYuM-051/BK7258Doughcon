@@ -19,6 +19,9 @@
 #include "hardware_hal.h"
 #include <driver/aon_rtc.h>
 
+#define TAG "[automode_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 extern void init_keypad_group();
@@ -41,7 +44,7 @@ static void _ams_pw_tick(lv_timer_t *t)
     if (s_ams_pw_idx >= s_ams_pw_count || !s_ams_pw_dummy) {
         lv_timer_delete(t); s_ams_pw_timer = NULL;
         if (s_ams_pw_dummy) { lv_obj_del(s_ams_pw_dummy); s_ams_pw_dummy = NULL; }
-        printf("[PERF] automodestart prewarm done (%d imgs)\n", s_ams_pw_count);
+        bk_printf(TAG "[PERF] automodestart prewarm done (%d imgs)\n", s_ams_pw_count);
         return;
     }
     _img_set_src_timed(s_ams_pw_dummy, s_ams_pw_paths[s_ams_pw_idx]);
@@ -125,7 +128,7 @@ static void _mm_pw_tick(lv_timer_t *t)
     if (s_mm_pw_idx >= _MM_PW_MAX || !s_mm_pw_dummy) {
         lv_timer_delete(t); s_mm_pw_timer = NULL;
         if (s_mm_pw_dummy) { lv_obj_del(s_mm_pw_dummy); s_mm_pw_dummy = NULL; }
-        printf("[PERF] memorymode prewarm done (%d imgs)\n", _MM_PW_MAX);
+        bk_printf(TAG "[PERF] memorymode prewarm done (%d imgs)\n", _MM_PW_MAX);
         return;
     }
     _img_set_src_timed(s_mm_pw_dummy, s_mm_pw_paths[s_mm_pw_idx]);
@@ -280,7 +283,7 @@ static void _underbar_show_automode(bk_lv_ui_t *bk_ui)
 
 static void _keypad_on_automode(bk_lv_ui_t *bk_ui)
 {
-    printf("keypad on ");
+    bk_printf(TAG "keypad on ");
     if (!bk_ui->automode_keypadbaseim) {
         bk_ui->automode_keypadbaseim = lv_image_create(bk_ui->automode);
         lv_obj_add_flag(bk_ui->automode_keypadbaseim, LV_OBJ_FLAG_HIDDEN);
@@ -786,7 +789,7 @@ static void _keypad_hide_automode(bk_lv_ui_t *bk_ui)
 {
     if (lv_tick_elaps(s_last_click_hide_am) < 250) return;
     s_last_click_hide_am = lv_tick_get();
-    printf("_keypad_hide_automode\n");
+    bk_printf(TAG "_keypad_hide_automode\n");
 
     _maxmin_automode(bk_ui);
     {
@@ -878,7 +881,7 @@ void automode_startbt_event_cb(lv_event_t *e)
     if (lv_tick_elaps(s_last_click_automode) < 250) return;
     s_last_click_automode = lv_tick_get();
     hal_buzzer_beep();
-    printf("startbt_event_cb\n");
+    bk_printf(TAG "startbt_event_cb\n");
 
     /* first_freeze/first_defrost 플래그만 선행 설정. uart_comm_trigger_first_start()는
      * 모든 send_*_hour/min 파라미터 확정 후 settings_save_dirty() 뒤에서 호출한다.
@@ -953,13 +956,13 @@ void automode_startbt_event_cb(lv_event_t *e)
 
         if (user_valid) {
             sy = cy; sm = cm; sd = cd; sh = ch; smn = cmn;
-            printf("[COMPLETE] %04d-%02d-%02d %02d:%02d (user input)\n", sy, sm, sd, sh, smn);
+            bk_printf(TAG "[COMPLETE] %04d-%02d-%02d %02d:%02d (user input)\n", sy, sm, sd, sh, smn);
         } else {
             /* 기본값: 익일 08:00 */
             sd++;
             if (sd > _days_in_month(sm, sy)) { sd = 1; if (++sm > 12) { sm = 1; sy++; } }
             sh = 8; smn = 0;
-            printf("[COMPLETE] %04d-%02d-%02d %02d:%02d (default next-day 08:00)\n", sy, sm, sd, sh, smn);
+            bk_printf(TAG "[COMPLETE] %04d-%02d-%02d %02d:%02d (default next-day 08:00)\n", sy, sm, sd, sh, smn);
         }
 
         char buf[8];
@@ -1035,7 +1038,7 @@ void automode_startbt_event_cb(lv_event_t *e)
             settings_set_str("CurrentSaveDefreezeTimeMin",       buf);
             settings_set_str("CurrentSaveFreezeTimeHour", "00");
             settings_set_str("CurrentSaveFreezeTimeMin",  "00");
-            printf("[SKIP FREEZE] day_period=%d freeze_min=%lld → DEFROST %dh%dm\n",
+            bk_printf(TAG "[SKIP FREEZE] day_period=%d freeze_min=%lld → DEFROST %dh%dm\n",
                    state->day_period, freeze_min,
                    state->send_defreeze_hour, state->send_defreeze_min);
         } else {
@@ -1046,7 +1049,7 @@ void automode_startbt_event_cb(lv_event_t *e)
             settings_set_str("CurrentSaveFreezeTimeHour", buf);
             snprintf(buf, sizeof(buf), "%02d", state->send_freeze_min);
             settings_set_str("CurrentSaveFreezeTimeMin",  buf);
-            printf("[FREEZE] calc %dh %dm (comp=%lld rtc=%lld other=%lld)\n",
+            bk_printf(TAG "[FREEZE] calc %dh %dm (comp=%lld rtc=%lld other=%lld)\n",
                    state->send_freeze_hour, state->send_freeze_min, comp_min, rtc_min, other_min);
         }
 
@@ -1071,7 +1074,7 @@ void automode_startbt_event_cb(lv_event_t *e)
     state->send_defreeze_hour = 0; state->send_defreeze_min = AUTO_MODE_TEST_MIN;
     state->send_ferm1_hour    = 0; state->send_ferm1_min    = AUTO_MODE_TEST_MIN;
     state->send_ferm2_hour    = 0; state->send_ferm2_min    = AUTO_MODE_TEST_MIN;
-    printf("[TEST] auto mode: each stage forced to %d min\n", AUTO_MODE_TEST_MIN);
+    bk_printf(TAG "[TEST] auto mode: each stage forced to %d min\n", AUTO_MODE_TEST_MIN);
 #endif
 
     /* arc 초기값: 첫 행정 잔여시간 (냉동 건너뛰면 해동 잔여시간) */
@@ -1374,14 +1377,14 @@ void process_auto_mode_save(bk_lv_ui_t *ui) {
     strncpy(g_device_state.memory_auto_save[13], lv_label_get_text(ui->automode_AutoModeCompleteHour), 15);
     strncpy(g_device_state.memory_auto_save[14], lv_label_get_text(ui->automode_AutoModeCompleteMin), 15);
     // --- 디버그 출력 추가 ---
-    printf("\n==============================================\n");
-    printf("[DEBUG] Auto Mode Memory Save Results:\n");
-    printf("----------------------------------------------\n");
+    bk_printf(TAG "\n==============================================\n");
+    bk_printf(TAG "[DEBUG] Auto Mode Memory Save Results:\n");
+    bk_printf(TAG "----------------------------------------------\n");
     for (int i = 0; i < 15; i++) {
         // 인덱스별로 저장된 문자열 출력
-        printf("Index [%02d]: %s\n", i, g_device_state .memory_auto_save[i]);
+        bk_printf(TAG "Index [%02d]: %s\n", i, g_device_state .memory_auto_save[i]);
     }
-    printf("==============================================\n\n");
+    bk_printf(TAG "==============================================\n\n");
 
     // 9. 화면 전환 로직 (필요 시 추가)
     // lv_scr_load(ui->MemoryMode_screen);
@@ -1401,7 +1404,7 @@ void automode_savebt_event_cb(lv_event_t *e)
     g_device_state.memory_mode_check    = MEMORY_MODE_SAVE;
     g_device_state.memory_slot_page     = 0;
     g_device_state.memory_slot_checking = 1;
-    printf("[SAVE] navigate to memorymode for slot selection\n");
+    bk_printf(TAG "[SAVE] navigate to memorymode for slot selection\n");
     if (bk_ui->memorymode == NULL || !lv_obj_is_valid(bk_ui->memorymode))
         init_page_memorymode(bk_ui);
     lv_scr_load(bk_ui->memorymode);
@@ -1544,7 +1547,7 @@ void keypad_touch_event_cb(lv_event_t * e) {
     // --- [PRESSED] 눌렀을 때: 피드백 이미지 표시 ---
     if (code == LV_EVENT_PRESSED) {
         uint32_t now = lv_tick_get();
-        printf("[KEYPAD-AM] PRESSED   idx=%d  dt_since_last_pressed=%lums\n",
+        bk_printf(TAG "[KEYPAD-AM] PRESSED   idx=%d  dt_since_last_pressed=%lums\n",
                index, (unsigned long)(now - s_am_kp_last_pressed_t));
         s_am_kp_last_pressed_t = now;
         lv_obj_set_flag(bk_ui->automode_KeyPadIm[index], LV_OBJ_FLAG_HIDDEN, false);
@@ -1553,7 +1556,7 @@ void keypad_touch_event_cb(lv_event_t * e) {
     // --- [RELEASED] 뗐을 때: 입력 로직 실행 ---
     else if (code == LV_EVENT_RELEASED) {
         uint32_t now = lv_tick_get();
-        printf("[KEYPAD-AM] RELEASED  idx=%d  dt_since_last_released=%lums\n",
+        bk_printf(TAG "[KEYPAD-AM] RELEASED  idx=%d  dt_since_last_released=%lums\n",
                index, (unsigned long)(now - s_am_kp_last_released_t));
         s_am_kp_last_released_t = now;
         lv_obj_set_flag(bk_ui->automode_KeyPadIm[index], LV_OBJ_FLAG_HIDDEN, true);

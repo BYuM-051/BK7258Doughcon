@@ -10,6 +10,9 @@
 #include "device_state.h"
 #include "hardware_hal.h"
 
+#define TAG "[popuppassword_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void destroy_page_popuppassword(bk_lv_ui_t *bk_ui);
 extern void init_page_main(bk_lv_ui_t *bk_ui);
@@ -161,7 +164,7 @@ static void _refresh_display(bk_lv_ui_t *bk_ui)
 static void _pw_digit(bk_lv_ui_t *bk_ui, char d)
 {
     uint32_t dt = lv_tick_elaps(last_digit_time);
-    printf("[KEYPAD] '%c' CLICKED  dt_since_last_clicked=%lums%s\n",
+    bk_printf(TAG "[KEYPAD] '%c' CLICKED  dt_since_last_clicked=%lums%s\n",
            d, (unsigned long)dt, (dt < 80) ? "  -> REJECTED(debounce)" : "");
     if (dt < 80) return;
     last_digit_time = lv_tick_get();
@@ -182,7 +185,7 @@ static void _pw_validate(bk_lv_ui_t *bk_ui)
     const char *neu = settings_get_str("NeurosysPassword");
     if (!neu || !*neu) neu = NeurosysPassword;
 
-    printf("Input Password: [%s]\n", s_pw_buf);
+    bk_printf(TAG "Input Password: [%s]\n", s_pw_buf);
 
     if (strcmp(s_pw_buf, det) == 0) {
         s_pw_buf[0] = '\0';
@@ -269,7 +272,7 @@ static void _keypad_im_track(lv_event_t *e, lv_obj_t *im)
     /* PRESSED dt 진단 로그는 하이라이트 기능 on/off와 무관하게 항상 남긴다 */
     if (code == LV_EVENT_PRESSED) {
         uint32_t now = lv_tick_get();
-        printf("[KEYPAD] PRESSED  dt_since_last_pressed=%lums\n",
+        bk_printf(TAG "[KEYPAD] PRESSED  dt_since_last_pressed=%lums\n",
                (unsigned long)(now - s_kp_last_pressed_t));
         s_kp_last_pressed_t = now;
     }

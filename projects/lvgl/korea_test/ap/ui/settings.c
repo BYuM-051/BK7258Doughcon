@@ -9,9 +9,12 @@
 #include "lvgl.h"
 #include "os/os.h"
 
+#define TAG "[settings.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 /* [SAVE]/[LOAD] 로그 on/off: 아래 두 줄 중 하나만 활성화 */
 //#define SAVE_LOG(fmt, ...) do {} while(0)
-#define SAVE_LOG(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#define SAVE_LOG(fmt, ...) bk_printf(TAG fmt, ##__VA_ARGS__)
 
 /* ---------------------------------------------------------------------------
  * Default values table (mirrors SettingData.kt settingArrayList)
@@ -185,10 +188,10 @@ static setting_entry_t s_settings[] = {
 //  * ---------------------------------------------------------------------------*/
 static setting_entry_t *_findorg(const char *key)
 {
-    printf(key);
+    bk_printf(TAG "%s", key);
     for (size_t i = 0; i < SETTINGS_TABLE_SIZE; i++) {
         if (strcmp(s_settings[i].key, key) == 0){
-            printf("[DEBUG] Value: %.2f\n", s_settings[i].value);            
+            bk_printf(TAG "[DEBUG] Value: %.2f\n", s_settings[i].value);            
             return &s_settings[i];
         }
     }
@@ -365,7 +368,7 @@ static int _ef_blob_load(void)
     for (int c = 0; c < nchunks; c++) {
         snprintf(ckey, sizeof(ckey), "_sf_%02d", c);
         ret = bk_get_env_enhance(ckey, buf, sizeof(buf));
-        if (ret <= 0) { missing++; printf("[SETTINGS] chunk %s MISSING\n", ckey); continue; }
+        if (ret <= 0) { missing++; bk_printf(TAG "[SETTINGS] chunk %s MISSING\n", ckey); continue; }
 
         char *p = buf;
         while (*p) {
@@ -397,7 +400,7 @@ static int _ef_blob_load(void)
         }
     }
     if (missing > 0)
-        printf("[SETTINGS] WARNING: %d/%d chunks missing — EasyFlash may be full!\n",
+        bk_printf(TAG "[SETTINGS] WARNING: %d/%d chunks missing — EasyFlash may be full!\n",
                missing, nchunks);
     return loaded;
 }
@@ -411,9 +414,9 @@ static void _backend_open(void)
      * before any bk_set/get_env_enhance() call. */
     EfErrCode rc = easyflash_init();
     if (rc != EF_NO_ERR)
-        printf("[SETTINGS] easyflash_init failed rc=%d\n", (int)rc);
+        bk_printf(TAG "[SETTINGS] easyflash_init failed rc=%d\n", (int)rc);
     else
-        printf("[SETTINGS] easyflash_init OK\n");
+        bk_printf(TAG "[SETTINGS] easyflash_init OK\n");
 }
 
 static void _backend_load_all(void)
@@ -423,21 +426,21 @@ static void _backend_load_all(void)
     /* Fast path: blob exists → read N chunks instead of 175 individual keys */
     int n = _ef_blob_load();
     if (n > 0) {
-        printf("[SETTINGS] blob load: %d keys in %lu ms\n", n, lv_tick_elaps(_t));
+        bk_printf(TAG "[SETTINGS] blob load: %d keys in %lu ms\n", n, lv_tick_elaps(_t));
         return;
     }
 
     /* No blob yet — auto-create from current default values immediately.
      * Skips bk_get_env_enhance() loop (was ~27s due to WiFi-cal mutex). */
-    printf("[SETTINGS] no blob — creating from defaults\n");
+    bk_printf(TAG "[SETTINGS] no blob — creating from defaults\n");
     if (_ef_blob_save() != 0) {
         /* Partition full (EF_ENV_FULL=6) — old individual keys from previous firmware
          * occupy all space.  Erase the partition and retry once. */
-        printf("[SETTINGS] partition full — erasing EasyFlash and retrying\n");
+        bk_printf(TAG "[SETTINGS] partition full — erasing EasyFlash and retrying\n");
         ef_env_set_default();
         _ef_blob_save();
     }
-    printf("[SETTINGS] blob created in %lu ms\n", lv_tick_elaps(_t));
+    bk_printf(TAG "[SETTINGS] blob created in %lu ms\n", lv_tick_elaps(_t));
 }
 
 /* Pending-save flag: set by settings_save_dirty() on the LVGL task,
@@ -497,7 +500,7 @@ static void _backend_load_all(void)
 static void _backend_save_dirty(void)
 {
     FILE *f = fopen(SETTINGS_FILE_TMP, "w");
-    if (!f) { printf("[SETTINGS] fopen failed: %s\n", SETTINGS_FILE_TMP); return; }
+    if (!f) { bk_printf(TAG "[SETTINGS] fopen failed: %s\n", SETTINGS_FILE_TMP); return; }
     for (size_t i = 0; i < SETTINGS_TABLE_SIZE; i++) {
         fprintf(f, "%s=%s\n", s_settings[i].key, s_settings[i].value);
         s_settings[i].dirty = 0;
@@ -525,7 +528,7 @@ void settings_init(void)
         s_settings[i].dirty = 0;
     }
     _backend_open();
-    printf("[INIT] %u entries set to default\n", (unsigned)SETTINGS_TABLE_SIZE);
+    bk_printf(TAG "[INIT] %u entries set to default\n", (unsigned)SETTINGS_TABLE_SIZE);
 }
 
 static volatile int s_settings_loaded = 0;
@@ -629,7 +632,7 @@ void settings_factory_reset(void)
 
     _backend_save_dirty();  /* sets s_save_pending */
     settings_flush();       /* factory reset must write immediately */
-    printf("[SETTINGS] factory reset done (%u basic-setting keys reset; auto/manual run values, "
+    bk_printf(TAG "[SETTINGS] factory reset done (%u basic-setting keys reset; auto/manual run values, "
            "memory slots, language/degree preserved)\n", (unsigned)FACTORY_RESET_KEY_COUNT);
 }
 

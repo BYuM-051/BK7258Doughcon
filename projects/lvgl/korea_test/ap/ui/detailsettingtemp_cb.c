@@ -13,6 +13,9 @@
 #include "hardware_hal.h"
 #include "uart_comm.h"
 
+#define TAG "[detailsettingtemp_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 
 static uint32_t last_click_time = 0;
@@ -306,7 +309,7 @@ static void _show_picker(bk_lv_ui_t *bk_ui, int field)
             *p = '\0';
             uint32_t tr = lv_tick_get();
             lv_roller_set_options(bk_ui->detailsettingtemp_settemp_setn1, opts, cnt <= 2 ? LV_ROLLER_MODE_NORMAL : LV_ROLLER_MODE_INFINITE);
-            printf("[PERF]   roller_set_options(pg=%d,field=%d,cnt=%d) %lu ms\n", s_page, field, cnt, (unsigned long)lv_tick_elaps(tr));
+            bk_printf(TAG "[PERF]   roller_set_options(pg=%d,field=%d,cnt=%d) %lu ms\n", s_page, field, cnt, (unsigned long)lv_tick_elaps(tr));
         }
         lv_roller_set_visible_row_count(bk_ui->detailsettingtemp_settemp_setn1, 3);
         s_roller_pg_field = pg_field;
@@ -493,13 +496,13 @@ void detailsettingtemp_load_event_cb(lv_event_t *e)
     }
     if (code != LV_EVENT_SCREEN_LOAD_START) return;
     uint32_t t0 = lv_tick_get();
-    printf("[PERF] detailtemp load_event start\n");
+    bk_printf(TAG "[PERF] detailtemp load_event start\n");
 
     _build_img_arrays_if_changed();
-    printf("[PERF]   _build_img_arrays +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF]   _build_img_arrays +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 
     ui_lang_apply_detailsettingtemp(bk_ui);
-    printf("[PERF]   ui_lang_apply +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF]   ui_lang_apply +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
     s_page = 0;
     s_edit_field = -1;
     /* s_roller_pg_field: 언어/℃↔℉ 변경 시 _build_img_arrays_if_changed()에서만 초기화.
@@ -507,9 +510,9 @@ void detailsettingtemp_load_event_cb(lv_event_t *e)
 
     _refresh(bk_ui);
     _update_txt_colors(bk_ui, -1);   /* 재진입 시 이전 선택 색상(검정) 잔류 방지 */
-    printf("[PERF]   _refresh(page0) +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF]   _refresh(page0) +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 
     lv_obj_add_flag(bk_ui->detailsettingtemp_settemp_setn1, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(bk_ui->detailsettingtemp_pickerbox,     LV_OBJ_FLAG_HIDDEN);
-    printf("[PERF] detailtemp load_event end total=%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF] detailtemp load_event end total=%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 }

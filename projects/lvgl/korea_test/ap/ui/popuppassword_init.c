@@ -8,6 +8,9 @@
 #include "ui_lang.h"
 #include "settings.h"
 
+#define TAG "[popuppassword_init.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void popuppassword_pop_keypad1_event_cb(lv_event_t *e);
 extern void popuppassword_pop_keypad2_event_cb(lv_event_t *e);
@@ -147,7 +150,7 @@ void popuppassword_bg_preload(void)
     lv_canvas_finish_layer(s_pw_canvas, &layer);
 
     s_pw_buf_lang = lang;
-    printf("[POPUP] password_popup preloaded: %s\n", path);
+    bk_printf(TAG "[POPUP] password_popup preloaded: %s\n", path);
 }
 
 /* 버튼 dirty area 완전 차단:
@@ -191,7 +194,7 @@ void init_page_popuppassword(bk_lv_ui_t * bk_ui) {
      * 배경 깨짐 버그와 동일 클래스) — 팝업이 떠 있는 동안 타이머 업데이트 자체를 끔. */
     lv_digital_clock_pause();
 #endif
-    printf("pop up pasword");
+    bk_printf(TAG "pop up pasword");
 
 #if UI_POPUPPASSWORD_COMBINED_BG_ENABLE
     /* settingmode의 자식으로 붙이는 방식은 실측 결과 오히려 더 느려짐 —

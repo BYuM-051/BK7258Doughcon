@@ -9,6 +9,9 @@
 #include <time.h>
 #include <driver/aon_rtc.h>
 
+#define TAG "[rtc_sync.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 /* 2020-01-01 00:00:00 UTC — minimum valid epoch */
 #define EPOCH_2020  1577836800UL
 /* 2100-01-01 00:00:00 UTC — upper sanity bound (0xFFFFFFFF uninitialized flash > this) */
@@ -34,12 +37,12 @@ bool rtc_is_valid(void)
 
 void rtc_sync_init(void)
 {
-    printf("[RTC] rtc_sync_init start\n");
+    bk_printf(TAG "[RTC] rtc_sync_init start\n");
 
     /* DS1338Z is battery-backed: try it first */
     int yr, mo, day, hr, mn, sc;
     bool from_ds1338z = hal_rtc_get(&yr, &mo, &day, &hr, &mn, &sc);
-    printf("[RTC] hal_rtc_get after init: %04d-%02d-%02d %02d:%02d:%02d  valid=%d  src=%s\n",
+    bk_printf(TAG "[RTC] hal_rtc_get after init: %04d-%02d-%02d %02d:%02d:%02d  valid=%d  src=%s\n",
            yr, mo, day, hr, mn, sc, (yr >= 2020 && yr <= 2099) ? 1 : 0,
            from_ds1338z ? "DS1338Z" : "AON");
 
@@ -47,7 +50,7 @@ void rtc_sync_init(void)
         if (from_ds1338z) {
             /* DS1338Z has valid battery-backed time — sync AON RTC */
             hal_rtc_set(yr, mo, day, hr, mn, sc);
-            printf("[RTC] init source: DS1338Z  %04d-%02d-%02d %02d:%02d:%02d\n",
+            bk_printf(TAG "[RTC] init source: DS1338Z  %04d-%02d-%02d %02d:%02d:%02d\n",
                    yr, mo, day, hr, mn, sc);
         } else {
             /* AON RTC fallback — DS1338Z failed.
@@ -61,7 +64,7 @@ void rtc_sync_init(void)
             t0.tm_hour = hr; t0.tm_min = mn; t0.tm_sec = sc; t0.tm_isdst = -1;
             unsigned long aon_ep = (unsigned long)mktime(&t0);
 
-            printf("[RTC] AON epoch=%lu  flash epoch=%lu (key=\"%s\"  valid=%d)\n",
+            bk_printf(TAG "[RTC] AON epoch=%lu  flash epoch=%lu (key=\"%s\"  valid=%d)\n",
                    aon_ep, flash_ep, v ? v : "(null)", _epoch_valid(flash_ep) ? 1 : 0);
 
             if (_epoch_valid(flash_ep) && flash_ep > aon_ep) {
@@ -73,14 +76,14 @@ void rtc_sync_init(void)
                 if (ft) {
                     hal_rtc_set(ft->tm_year + 1900, ft->tm_mon + 1, ft->tm_mday,
                                 ft->tm_hour, ft->tm_min, ft->tm_sec);
-                    printf("[RTC] init source: flash (newer by %lus)  %04d-%02d-%02d %02d:%02d:%02d\n",
+                    bk_printf(TAG "[RTC] init source: flash (newer by %lus)  %04d-%02d-%02d %02d:%02d:%02d\n",
                            flash_ep - aon_ep,
                            ft->tm_year + 1900, ft->tm_mon + 1, ft->tm_mday,
                            ft->tm_hour, ft->tm_min, ft->tm_sec);
                 }
             } else {
                 hal_rtc_set(yr, mo, day, hr, mn, sc);
-                printf("[RTC] init source: AON  %04d-%02d-%02d %02d:%02d:%02d\n",
+                bk_printf(TAG "[RTC] init source: AON  %04d-%02d-%02d %02d:%02d:%02d\n",
                        yr, mo, day, hr, mn, sc);
             }
         }
@@ -90,7 +93,7 @@ void rtc_sync_init(void)
     /* DS1338Z not available or unset — fall back to flash-saved epoch */
     const char *v = settings_get_str("rtc_epoch");
     unsigned long epoch = (v && v[0] != '\0') ? strtoul(v, NULL, 10) : 0;
-    printf("[RTC] flash epoch key=\"%s\" parsed=%lu  valid=%d\n",
+    bk_printf(TAG "[RTC] flash epoch key=\"%s\" parsed=%lu  valid=%d\n",
            v ? v : "(null)", epoch, _epoch_valid(epoch) ? 1 : 0);
 
     if (_epoch_valid(epoch)) {
@@ -102,7 +105,7 @@ void rtc_sync_init(void)
         if (t) {
             hal_rtc_set(t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
                         t->tm_hour, t->tm_min, t->tm_sec);
-            printf("[RTC] init source: flash  %04d-%02d-%02d %02d:%02d:%02d (epoch=%lu)\n",
+            bk_printf(TAG "[RTC] init source: flash  %04d-%02d-%02d %02d:%02d:%02d (epoch=%lu)\n",
                    t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
                    t->tm_hour, t->tm_min, t->tm_sec, epoch);
         }
@@ -113,7 +116,7 @@ void rtc_sync_init(void)
         hal_rtc_set(2026, 1, 1, 0, 0, 0);
         settings_set_str("rtc_epoch", "1767225600");
         settings_save_dirty();
-        printf("[RTC] init source: FALLBACK 2026-01-01 (bad epoch was %lu)\n", epoch);
+        bk_printf(TAG "[RTC] init source: FALLBACK 2026-01-01 (bad epoch was %lu)\n", epoch);
     }
 
     /* Final state verify */
@@ -122,7 +125,7 @@ void rtc_sync_init(void)
         bk_rtc_gettimeofday(&tv2, NULL);
         struct tm *tf = localtime(&tv2.tv_sec);
         if (tf) {
-            printf("[RTC] AON RTC after init: %04d-%02d-%02d %02d:%02d:%02d (epoch=%lu)\n",
+            bk_printf(TAG "[RTC] AON RTC after init: %04d-%02d-%02d %02d:%02d:%02d (epoch=%lu)\n",
                    tf->tm_year + 1900, tf->tm_mon + 1, tf->tm_mday,
                    tf->tm_hour, tf->tm_min, tf->tm_sec, (unsigned long)tv2.tv_sec);
         }
@@ -131,14 +134,14 @@ void rtc_sync_init(void)
 
 void rtc_sync_from_mcu(int yr2, int mo, int day, int hr, int mn, int sc)
 {
-    printf("[RTC] rtc_sync_from_mcu: 20%02d-%02d-%02d %02d:%02d:%02d\n",
+    bk_printf(TAG "[RTC] rtc_sync_from_mcu: 20%02d-%02d-%02d %02d:%02d:%02d\n",
            yr2, mo, day, hr, mn, sc);
 
-    if (yr2 < 20 || yr2 > 99) { printf("[RTC] MCU sync REJECT: yr2=%d out of range\n", yr2); return; }
-    if (mo  < 1  || mo  > 12) { printf("[RTC] MCU sync REJECT: mo=%d out of range\n", mo);  return; }
-    if (day < 1  || day > 31) { printf("[RTC] MCU sync REJECT: day=%d out of range\n", day); return; }
+    if (yr2 < 20 || yr2 > 99) { bk_printf(TAG "[RTC] MCU sync REJECT: yr2=%d out of range\n", yr2); return; }
+    if (mo  < 1  || mo  > 12) { bk_printf(TAG "[RTC] MCU sync REJECT: mo=%d out of range\n", mo);  return; }
+    if (day < 1  || day > 31) { bk_printf(TAG "[RTC] MCU sync REJECT: day=%d out of range\n", day); return; }
     if (hr  > 23 || mn  > 59 || sc > 59) {
-        printf("[RTC] MCU sync REJECT: time %02d:%02d:%02d out of range\n", hr, mn, sc);
+        bk_printf(TAG "[RTC] MCU sync REJECT: time %02d:%02d:%02d out of range\n", hr, mn, sc);
         return;
     }
 
@@ -153,7 +156,7 @@ void rtc_sync_from_mcu(int yr2, int mo, int day, int hr, int mn, int sc)
 
     time_t epoch = mktime(&t);
     if (epoch == (time_t)-1 || !_epoch_valid((unsigned long)epoch)) {
-        printf("[RTC] MCU sync REJECT: mktime failed or epoch %lu out of valid range\n",
+        bk_printf(TAG "[RTC] MCU sync REJECT: mktime failed or epoch %lu out of valid range\n",
                (unsigned long)epoch);
         return;
     }
@@ -166,7 +169,7 @@ void rtc_sync_from_mcu(int yr2, int mo, int day, int hr, int mn, int sc)
     settings_set_str("rtc_epoch", buf);
     settings_save_dirty();
 
-    printf("[RTC] MCU sync OK: 20%02d-%02d-%02d %02d:%02d:%02d (epoch=%lu) saved\n",
+    bk_printf(TAG "[RTC] MCU sync OK: 20%02d-%02d-%02d %02d:%02d:%02d (epoch=%lu) saved\n",
            yr2, mo, day, hr, mn, sc, (unsigned long)epoch);
 }
 
@@ -179,7 +182,7 @@ void rtc_sync_save_now(void)
     snprintf(buf, sizeof(buf), "%lu", (unsigned long)tv.tv_sec);
     settings_set_str("rtc_epoch", buf);
     settings_save_dirty();
-    printf("[RTC] epoch saved immediately (user set): %lu\n", (unsigned long)tv.tv_sec);
+    bk_printf(TAG "[RTC] epoch saved immediately (user set): %lu\n", (unsigned long)tv.tv_sec);
 }
 
 void rtc_sync_periodic_save(void)

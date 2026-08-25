@@ -12,6 +12,9 @@
 #include "hardware_hal.h"
 #include "rtc_sync.h"
 
+#define TAG "[settingmodetime_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void lv_digital_clock_set_datetime(int yr, int mo, int day, int hr, int mn, int sc);
 
@@ -337,7 +340,7 @@ static void _commit_datetime_smt(bk_lv_ui_t *bk_ui)
     lv_label_set_text(bk_ui->settingmodetime_setting_time_settime, time_buf);
     settings_set_str("settingday",  date_buf);
     settings_set_str("settingtime", time_buf);
-    printf("[TIME] RTC %d.%02d.%02d %02d:%02d\n", y, mo, d, h, mi);
+    bk_printf(TAG "[TIME] RTC %d.%02d.%02d %02d:%02d\n", y, mo, d, h, mi);
 }
 
 /* ── RTC 값으로 입력 필드 초기화 ────────────────────────────────────── */

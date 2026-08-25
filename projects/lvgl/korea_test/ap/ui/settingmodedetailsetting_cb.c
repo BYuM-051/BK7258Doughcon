@@ -11,6 +11,9 @@
 #include "ui_lang.h"
 #include "hardware_hal.h"
 
+#define TAG "[settingmodedetailsetting_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 
 static uint32_t last_click_time = 0;
@@ -44,8 +47,8 @@ static void _rst_prewarm_cancel(void)
 
 /* Performance logging — measure time from tap to screen load start */
 static uint32_t _pt0 = 0;
-#define PERF_START(tag)   do { _pt0 = lv_tick_get(); printf("[PERF] %s tap\n", tag); } while(0)
-#define PERF_MARK(tag)    printf("[PERF]   %s +%lu ms\n", (tag), (unsigned long)lv_tick_elaps(_pt0))
+#define PERF_START(tag)   do { _pt0 = lv_tick_get(); bk_printf(TAG "[PERF] %s tap\n", tag); } while(0)
+#define PERF_MARK(tag)    bk_printf(TAG "[PERF]   %s +%lu ms\n", (tag), (unsigned long)lv_tick_elaps(_pt0))
 
 void settingmodedetailsetting_backbt_event_cb(lv_event_t *e);
 void settingmodedetailsetting_detail_temp_bt_event_cb(lv_event_t *e);
@@ -173,7 +176,7 @@ void settingmodedetailsetting_detail_reset_bt_event_cb(lv_event_t *e)
 
     _rst_prewarm_cancel();   /* stop timer before popup renders */
     hal_buzzer_beep();
-    printf("[MEM] reset popup: psram_free=%u min=%u\n",
+    bk_printf(TAG "[MEM] reset popup: psram_free=%u min=%u\n",
            (unsigned)rtos_get_psram_free_heap_size(),
            (unsigned)rtos_get_psram_minimum_free_heap_size());
 

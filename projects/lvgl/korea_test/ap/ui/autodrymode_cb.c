@@ -16,6 +16,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define TAG "[autodrymode_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 
@@ -502,7 +505,7 @@ static void _adm_end(bk_lv_ui_t *bk_ui)
     hal_buzzer_complete();
     init_page_main(bk_ui);
     lv_scr_load(bk_ui->main);
-    printf("[DRY END] complete buzzer started, → main\n");
+    bk_printf(TAG "[DRY END] complete buzzer started, → main\n");
 }
 
 static void _ui_timer_cb_adm(lv_timer_t *timer)
@@ -528,7 +531,7 @@ static void _ui_timer_cb_adm(lv_timer_t *timer)
         bool _mcu_done = (_total_min > 0) && _mcu_running &&
                          (state->remain_hour == 0 && state->remain_min == 0);
         if (state->auto_dry_complete || _mcu_done) {
-            printf("[DRY CHK] complete=%d mcu_done=%d op=0x%02X remain=%dh%dm total=%dmin\n",
+            bk_printf(TAG "[DRY CHK] complete=%d mcu_done=%d op=0x%02X remain=%dh%dm total=%dmin\n",
                    state->auto_dry_complete, _mcu_done, _mcu_op,
                    state->remain_hour, state->remain_min, _total_min);
             _adm_end(bk_ui);

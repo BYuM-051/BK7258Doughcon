@@ -8,6 +8,9 @@
 #include "ui_lang.h"
 #include "settings.h"
 
+#define TAG "[popupreset_init.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void popupreset_yesbt_event_cb(lv_event_t *e);
 extern void popupreset_nobt_event_cb(lv_event_t *e);
@@ -50,9 +53,9 @@ void popupreset_canvas_buf_alloc(void)
     uint32_t buf_sz = LV_CANVAS_BUF_SIZE(_RP_W, _RP_H, _RP_BPP, LV_DRAW_BUF_ALIGN);
     s_rp_canvas_buf = lv_malloc(buf_sz);
     if (s_rp_canvas_buf)
-        printf("[POPUP] reset_popup buf alloc ok (%lu B)\n", (unsigned long)buf_sz);
+        bk_printf(TAG "[POPUP] reset_popup buf alloc ok (%lu B)\n", (unsigned long)buf_sz);
     else
-        printf("[POPUP] reset_popup buf alloc FAILED\n");
+        bk_printf(TAG "[POPUP] reset_popup buf alloc FAILED\n");
 }
 
 void popupreset_canvas_free(void)
@@ -100,7 +103,7 @@ void popupreset_bg_preload(void)
     lv_canvas_finish_layer(s_rp_canvas, &layer);
 
     s_rp_buf_lang = lang;
-    printf("[PERF] reset_popup preloaded: %s\n", path);
+    bk_printf(TAG "[PERF] reset_popup preloaded: %s\n", path);
 }
 
 void destroy_page_popupreset(bk_lv_ui_t *bk_ui)

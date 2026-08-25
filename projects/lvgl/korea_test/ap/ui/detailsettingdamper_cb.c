@@ -13,6 +13,9 @@
 #include "hardware_hal.h"
 #include "uart_comm.h"
 
+#define TAG "[detailsettingdamper_cb.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 
 static uint32_t last_click_time = 0;
@@ -322,10 +325,10 @@ void detailsettingdamper_load_event_cb(lv_event_t *e)
     }
     if (code != LV_EVENT_SCREEN_LOAD_START) return;
     uint32_t t0 = lv_tick_get();
-    printf("[PERF] detaildamper load_event start\n");
+    bk_printf(TAG "[PERF] detaildamper load_event start\n");
 
     _build_img_arrays_if_changed();
-    printf("[PERF]   _build_img_arrays +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF]   _build_img_arrays +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 
     ui_lang_apply_detailsettingdamper(bk_ui);
     s_edit_field = -1;
@@ -333,12 +336,12 @@ void detailsettingdamper_load_event_cb(lv_event_t *e)
      * 스크린 재진입마다 초기화하면 첫 탭 시 lv_roller_set_options 가 불필요하게 재호출됨. */
     _refresh(bk_ui);
     _update_txt_colors(bk_ui, -1);   /* 재진입 시 이전 선택 색상(검정) 잔류 방지 */
-    printf("[PERF]   _refresh +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF]   _refresh +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 
     lv_obj_add_flag(bk_ui->detailsettingdamper_settemp_setn1, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(bk_ui->detailsettingdamper_settemp_setn2, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(bk_ui->detailsettingdamper_settemp_setn3, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(bk_ui->detailsettingdamper_settemp_setn4, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(bk_ui->detailsettingdamper_pickerbox,     LV_OBJ_FLAG_HIDDEN);
-    printf("[PERF] detaildamper load_event end total=%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    bk_printf(TAG "[PERF] detaildamper load_event end total=%lu ms\n", (unsigned long)lv_tick_elaps(t0));
 }
