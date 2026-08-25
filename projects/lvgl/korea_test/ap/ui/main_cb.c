@@ -242,7 +242,7 @@ void main_automode_event_cb(lv_event_t *e)
     uint32_t _t0 = lv_tick_get();
     bk_printf(TAG "[SCREEN] ── main→automode ──────────────────\n");
 
-#if PRENDERING_ENABLE
+#if UI_PRENDERING_ENABLE
     /* prewarm이 이미 끝났으면 init_page_automode()에서 바로 페이지 전환과
      * 쓰지 않는 페이지 삭제까지 끝내므로 여기서는 init만 호출 */
 #if 0
@@ -287,7 +287,7 @@ void main_manualmode_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
 
-#if PRENDERING_ENABLE
+#if UI_PRENDERING_ENABLE
     uint32_t _t0 = lv_tick_get();
     bk_printf(TAG "[SCREEN] ── main→manualmode ─────────────────\n");
     if (bk_ui->manualmode == NULL || !lv_obj_is_valid(bk_ui->manualmode))
@@ -317,7 +317,7 @@ void main_autodrymode_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
 
-#if PRENDERING_ENABLE
+#if UI_PRENDERING_ENABLE
     uint32_t _t0 = lv_tick_get();
     bk_printf(TAG "[SCREEN] ── main→autodrymode ───────────────\n");
     init_page_autodrymode(bk_ui);
