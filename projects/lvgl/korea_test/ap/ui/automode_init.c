@@ -120,13 +120,11 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
         destroy_page_automode(bk_ui);
     }
 #endif
-    
-#if UI_PRENDERING_ENABLE
-    
     /* 오브젝트를 새로 만드므로 ui_lang 캐시를 무효화 — 다음 SCREEN_LOAD_START의
      * ui_lang_apply_automode()가 언어 변경 여부와 무관하게 반드시 새 이미지를 채우게 함 */
     ui_lang_reset_automode_cache();
 
+#if UI_PRENDERING_ENABLE
     if(lv_obj_is_valid(preRenderRoot))
     {
         bk_printf(TAG "preRenderRoot is valid\n");
@@ -154,11 +152,6 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
     lv_obj_set_style_bg_color(bk_ui->automode, lv_color_hex(0xD9D9D9), 0);
     lv_obj_set_style_bg_opa(bk_ui->automode, LV_OPA_COVER, 0);
 #else
-
-    /* 오브젝트를 새로 만드므로 ui_lang 캐시를 무효화 — 다음 SCREEN_LOAD_START의
-     * ui_lang_apply_automode()가 언어 변경 여부와 무관하게 반드시 새 이미지를 채우게 함 */
-    ui_lang_reset_automode_cache();
-
     bk_ui->automode = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->automode, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->automode, LV_SCROLLBAR_MODE_OFF);
@@ -706,17 +699,6 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
     lv_obj_set_size(bk_ui->automode_AutoModeFermentation2TimeCheckBoxIm, 142, 99);
     // keypadbaseim + KeyPad: lazy-created in _keypad_on_automode on first use
     // auto_f1~f4: lazy-created in automode_load_event_cb only when °F mode active
-
-#if UI_PRENDERING_ENABLE
-    lv_obj_add_event_cb
-    (
-        bk_ui->automode, 
-        preRendererWrapper, 
-        LV_EVENT_SCREEN_LOADED, 
-        (void*) bk_ui->automode
-    ); // pre-renderer wrapper는 이곳에 있어야 ui가 모두 생성된 이후에 호출되어서 null pointer dereference가 발생하지 않음.
-    //아냐 여기도 아냐. pre-renderer는 화면 전환시에 호출되어야해. 여기는 생성부라서 안맞아.
-#endif /* UI_PRENDERING_ENABLE */
     bk_printf(TAG "[IMGTIME] ===== automode init total: %lu ms =====\n", lv_tick_elaps(_t_start));
 }
 
