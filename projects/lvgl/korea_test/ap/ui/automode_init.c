@@ -137,7 +137,6 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
     lv_obj_remove_style_all(bk_ui->automode);
     lv_obj_set_size(bk_ui->automode, 1024, 600);
     lv_obj_set_style_radius(bk_ui->automode, 0, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(bk_ui->automode, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_pos(bk_ui->automode, 0, 0);
     lv_obj_set_scrollbar_mode(bk_ui->automode, LV_SCROLLBAR_MODE_OFF);
 
