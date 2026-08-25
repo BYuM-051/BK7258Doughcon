@@ -13,6 +13,7 @@
 #endif
 #include "lv_vendor.h"
 #include "ui/beken_ui.h"
+#include "ui/hardware_hal.h"
 
 #include "media_service.h"
 #include "components/bk_display.h"
@@ -139,6 +140,12 @@ bk_err_t lvgl_app_86box_init(void)
 
 bk_err_t lvgl_app_86box_deinit(void)
 {
+    /*
+    * 솔직히 뭐하는 코드인지 모르는 부분이긴 한데 UART 프레임 깨져서 이런 경우가 있을 수도 있으니 failsafe로 이럴때 재부팅이라도 해야지 왜 이렇게 하는지 모르겠음.
+    */
+    bk_printf(TAG "[BOOT] lvgl_app_86box_deinit\r\n");
+    hal_system_restart();
+
     lcd_backlight_close(GPIO_9);
     bk_display_close(vendor_config.handle);
 
