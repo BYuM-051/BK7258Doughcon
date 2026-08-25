@@ -19,9 +19,6 @@
 #include "hardware_hal.h"
 #include "ui_config.h"
 
-#define TAG "[hardware_hal.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
-
 /* ================================================================
  * EMULATOR — PC simulator / loopback (HAL_USE_EMULATOR)
 //  * ================================================================*/
@@ -399,6 +396,9 @@ void hal_rtc_set(int year, int month, int day,
 #include <driver/drv_tp.h>       /* drv_tp_read(), tp_point_infor_t, TP_DATA_QUEUE_MAX_SIZE */
 #include "lvgl.h"
 #include "device_state.h"
+
+#define TAG "[hardware_hal.c] "
+#define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 /* ----------------------------------------------------------------
  * Pin / channel constants
