@@ -7,10 +7,14 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ui_config.h"
+#include "preRenderer.h"
+
 #define TAG "[settingmodetest_init.c] "
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 extern void settingmodetest_backbt_event_cb(lv_event_t *e);
 extern void settingmodetest_compbt_event_cb(lv_event_t *e);
 extern void settingmodetest_roomfanbt_event_cb(lv_event_t *e);
@@ -147,12 +151,25 @@ void init_page_settingmodetest(bk_lv_ui_t * bk_ui) {
 #endif
 
     ui_lang_reset_settingmodetest_cache();
+
+#if UI_PRENDERING_ENABLE
+    bk_ui->settingmodetest = lv_obj_create(preRenderRoot);
+    lv_obj_remove_style_all(bk_ui->settingmodetest);
+    lv_obj_set_size(bk_ui->settingmodetest, 1024, 600);
+    lv_obj_set_pos(bk_ui->settingmodetest, 0, 0);
+    lv_obj_set_style_radius(bk_ui->settingmodetest, 0, LV_PART_MAIN);
+    lv_obj_set_scrollbar_mode(bk_ui->settingmodetest, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
+#else
     bk_ui->settingmodetest = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->settingmodetest, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->settingmodetest, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
     lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
     lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
+#endif /* UI_PRENDERING_ENABLE */
     /* 배경 — bg.jpg 대신 단색(0xd9d9d9) */
     bk_ui->settingmodetest_bg = lv_image_create(bk_ui->settingmodetest);
     lv_obj_add_flag(bk_ui->settingmodetest_bg, LV_OBJ_FLAG_HIDDEN);
