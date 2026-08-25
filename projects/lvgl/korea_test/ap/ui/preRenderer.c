@@ -7,7 +7,7 @@
 // #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
-lv_obj_t *preRenderRoot = NULL;
+extern lv_obj_t *preRenderRoot;
 lv_obj_t *currentPage = NULL;
 
 #if !UI_PRENDERING_ENABLE
