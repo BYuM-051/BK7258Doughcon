@@ -6,7 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ui_config.h"
+#include "preRenderer.h"
+
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 extern void detailsettingtemp_backbt_event_cb(lv_event_t *e);
 extern void detailsettingtemp_settingbt1_event_cb(lv_event_t *e);
 extern void detailsettingtemp_settingbt2_event_cb(lv_event_t *e);
@@ -35,11 +39,23 @@ void init_page_detailsettingtemp(bk_lv_ui_t * bk_ui) {
     }
 
     ui_lang_reset_detailsettingtemp_cache();
+
+#if UI_PRENDERING_ENABLE
+    bk_ui->detailsettingtemp = lv_obj_create(preRenderRoot);
+    lv_obj_remove_style_all(bk_ui->detailsettingtemp);
+    lv_obj_set_size(bk_ui->detailsettingtemp, 1024, 600);
+    lv_obj_set_pos(bk_ui->detailsettingtemp, 0, 0);
+    lv_obj_set_style_radius(bk_ui->detailsettingtemp, 0, LV_PART_MAIN);
+    lv_obj_set_scrollbar_mode(bk_ui->detailsettingtemp, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_event_cb(bk_ui->detailsettingtemp, detailsettingtemp_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingtemp, detailsettingtemp_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+#else
     bk_ui->detailsettingtemp = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->detailsettingtemp, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->detailsettingtemp, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->detailsettingtemp, detailsettingtemp_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
     lv_obj_add_event_cb(bk_ui->detailsettingtemp, detailsettingtemp_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+#endif /* UI_PRENDERING_ENABLE */
     bk_ui->detailsettingtemp_bg = lv_image_create(bk_ui->detailsettingtemp);
     lv_obj_add_flag(bk_ui->detailsettingtemp_bg, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_style_bg_color(bk_ui->detailsettingtemp, lv_color_hex(0xd9d9d9), 0);
