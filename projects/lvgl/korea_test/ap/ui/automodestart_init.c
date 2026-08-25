@@ -6,7 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ui_config.h"
+#include "preRenderer.h"
+
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 extern void automodestart_startbt_event_cb(lv_event_t *e);
 extern void automodestart_load_event_cb(lv_event_t *e);
 
@@ -36,10 +40,23 @@ void init_page_automodestart(bk_lv_ui_t * bk_ui) {
      * 이전 세션과 언어/단위/모드가 우연히 같아도 반드시 새 이미지를 채우게 함 */
     ui_lang_reset_automodestart_cache();
 
+#if UI_PRENDERING_ENABLE
+    bk_ui->automodestart = lv_obj_create(preRenderRoot);
+    lv_obj_remove_style_all(bk_ui->automodestart);
+    lv_obj_set_size(bk_ui->automodestart, 1024, 600);
+    lv_obj_set_pos(bk_ui->automodestart, 0, 0);
+    lv_obj_set_style_radius(bk_ui->automodestart, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_width(bk_ui->automodestart, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(bk_ui->automodestart, lv_color_hex(0xD9D9D9), 0);
+    lv_obj_set_style_bg_opa(bk_ui->automodestart, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_scrollbar_mode(bk_ui->automodestart, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_event_cb(bk_ui->automodestart, automodestart_load_event_cb, LV_EVENT_ALL, NULL);
+#else
     bk_ui->automodestart = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->automodestart, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->automodestart, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->automodestart, automodestart_load_event_cb, LV_EVENT_ALL, NULL);
+#endif /* UI_PRENDERING_ENABLE */
 
     // ImageView: auto_bg
     bk_ui->automodestart_auto_bg = lv_image_create(bk_ui->automodestart);

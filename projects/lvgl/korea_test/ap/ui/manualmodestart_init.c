@@ -6,7 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ui_config.h"
+#include "preRenderer.h"
+
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 extern void manualmodestart_backbt_event_cb(lv_event_t *e);
 extern void manualmodestart_startbt_event_cb(lv_event_t *e);
 extern void manualmodestart_manual_freeze_temp_bt_event_cb(lv_event_t *e);
@@ -76,10 +80,23 @@ void init_page_manualmodestart(bk_lv_ui_t * bk_ui) {
     bk_ui->manualmodestart_manual_gif_basic                      = NULL;
     bk_ui->manualmodestart_run_arc                               = NULL;
 
+#if UI_PRENDERING_ENABLE
+    bk_ui->manualmodestart = lv_obj_create(preRenderRoot);
+    lv_obj_remove_style_all(bk_ui->manualmodestart);
+    lv_obj_set_size(bk_ui->manualmodestart, 1024, 600);
+    lv_obj_set_pos(bk_ui->manualmodestart, 0, 0);
+    lv_obj_set_style_radius(bk_ui->manualmodestart, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_width(bk_ui->manualmodestart, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0xD9D9D9), 0);
+    lv_obj_set_style_bg_opa(bk_ui->manualmodestart, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_scrollbar_mode(bk_ui->manualmodestart, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_load_event_cb, LV_EVENT_ALL, NULL);
+#else
     bk_ui->manualmodestart = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->manualmodestart, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->manualmodestart, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_load_event_cb, LV_EVENT_ALL, NULL);
+#endif /* UI_PRENDERING_ENABLE */
 
     // ImageView: bg (must be first child — lowest z-order)
     bk_ui->manualmodestart_bg = lv_image_create(bk_ui->manualmodestart);

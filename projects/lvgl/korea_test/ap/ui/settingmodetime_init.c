@@ -6,7 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ui_config.h"
+#include "preRenderer.h"
+
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 extern void settingmodetime_backbt_event_cb(lv_event_t *e);
 extern void settingmodetime_setting_time_setdatebt_event_cb(lv_event_t *e);
 extern void settingmodetime_setting_time_settimebt_event_cb(lv_event_t *e);
@@ -107,10 +111,21 @@ void init_page_settingmodetime(bk_lv_ui_t *bk_ui)
     }
 
     ui_lang_reset_settingmodetime_cache();
+
+#if UI_PRENDERING_ENABLE
+    bk_ui->settingmodetime = lv_obj_create(preRenderRoot);
+    lv_obj_remove_style_all(bk_ui->settingmodetime);
+    lv_obj_set_size(bk_ui->settingmodetime, 1024, 600);
+    lv_obj_set_pos(bk_ui->settingmodetime, 0, 0);
+    lv_obj_set_style_radius(bk_ui->settingmodetime, 0, LV_PART_MAIN);
+    lv_obj_set_scrollbar_mode(bk_ui->settingmodetime, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_event_cb(bk_ui->settingmodetime, settingmodetime_load_event_cb, LV_EVENT_ALL, NULL);
+#else
     bk_ui->settingmodetime = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->settingmodetime, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->settingmodetime, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->settingmodetime, settingmodetime_load_event_cb, LV_EVENT_ALL, NULL);
+#endif /* UI_PRENDERING_ENABLE */
 
     /* 배경 — bg.jpg 대신 단색(0xd9d9d9) */
     bk_ui->settingmodetime_bg = lv_image_create(bk_ui->settingmodetime);

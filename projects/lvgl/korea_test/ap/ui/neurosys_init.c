@@ -5,7 +5,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ui_config.h"
+#include "preRenderer.h"
+
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 extern void neurosys_allbt_event_cb(lv_event_t *e);
 extern void neurosys_onebt_event_cb(lv_event_t *e);
 extern void neurosys_twobt_event_cb(lv_event_t *e);
@@ -28,9 +32,19 @@ void init_page_neurosys(bk_lv_ui_t * bk_ui) {
         destroy_page_neurosys(bk_ui);
     }
 
+#if UI_PRENDERING_ENABLE
+    bk_ui->neurosys = lv_obj_create(preRenderRoot);
+    lv_obj_remove_style_all(bk_ui->neurosys);
+    lv_obj_set_size(bk_ui->neurosys, 1024, 600);
+    lv_obj_set_pos(bk_ui->neurosys, 0, 0);
+    lv_obj_set_style_radius(bk_ui->neurosys, 0, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(bk_ui->neurosys, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_scrollbar_mode(bk_ui->neurosys, LV_SCROLLBAR_MODE_OFF);
+#else
     bk_ui->neurosys = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->neurosys, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->neurosys, LV_SCROLLBAR_MODE_OFF);
+#endif /* UI_PRENDERING_ENABLE */
     // ImageView: allim
     bk_ui->neurosys_allim = lv_image_create(bk_ui->neurosys);
     _img_set_src_timed(bk_ui->neurosys_allim, "/images/red.png");

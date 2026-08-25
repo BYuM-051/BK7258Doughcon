@@ -6,7 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ui_config.h"
+#include "preRenderer.h"
+
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 extern void settingmoderecord_deletebt_event_cb(lv_event_t *e);
 extern void settingmoderecord_backbt_event_cb(lv_event_t *e);
 extern void settingmoderecord_load_event_cb(lv_event_t *e);
@@ -28,11 +32,23 @@ void init_page_settingmoderecord(bk_lv_ui_t * bk_ui) {
     }
 
     ui_lang_reset_settingmoderecord_cache();
+
+#if UI_PRENDERING_ENABLE
+    bk_ui->settingmoderecord = lv_obj_create(preRenderRoot);
+    lv_obj_remove_style_all(bk_ui->settingmoderecord);
+    lv_obj_set_size(bk_ui->settingmoderecord, 1024, 600);
+    lv_obj_set_pos(bk_ui->settingmoderecord, 0, 0);
+    lv_obj_set_style_radius(bk_ui->settingmoderecord, 0, LV_PART_MAIN);
+    lv_obj_set_scrollbar_mode(bk_ui->settingmoderecord, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_event_cb(bk_ui->settingmoderecord, settingmoderecord_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmoderecord, settingmoderecord_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+#else
     bk_ui->settingmoderecord = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->settingmoderecord, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->settingmoderecord, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->settingmoderecord, settingmoderecord_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
     lv_obj_add_event_cb(bk_ui->settingmoderecord, settingmoderecord_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+#endif /* UI_PRENDERING_ENABLE */
     /* 배경 — bg.jpg 대신 단색(0xd9d9d9) */
     bk_ui->settingmoderecord_bg = lv_image_create(bk_ui->settingmoderecord);
     lv_obj_add_flag(bk_ui->settingmoderecord_bg, LV_OBJ_FLAG_HIDDEN);

@@ -6,6 +6,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ui_config.h"
+#include "preRenderer.h"
+
+#define TAG "[automode_init.c] "
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+extern lv_obj_t *preRenderRoot;
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void automodeend_stopbt_event_cb(lv_event_t *e);
 extern void automodeend_load_event_cb(lv_event_t *e);
@@ -27,11 +34,28 @@ void init_page_automodeend(bk_lv_ui_t * bk_ui) {
     }
 
     ui_lang_reset_automodeend_cache();
+
+#if UI_PRENDERING_ENABLE
+    bk_ui->automodeend = lv_obj_create(preRenderRoot);
+    lv_obj_remove_style_all(bk_ui->automodeend);
+    lv_obj_set_size(bk_ui->automodeend, 1024, 600);
+    lv_obj_set_pos(bk_ui->automodeend, 0, 0);
+    lv_obj_set_style_radius(bk_ui->automodeend, 0, LV_PART_MAIN);
+    lv_obj_set_scrollbar_mode(bk_ui->automodeend, LV_SCROLLBAR_MODE_OFF);
+    //TODO : event callback이 screen에 등록되면 automode가 아니라 preRenderRoot에 등록되니까 구조 바꿔야됨. 이거 어차피 enter랑 exit이니까 생명주기 관리자를 만들자요 ㅇㅇ    
+    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+
+    lv_obj_set_style_bg_color(bk_ui->automodeend, lv_color_hex(0xD9D9D9), 0);
+    lv_obj_set_style_bg_opa(bk_ui->automodeend, LV_OPA_COVER, 0);
+
+#else
     bk_ui->automodeend = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->automodeend, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->automodeend, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->automodeend, automodeend_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
     lv_obj_add_event_cb(bk_ui->automodeend, automodeend_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+#endif /* UI_PRENDERING_ENABLE */
 
     // ImageView: auto_mode_end_bg
     bk_ui->automodeend_auto_mode_end_bg = lv_image_create(bk_ui->automodeend);

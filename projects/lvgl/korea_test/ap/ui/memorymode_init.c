@@ -6,7 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ui_config.h"
+#include "preRenderer.h"
+
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 extern void memorymode_backbt_event_cb(lv_event_t *e);
 extern void memorymode_memory_check1bt_event_cb(lv_event_t *e);
 extern void memorymode_memory_check2bt_event_cb(lv_event_t *e);
@@ -41,10 +45,20 @@ void init_page_memorymode(bk_lv_ui_t * bk_ui) {
      * 언어 변경 여부와 무관하게 반드시 새 이미지를 채우게 함 */
     ui_lang_reset_memorymode_cache();
 
+#if UI_PRENDERING_ENABLE
+    bk_ui->memorymode = lv_obj_create(preRenderRoot);
+    lv_obj_remove_style_all(bk_ui->memorymode);
+    lv_obj_set_size(bk_ui->memorymode, 1024, 600);
+    lv_obj_set_pos(bk_ui->memorymode, 0, 0);
+    lv_obj_set_style_radius(bk_ui->memorymode, 0, LV_PART_MAIN);
+    lv_obj_set_scrollbar_mode(bk_ui->memorymode, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_event_cb(bk_ui->memorymode, memorymode_load_event_cb, LV_EVENT_ALL, NULL);
+#else
     bk_ui->memorymode = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->memorymode, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->memorymode, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->memorymode, memorymode_load_event_cb, LV_EVENT_ALL, NULL);
+#endif /* UI_PRENDERING_ENABLE */
     bk_ui->memorymode_bg = lv_image_create(bk_ui->memorymode);
     /* bg.jpg 대신 단색(0xd9d9d9)으로 채움 */
     lv_obj_add_flag(bk_ui->memorymode_bg, LV_OBJ_FLAG_HIDDEN);

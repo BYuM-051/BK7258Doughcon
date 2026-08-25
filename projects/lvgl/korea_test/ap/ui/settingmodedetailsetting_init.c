@@ -6,7 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ui_config.h"
+#include "preRenderer.h"
+
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 extern void settingmodedetailsetting_backbt_event_cb(lv_event_t *e);
 extern void settingmodedetailsetting_detail_temp_bt_event_cb(lv_event_t *e);
 extern void settingmodedetailsetting_detail_humidity_bt_event_cb(lv_event_t *e);
@@ -33,10 +37,21 @@ void init_page_settingmodedetailsetting(bk_lv_ui_t * bk_ui) {
     }
 
     ui_lang_reset_settingmodedetailsetting_cache();
+
+#if UI_PRENDERING_ENABLE
+    bk_ui->settingmodedetailsetting = lv_obj_create(preRenderRoot);
+    lv_obj_remove_style_all(bk_ui->settingmodedetailsetting);
+    lv_obj_set_size(bk_ui->settingmodedetailsetting, 1024, 600);
+    lv_obj_set_pos(bk_ui->settingmodedetailsetting, 0, 0);
+    lv_obj_set_style_radius(bk_ui->settingmodedetailsetting, 0, LV_PART_MAIN);
+    lv_obj_set_scrollbar_mode(bk_ui->settingmodedetailsetting, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting, settingmodedetailsetting_load_event_cb, LV_EVENT_ALL, NULL);
+#else
     bk_ui->settingmodedetailsetting = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->settingmodedetailsetting, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->settingmodedetailsetting, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(bk_ui->settingmodedetailsetting, settingmodedetailsetting_load_event_cb, LV_EVENT_ALL, NULL);
+#endif /* UI_PRENDERING_ENABLE */
     bk_ui->settingmodedetailsetting_bg = lv_image_create(bk_ui->settingmodedetailsetting);
 #if !UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE
     _bg_set(bk_ui->settingmodedetailsetting_bg);
