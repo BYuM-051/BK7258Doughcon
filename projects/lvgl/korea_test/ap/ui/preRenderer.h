@@ -8,7 +8,16 @@
 extern "C" {
 #endif
 
-void preRendererWrapper(lv_event_t *e);
+extern lv_obj_t *preRenderRoot;
+extern lv_obj_t *currentPage;
+extern lv_event_code_t UI_EVENT_PAGE_SHOW_START;
+extern lv_event_code_t UI_EVENT_PAGE_SHOWN;
+extern lv_event_code_t UI_EVENT_PAGE_HIDE_START;
+extern lv_event_code_t UI_EVENT_PAGE_HIDDEN;
+
+extern void ui_screen_event_init(void);
+extern bool ui_screen_event_initialized(void);
+extern void ui_screen_change(lv_obj_t *newScreen);
 
 #ifdef __cplusplus
 }
