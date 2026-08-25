@@ -67,6 +67,8 @@ static int32_t lv_draw_sw_delete(lv_draw_unit_t * draw_unit);
 /**********************
  *      MACROS
  **********************/
+#define TAG "[lv_draw_sw.c] "
+#define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 /**********************
  *   GLOBAL FUNCTIONS
@@ -440,6 +442,7 @@ static void execute_drawing(lv_draw_task_t * t)
             if(src_type == LV_IMAGE_SRC_FILE)
             {
                 bk_printf(
+                    TAG 
                     "[IMG_TASK] %lu ms src=%s "
                     "img=%ux%u cf=%d flags=0x%lx "
                     "area=(%ld,%ld)-(%ld,%ld)\n",
@@ -458,6 +461,7 @@ static void execute_drawing(lv_draw_task_t * t)
             else
             {
                 bk_printf(
+                    TAG 
                     "[IMG_TASK] %lu ms src=%p type=%d "
                     "img=%ux%u cf=%d flags=0x%lx "
                     "area=(%ld,%ld)-(%ld,%ld)\n",
