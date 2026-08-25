@@ -743,7 +743,7 @@ void main_activity_on_create(void)
     hal_led_lock_set(false);
 
     ma->startup_time = lv_tick_get();
-    hal_buzzer_beep();
+    // hal_buzzer_beep(); // 시작할 때 두번이나 울리는 문제로 제거
     _key_driver_start();   /* Lock/Power/Lamp 물리 키 (공식 key 컴포넌트) */
 
     /* ── 3. 전원 상태 (정전복구용 플래그 — 화면 ON/OFF LED와는 무관, 그대로 유지) ── */

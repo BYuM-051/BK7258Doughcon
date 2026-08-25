@@ -187,7 +187,7 @@ int main(void)
 {
     lcd_backlight_close(GPIO_9);
     bk_init();
-    hal_buzzer_start(2000, 200);   /* 부팅 beep: 2 kHz × 200 ms */
+    hal_buzzer_start(2000, 200);   /* 부팅 beep: 2 kHz × 200 ms */ // startup beep
     media_service_init();
 
     bk_pm_module_vote_psram_ctrl(PM_POWER_PSRAM_MODULE_NAME_LVGL_CODE_RUN, PM_POWER_MODULE_STATE_ON);
