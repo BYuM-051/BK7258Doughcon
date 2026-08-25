@@ -6,6 +6,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ui_config.h"
+#include "preRenderer.h"
+
+#define TAG "[autodrymode_init.c] "
+// #define bk_printf(fmt, ...) do {} while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 extern void autodrymode_backbt_event_cb(lv_event_t *e);
@@ -30,11 +36,8 @@ void destroy_page_autodrymode(bk_lv_ui_t *bk_ui)
 }
 
 void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
-    if (bk_ui->autodrymode != NULL && lv_obj_is_valid(bk_ui->autodrymode)) 
-    {
-        lv_obj_move_to_index(bk_ui->autodrymode, -1);
-        return;
-        //destroy_page_autodrymode(bk_ui);
+    if (bk_ui->autodrymode != NULL && lv_obj_is_valid(bk_ui->autodrymode)) {
+        destroy_page_autodrymode(bk_ui);
     }
 
     // Clear lazily-created child pointers (stale after destroy+re-init)
@@ -53,10 +56,13 @@ void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
     }
 
     ui_lang_reset_autodrymode_cache();
-    // bk_ui->autodrymode = lv_obj_create(NULL);
+
+#if UI_PRENDERING_ENABLE
     bk_ui->autodrymode = lv_obj_create(preRenderRoot);
+    lv_obj_remove_style_all(bk_ui->autodrymode);
     lv_obj_set_size(bk_ui->autodrymode, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->autodrymode, LV_SCROLLBAR_MODE_OFF);
+    // TODO : 이 아래 이새끼도 loaded event구만.
     lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_load_event_cb, LV_EVENT_ALL, NULL);
     // bk_ui->autodrymode_bg = lv_image_create(bk_ui->autodrymode);
     // _img_set_src_timed(bk_ui->autodrymode_bg, "./images/auto_dry_bg.jpg");
@@ -67,7 +73,18 @@ void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
     lv_obj_set_style_radius(bk_ui->autodrymode, 0, LV_PART_MAIN);
     lv_obj_set_style_border_width(bk_ui->autodrymode, 0, LV_PART_MAIN);
     lv_obj_set_style_bg_opa(bk_ui->autodrymode, LV_OPA_COVER, LV_PART_MAIN);
-
+#else
+    bk_ui->autodrymode = lv_obj_create(NULL);
+    lv_obj_set_size(bk_ui->autodrymode, 1024, 600);
+    lv_obj_set_scrollbar_mode(bk_ui->autodrymode, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_load_event_cb, LV_EVENT_ALL, NULL);
+    // bk_ui->autodrymode_bg = lv_image_create(bk_ui->autodrymode);
+    // _img_set_src_timed(bk_ui->autodrymode_bg, "./images/auto_dry_bg.jpg");
+    lv_obj_set_scrollbar_mode(bk_ui->autodrymode, LV_SCROLLBAR_MODE_OFF);
+    // lv_obj_set_style_bg_color(bk_ui->autodrymode, lv_color_hex(0x4DA212), 0);
+    // lv_obj_set_pos(bk_ui->autodrymode_bg, 0, 0);
+    lv_obj_set_style_bg_color(bk_ui->autodrymode, lv_color_hex(0x49b206), 0);
+#endif /* UI_PRENDERING_ENABLE */
 
     // ImageView: title
     bk_ui->autodrymode_title = lv_image_create(bk_ui->autodrymode);

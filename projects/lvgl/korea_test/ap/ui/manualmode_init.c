@@ -6,6 +6,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ui_config.h"
+#include "preRenderer.h"
+
+#define TAG "[manualmode_init.c] "
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 extern void manualmode_backbt_event_cb(lv_event_t *e);
@@ -25,24 +31,37 @@ void destroy_page_manualmode(bk_lv_ui_t *bk_ui)
     }
 }
 
-void init_page_manualmode(bk_lv_ui_t * bk_ui) {
+void init_page_manualmode(bk_lv_ui_t * bk_ui) 
+{
+    uint32_t _t_start = lv_tick_get();
+    bk_printf(TAG "[SCREEN] init_page_manualmode start\n");
+
     if (bk_ui->manualmode != NULL && lv_obj_is_valid(bk_ui->manualmode)) 
     {
-        lv_obj_move_to_index(bk_ui->manualmode, -1);
-        return;
-        // destroy_page_manualmode(bk_ui);
+        destroy_page_manualmode(bk_ui);
     }
-
+#if UI_PRENDERING_ENABLE
     ui_lang_reset_manualmode_cache();
     bk_ui->manualmode = lv_obj_create(preRenderRoot);
+    lv_obj_remove_style_all(bk_ui->manualmode);
     lv_obj_set_size(bk_ui->manualmode, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->manualmode, LV_SCROLLBAR_MODE_OFF);
+    // TODO : 이새끼도 load callback 등록이 이렇게 되어있네
     lv_obj_add_event_cb(bk_ui->manualmode, manualmode_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
     lv_obj_add_event_cb(bk_ui->manualmode, manualmode_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
     lv_obj_set_style_bg_color(bk_ui->manualmode, lv_color_hex(0xD9D9D9), 0);
     lv_obj_set_style_radius(bk_ui->manualmode, 0, LV_PART_MAIN);
     lv_obj_set_style_border_width(bk_ui->manualmode, 0, LV_PART_MAIN);
     lv_obj_set_style_bg_opa(bk_ui->manualmode, LV_OPA_COVER, LV_PART_MAIN);
+#else
+    ui_lang_reset_manualmode_cache();
+    bk_ui->manualmode = lv_obj_create(NULL);
+    lv_obj_set_size(bk_ui->manualmode, 1024, 600);
+    lv_obj_set_scrollbar_mode(bk_ui->manualmode, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_set_style_bg_color(bk_ui->manualmode, lv_color_hex(0xD9D9D9), 0);
+#endif /* UI_PRENDERING_ENABLE */
 
     // bk_ui->manualmode_bg = lv_image_create(bk_ui->manualmode);
     // _img_set_src_timed(bk_ui->manualmode_bg, "/images/manual_bg.jpg");
