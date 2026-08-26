@@ -18,7 +18,10 @@ extern void manualmode_backbt_event_cb(lv_event_t *e);
 extern void manualmode_manual_freezebt_event_cb(lv_event_t *e);
 extern void manualmode_manual_defrostbt_event_cb(lv_event_t *e);
 extern void manualmode_manual_fermentationbt_event_cb(lv_event_t *e);
-extern void manualmode_load_event_cb(lv_event_t *e);
+extern void manualmode_load_start_event_cb(lv_event_t *e);
+extern void manualmode_loaded_event_cb(lv_event_t *e);
+extern void manualmode_unload_start_event_cb(lv_event_t *e);
+extern void manualmode_unloaded_event_cb(lv_event_t *e);
 
 void destroy_page_manualmode(bk_lv_ui_t *bk_ui)
 {
@@ -46,9 +49,10 @@ void init_page_manualmode(bk_lv_ui_t * bk_ui)
     lv_obj_remove_style_all(bk_ui->manualmode);
     lv_obj_set_size(bk_ui->manualmode, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->manualmode, LV_SCROLLBAR_MODE_OFF);
-    // TODO : 이새끼도 load callback 등록이 이렇게 되어있네
-    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_load_start_event_cb, UI_EVENT_PAGE_SHOW_START, NULL);
+    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_loaded_event_cb, UI_EVENT_PAGE_SHOWN,     NULL);
+    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN,     NULL);
     lv_obj_set_style_bg_color(bk_ui->manualmode, lv_color_hex(0xD9D9D9), 0);
     lv_obj_set_style_radius(bk_ui->manualmode, 0, LV_PART_MAIN);
     lv_obj_set_style_border_width(bk_ui->manualmode, 0, LV_PART_MAIN);
@@ -58,8 +62,10 @@ void init_page_manualmode(bk_lv_ui_t * bk_ui)
     bk_ui->manualmode = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->manualmode, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->manualmode, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_loaded_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->manualmode, manualmode_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
     lv_obj_set_style_bg_color(bk_ui->manualmode, lv_color_hex(0xD9D9D9), 0);
 #endif /* UI_PRENDERING_ENABLE */
 

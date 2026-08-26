@@ -19,7 +19,10 @@ extern void manualmodestart_manual_fermentation_temp_bt_event_cb(lv_event_t *e);
 extern void manualmodestart_manual_fermentation_humidity_bt_event_cb(lv_event_t *e);
 extern void manualmodestart_keypad_event_cb(lv_event_t *e);
 extern void manualmodestart_keypadhide_event_cb(lv_event_t *e);
-extern void manualmodestart_load_event_cb(lv_event_t *e);
+extern void manualmodestart_load_start_event_cb(lv_event_t *e);
+extern void manualmodestart_loaded_event_cb(lv_event_t *e);
+extern void manualmodestart_unload_start_event_cb(lv_event_t *e);
+extern void manualmodestart_unloaded_event_cb(lv_event_t *e);
 
 void destroy_page_manualmodestart(bk_lv_ui_t *bk_ui)
 {
@@ -90,12 +93,18 @@ void init_page_manualmodestart(bk_lv_ui_t * bk_ui) {
     lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0xD9D9D9), 0);
     lv_obj_set_style_bg_opa(bk_ui->manualmodestart, LV_OPA_COVER, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(bk_ui->manualmodestart, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_load_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_load_start_event_cb, UI_EVENT_PAGE_SHOW_START, NULL);
+    lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_loaded_event_cb, UI_EVENT_PAGE_SHOWN,     NULL);
+    lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+    lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN,     NULL);
 #else
     bk_ui->manualmodestart = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->manualmodestart, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->manualmodestart, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_load_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
+    lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_loaded_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
+    lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED, NULL);
 #endif /* UI_PRENDERING_ENABLE */
 
     // ImageView: bg (must be first child — lowest z-order)

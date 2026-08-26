@@ -10,10 +10,11 @@
 #include "preRenderer.h"
 
 #define TAG "[automode_init.c] "
+#include "preRenderer.h"
 // #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 
-extern bk_lv_ui_t bk_lv_tool_ui;
 // void init_keypad_group(bk_lv_ui_t *bk_ui);
 extern void automode_backbt_event_cb(lv_event_t *e);
 extern void automode_startbt_event_cb(lv_event_t *e);
@@ -38,7 +39,10 @@ extern void automode_AutoFermentation2TimeHourBt_event_cb(lv_event_t *e);
 extern void automode_AutoFermentation2TimeMinBt_event_cb(lv_event_t *e);
 extern void keypad_touch_event_cb(lv_event_t *e);
 extern void automode_keypadhide_event_cb(lv_event_t *e);
-extern void automode_load_event_cb(lv_event_t *e);
+extern void automode_load_start_event_cb(lv_event_t *e);
+extern void automode_loaded_event_cb(lv_event_t *e);
+extern void automode_unload_start_event_cb(lv_event_t *e);
+extern void automode_unloaded_event_cb(lv_event_t *e);
 
 void destroy_page_automode(bk_lv_ui_t *bk_ui)
 {
@@ -88,51 +92,14 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
     uint32_t _t_start = lv_tick_get();
     bk_printf(TAG "[IMGTIME] ===== automode init(create) start =====\n");
 
-    /*프리힛이 되어서 enter 함수는 따로 빼서 lvgl event로 만들거임.
-    * init은 진짜로 객체 생성에만 사용하는 함수임.
-    * 이부분의 코드를 재사용하게 합시다.
-    */
-#if 0
-    if (bk_ui->automode != NULL && lv_obj_is_valid(bk_ui->automode)) 
-    {   
-        uint32_t elapsed;
-        bk_printf(TAG "[SCREEN] automode already exists, moving to top\n");
-        /*
-        * 여기는 프리힛이 이미 됐다는 소리잖아. 프리힛 된거에 다시 init했다는거는 다른애들 지우고 refresh하면 되는거잖아
-        */
-        bk_ui->main != NULL ? lv_obj_add_flag(bk_ui->main, LV_OBJ_FLAG_HIDDEN) : (void)0;
-        bk_ui->automode != NULL ? lv_obj_add_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN) : (void)0;
-        bk_ui->manualmode != NULL ? lv_obj_add_flag(bk_ui->manualmode, LV_OBJ_FLAG_HIDDEN) : (void)0;
-        bk_ui->autodrymode != NULL ? lv_obj_add_flag(bk_ui->autodrymode, LV_OBJ_FLAG_HIDDEN) : (void)0;
-        elapsed = lv_tick_get() - _t_start;
-        bk_printf(TAG "[SCREEN] preRenderCleared elapsed: %u\n", elapsed);
-        lv_obj_move_to_index(bk_ui->automode, -1);
-        lv_obj_remove_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN);
-        elapsed = lv_tick_get() - _t_start;
-        bk_printf(TAG "[SCREEN] automode unhidden elapsed: %u\n", elapsed);
-        lv_refr_now(NULL);
-        elapsed = lv_tick_get() - _t_start;
-        bk_printf(TAG "[SCREEN] automode moved to top elapsed: %u\n", elapsed);
-        return;
-    }
-#else
     if (bk_ui->automode != NULL && lv_obj_is_valid(bk_ui->automode)) {
         destroy_page_automode(bk_ui);
     }
-#endif
     /* 오브젝트를 새로 만드므로 ui_lang 캐시를 무효화 — 다음 SCREEN_LOAD_START의
      * ui_lang_apply_automode()가 언어 변경 여부와 무관하게 반드시 새 이미지를 채우게 함 */
     ui_lang_reset_automode_cache();
 
 #if UI_PRENDERING_ENABLE
-    if(lv_obj_is_valid(preRenderRoot))
-    {
-        bk_printf(TAG "preRenderRoot is valid\n");
-    }
-    else
-    {
-        bk_printf(TAG "preRenderRoot is NOT valid\n");
-    }
     bk_ui->automode = lv_obj_create(preRenderRoot);
     lv_obj_remove_style_all(bk_ui->automode);
     lv_obj_set_size(bk_ui->automode, 1024, 600);
@@ -140,10 +107,10 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
     lv_obj_set_pos(bk_ui->automode, 0, 0);
     lv_obj_set_scrollbar_mode(bk_ui->automode, LV_SCROLLBAR_MODE_OFF);
 
-    //TODO : event callback이 screen에 등록되면 automode가 아니라 preRenderRoot에 등록되니까 구조 바꿔야됨. 이거 어차피 enter랑 exit이니까 생명주기 관리자를 만들자요 ㅇㅇ
-    lv_obj_add_event_cb(bk_ui->automode, automode_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
-    lv_obj_add_event_cb(bk_ui->automode, automode_load_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
-    lv_obj_add_event_cb(bk_ui->automode, automode_load_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->automode, automode_load_start_event_cb, UI_EVENT_PAGE_SHOW_START,   NULL);
+    lv_obj_add_event_cb(bk_ui->automode, automode_loaded_event_cb, UI_EVENT_PAGE_SHOWN,       NULL);
+    lv_obj_add_event_cb(bk_ui->automode, automode_unloaded_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+    lv_obj_add_event_cb(bk_ui->automode, automode_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
     bk_ui->automode_bg = lv_image_create(bk_ui->automode);
     // _img_set_src_timed(bk_ui->automode_bg, "/images/auto_mode_bgi.jpg");
     // lv_obj_set_pos(bk_ui->automode_bg, 0, 0);
@@ -154,9 +121,10 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
     bk_ui->automode = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->automode, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->automode, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->automode, automode_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
-    lv_obj_add_event_cb(bk_ui->automode, automode_load_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
-    lv_obj_add_event_cb(bk_ui->automode, automode_load_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->automode, automode_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
+    lv_obj_add_event_cb(bk_ui->automode, automode_loaded_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
+    lv_obj_add_event_cb(bk_ui->automode, automode_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED, NULL);
+    lv_obj_add_event_cb(bk_ui->automode, automode_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
     bk_ui->automode_bg = lv_image_create(bk_ui->automode);
     // _img_set_src_timed(bk_ui->automode_bg, "/images/auto_mode_bgi.jpg");
     // lv_obj_set_pos(bk_ui->automode_bg, 0, 0);
@@ -702,6 +670,10 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
 }
 
 void init_keypad_group(bk_lv_ui_t *bk_ui) {
+    /*FIXME: 다음줄부터
+    * lv_style_init은 여러번 호출되면 안 됨
+    * 왜 이렇게 만들었는지 모르겠는데 나중에 beken_ui.c에서 만들어서 extern으로 데리고 오면 될듯
+    * 지금은 일단 손댈게 많으니까 이쪽은 나중에 손대는데 중요노트라 길게 씀 */
     static lv_style_t style_transp;
     lv_style_init(&style_transp);
     lv_style_set_bg_opa(&style_transp, LV_OPA_TRANSP);

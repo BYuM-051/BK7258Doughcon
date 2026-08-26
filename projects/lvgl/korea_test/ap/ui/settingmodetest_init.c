@@ -26,7 +26,10 @@ extern void settingmodetest_ledbt_event_cb(lv_event_t *e);
 extern void settingmodetest_cabinetheaterbt_event_cb(lv_event_t *e);
 extern void settingmodetest_damperbt_event_cb(lv_event_t *e);
 extern void settingmodetest_test_error_check_bt_event_cb(lv_event_t *e);
-extern void settingmodetest_load_event_cb(lv_event_t *e);
+extern void settingmodetest_load_start_event_cb(lv_event_t *e);
+extern void settingmodetest_loaded_event_cb(lv_event_t *e);
+extern void settingmodetest_unload_start_event_cb(lv_event_t *e);
+extern void settingmodetest_unloaded_event_cb(lv_event_t *e);
 
 /* testmode_box.jpg 전용 canvas 버퍼 — 공유 LVGL 이미지 캐시(LV_CACHE_DEF_SIZE)
  * 밖에 있어 popuppassword 등 다른 prewarm과 캐시 자리를 두고 경쟁하지 않음
@@ -159,16 +162,18 @@ void init_page_settingmodetest(bk_lv_ui_t * bk_ui) {
     lv_obj_set_pos(bk_ui->settingmodetest, 0, 0);
     lv_obj_set_style_radius(bk_ui->settingmodetest, 0, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(bk_ui->settingmodetest, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_start_event_cb, UI_EVENT_PAGE_SHOW_START,   NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_loaded_event_cb, UI_EVENT_PAGE_SHOWN,       NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN,     NULL);
 #else
     bk_ui->settingmodetest = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->settingmodetest, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->settingmodetest, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_loaded_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
 #endif /* UI_PRENDERING_ENABLE */
     /* 배경 — bg.jpg 대신 단색(0xd9d9d9) */
     bk_ui->settingmodetest_bg = lv_image_create(bk_ui->settingmodetest);

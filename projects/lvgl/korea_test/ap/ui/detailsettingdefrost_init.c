@@ -17,7 +17,10 @@ extern void detailsettingdefrost_settingbt2_event_cb(lv_event_t *e);
 extern void detailsettingdefrost_settingbt3_event_cb(lv_event_t *e);
 extern void detailsettingdefrost_changebt_event_cb(lv_event_t *e);
 extern void detailsettingdefrost_roller_event_cb(lv_event_t *e);
-extern void detailsettingdefrost_load_event_cb(lv_event_t *e);
+extern void detailsettingdefrost_load_start_event_cb(lv_event_t *e);
+extern void detailsettingdefrost_loaded_event_cb(lv_event_t *e);
+extern void detailsettingdefrost_unload_start_event_cb(lv_event_t *e);
+extern void detailsettingdefrost_unloaded_event_cb(lv_event_t *e);
 
 void destroy_page_detailsettingdefrost(bk_lv_ui_t *bk_ui)
 {
@@ -44,14 +47,18 @@ void init_page_detailsettingdefrost(bk_lv_ui_t * bk_ui) {
     lv_obj_set_pos(bk_ui->detailsettingdefrost, 0, 0);
     lv_obj_set_style_radius(bk_ui->detailsettingdefrost, 0, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(bk_ui->detailsettingdefrost, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->detailsettingdefrost, detailsettingdefrost_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->detailsettingdefrost, detailsettingdefrost_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdefrost, detailsettingdefrost_load_start_event_cb, UI_EVENT_PAGE_SHOW_START, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdefrost, detailsettingdefrost_loaded_event_cb, UI_EVENT_PAGE_SHOWN,     NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdefrost, detailsettingdefrost_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdefrost, detailsettingdefrost_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN,     NULL);
 #else
     bk_ui->detailsettingdefrost = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->detailsettingdefrost, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->detailsettingdefrost, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->detailsettingdefrost, detailsettingdefrost_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->detailsettingdefrost, detailsettingdefrost_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdefrost, detailsettingdefrost_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdefrost, detailsettingdefrost_loaded_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdefrost, detailsettingdefrost_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdefrost, detailsettingdefrost_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
 #endif /* UI_PRENDERING_ENABLE */
     bk_ui->detailsettingdefrost_bg = lv_image_create(bk_ui->detailsettingdefrost);
     lv_obj_add_flag(bk_ui->detailsettingdefrost_bg, LV_OBJ_FLAG_HIDDEN);

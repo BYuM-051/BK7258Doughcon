@@ -10,12 +10,16 @@
 #include "preRenderer.h"
 
 #define TAG "[automode_init.c] "
-// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+#include "preRenderer.h"
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 
-extern bk_lv_ui_t bk_lv_tool_ui;
 extern void automodeend_stopbt_event_cb(lv_event_t *e);
-extern void automodeend_load_event_cb(lv_event_t *e);
+extern void automodeend_load_start_event_cb(lv_event_t *e);
+extern void automodeend_loaded_event_cb(lv_event_t *e);
+extern void automodeend_unload_start_event_cb(lv_event_t *e);
+extern void automodeend_unloaded_event_cb(lv_event_t *e);
 
 void destroy_page_automodeend(bk_lv_ui_t *bk_ui)
 {
@@ -42,9 +46,10 @@ void init_page_automodeend(bk_lv_ui_t * bk_ui) {
     lv_obj_set_pos(bk_ui->automodeend, 0, 0);
     lv_obj_set_style_radius(bk_ui->automodeend, 0, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(bk_ui->automodeend, LV_SCROLLBAR_MODE_OFF);
-    //TODO : event callback이 screen에 등록되면 automode가 아니라 preRenderRoot에 등록되니까 구조 바꿔야됨. 이거 어차피 enter랑 exit이니까 생명주기 관리자를 만들자요 ㅇㅇ    
-    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_load_start_event_cb, UI_EVENT_PAGE_SHOW_START, NULL);
+    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_loaded_event_cb, UI_EVENT_PAGE_SHOWN,     NULL);
+    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN,     NULL);
 
     lv_obj_set_style_bg_color(bk_ui->automodeend, lv_color_hex(0xD9D9D9), 0);
     lv_obj_set_style_bg_opa(bk_ui->automodeend, LV_OPA_COVER, 0);
@@ -53,8 +58,10 @@ void init_page_automodeend(bk_lv_ui_t * bk_ui) {
     bk_ui->automodeend = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->automodeend, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->automodeend, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_loaded_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->automodeend, automodeend_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
 #endif /* UI_PRENDERING_ENABLE */
 
     // ImageView: auto_mode_end_bg

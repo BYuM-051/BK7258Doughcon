@@ -12,7 +12,10 @@
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 extern void settingmodedefrost_backbt_event_cb(lv_event_t *e);
-extern void settingmodedefrost_load_event_cb(lv_event_t *e);
+extern void settingmodedefrost_load_start_event_cb(lv_event_t *e);
+extern void settingmodedefrost_loaded_event_cb(lv_event_t *e);
+extern void settingmodedefrost_unload_start_event_cb(lv_event_t *e);
+extern void settingmodedefrost_unloaded_event_cb(lv_event_t *e);
 
 void destroy_page_settingmodedefrost(bk_lv_ui_t *bk_ui)
 {
@@ -39,14 +42,18 @@ void init_page_settingmodedefrost(bk_lv_ui_t * bk_ui) {
     lv_obj_set_pos(bk_ui->settingmodedefrost, 0, 0);
     lv_obj_set_style_radius(bk_ui->settingmodedefrost, 0, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(bk_ui->settingmodedefrost, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->settingmodedefrost, settingmodedefrost_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodedefrost, settingmodedefrost_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedefrost, settingmodedefrost_load_start_event_cb, UI_EVENT_PAGE_SHOW_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedefrost, settingmodedefrost_loaded_event_cb, UI_EVENT_PAGE_SHOWN,     NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedefrost, settingmodedefrost_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedefrost, settingmodedefrost_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN,     NULL);
 #else
     bk_ui->settingmodedefrost = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->settingmodedefrost, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->settingmodedefrost, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->settingmodedefrost, settingmodedefrost_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodedefrost, settingmodedefrost_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedefrost, settingmodedefrost_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedefrost, settingmodedefrost_loaded_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedefrost, settingmodedefrost_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedefrost, settingmodedefrost_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
 #endif /* UI_PRENDERING_ENABLE */
     bk_ui->settingmodedefrost_bg = lv_image_create(bk_ui->settingmodedefrost);
     _bg_set(bk_ui->settingmodedefrost_bg);

@@ -16,7 +16,10 @@ extern void settingmodelanguage_backbt_event_cb(lv_event_t *e);
 extern void settingmodelanguage_koreanbt_event_cb(lv_event_t *e);
 extern void settingmodelanguage_englishbt_event_cb(lv_event_t *e);
 extern void settingmodelanguage_chinabt_event_cb(lv_event_t *e);
-extern void settingmodelanguage_load_event_cb(lv_event_t *e);
+extern void settingmodelanguage_load_start_event_cb(lv_event_t *e);
+extern void settingmodelanguage_loaded_event_cb(lv_event_t *e);
+extern void settingmodelanguage_unload_start_event_cb(lv_event_t *e);
+extern void settingmodelanguage_unloaded_event_cb(lv_event_t *e);
 extern void _update_language_ui();
 
 void destroy_page_settingmodelanguage(bk_lv_ui_t *bk_ui)
@@ -44,14 +47,18 @@ void init_page_settingmodelanguage(bk_lv_ui_t * bk_ui) {
     lv_obj_set_pos(bk_ui->settingmodelanguage, 0, 0);
     lv_obj_set_style_radius(bk_ui->settingmodelanguage, 0, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(bk_ui->settingmodelanguage, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_load_start_event_cb, UI_EVENT_PAGE_SHOW_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_loaded_event_cb, UI_EVENT_PAGE_SHOWN,     NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN,     NULL);
 #else
     bk_ui->settingmodelanguage = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->settingmodelanguage, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->settingmodelanguage, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_load_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_loaded_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
 #endif /* UI_PRENDERING_ENABLE */
     /* 배경 — bg.jpg 대신 단색(0xd9d9d9) */
     bk_ui->settingmodelanguage_bg = lv_image_create(bk_ui->settingmodelanguage);
