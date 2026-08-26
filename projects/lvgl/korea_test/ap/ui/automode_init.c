@@ -109,7 +109,7 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
 
     lv_obj_add_event_cb(bk_ui->automode, automode_load_start_event_cb, UI_EVENT_PAGE_SHOW_START,   NULL);
     lv_obj_add_event_cb(bk_ui->automode, automode_loaded_event_cb, UI_EVENT_PAGE_SHOWN,       NULL);
-    lv_obj_add_event_cb(bk_ui->automode, automode_unloaded_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+    lv_obj_add_event_cb(bk_ui->automode, automode_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN, NULL);
     lv_obj_add_event_cb(bk_ui->automode, automode_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
     bk_ui->automode_bg = lv_image_create(bk_ui->automode);
     // _img_set_src_timed(bk_ui->automode_bg, "/images/auto_mode_bgi.jpg");
