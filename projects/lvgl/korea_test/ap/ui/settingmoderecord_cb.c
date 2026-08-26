@@ -18,7 +18,10 @@ static uint32_t last_click_time = 0;
 
 void settingmoderecord_deletebt_event_cb(lv_event_t *e);
 void settingmoderecord_backbt_event_cb(lv_event_t *e);
-void settingmoderecord_load_event_cb(lv_event_t *e);
+void settingmoderecord_load_start_event_cb(lv_event_t *e);
+void settingmoderecord_loaded_event_cb(lv_event_t *e);
+void settingmoderecord_unload_start_event_cb(lv_event_t *e);
+void settingmoderecord_unloaded_event_cb(lv_event_t *e);
 
 static void _apply_record_labels(bk_lv_ui_t *bk_ui);
 
@@ -325,16 +328,25 @@ static void _apply_record_labels(bk_lv_ui_t *bk_ui)
 #undef RT_SCALE
 }
 
-void settingmoderecord_load_event_cb(lv_event_t *e)
+void settingmoderecord_loaded_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->settingmoderecord_title);
-        return;
-    }
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+    ui_title_anim(bk_ui->settingmoderecord_title);
+}
 
+void settingmoderecord_unload_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void settingmoderecord_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void settingmoderecord_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     ui_lang_apply_settingmoderecord(bk_ui);
     _apply_record_labels(bk_ui);
 }

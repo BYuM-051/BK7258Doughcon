@@ -15,7 +15,10 @@ extern bk_lv_ui_t bk_lv_tool_ui;
 static uint32_t last_click_time = 0;
 
 void settingmodedefrost_backbt_event_cb(lv_event_t *e);
-void settingmodedefrost_load_event_cb(lv_event_t *e);
+void settingmodedefrost_load_start_event_cb(lv_event_t *e);
+void settingmodedefrost_loaded_event_cb(lv_event_t *e);
+void settingmodedefrost_unload_start_event_cb(lv_event_t *e);
+void settingmodedefrost_unloaded_event_cb(lv_event_t *e);
 
 void settingmodedefrost_backbt_event_cb(lv_event_t *e)
 {
@@ -29,15 +32,24 @@ void settingmodedefrost_backbt_event_cb(lv_event_t *e)
     lv_scr_load(bk_ui->settingmode);
 }
 
-void settingmodedefrost_load_event_cb(lv_event_t *e)
+void settingmodedefrost_loaded_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->settingmodedefrost_title);
-        return;
-    }
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+    ui_title_anim(bk_ui->settingmodedefrost_title);
+}
 
+void settingmodedefrost_unload_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void settingmodedefrost_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void settingmodedefrost_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     ui_lang_apply_settingmodedefrost(bk_ui);
 }

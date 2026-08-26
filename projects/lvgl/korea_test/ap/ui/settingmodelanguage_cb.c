@@ -20,7 +20,10 @@ void settingmodelanguage_backbt_event_cb(lv_event_t *e);
 void settingmodelanguage_koreanbt_event_cb(lv_event_t *e);
 void settingmodelanguage_englishbt_event_cb(lv_event_t *e);
 void settingmodelanguage_chinabt_event_cb(lv_event_t *e);
-void settingmodelanguage_load_event_cb(lv_event_t *e);
+void settingmodelanguage_load_start_event_cb(lv_event_t *e);
+void settingmodelanguage_loaded_event_cb(lv_event_t *e);
+void settingmodelanguage_unload_start_event_cb(lv_event_t *e);
+void settingmodelanguage_unloaded_event_cb(lv_event_t *e);
 /* 이미지 상태 업데이트 함수 (alloffim 역할) */
 void _update_language_ui(void)
 {
@@ -131,16 +134,25 @@ void settingmodelanguage_chinabt_event_cb(lv_event_t *e)
 
 
 
-void settingmodelanguage_load_event_cb(lv_event_t *e)
+void settingmodelanguage_loaded_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->settingmodelanguage_title);
-        return;
-    }
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+    ui_title_anim(bk_ui->settingmodelanguage_title);
+}
 
+void settingmodelanguage_unload_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void settingmodelanguage_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void settingmodelanguage_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     ui_lang_apply_settingmodelanguage(bk_ui);
     _update_language_ui();
 }

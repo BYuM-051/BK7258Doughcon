@@ -107,7 +107,10 @@ void detailsettingdefrost_settingbt2_event_cb(lv_event_t *e);
 void detailsettingdefrost_settingbt3_event_cb(lv_event_t *e);
 void detailsettingdefrost_changebt_event_cb(lv_event_t *e);
 void detailsettingdefrost_roller_event_cb(lv_event_t *e);
-void detailsettingdefrost_load_event_cb(lv_event_t *e);
+void detailsettingdefrost_load_start_event_cb(lv_event_t *e);
+void detailsettingdefrost_loaded_event_cb(lv_event_t *e);
+void detailsettingdefrost_unload_start_event_cb(lv_event_t *e);
+void detailsettingdefrost_unloaded_event_cb(lv_event_t *e);
 
 static void _get_row_objs(bk_lv_ui_t *bk_ui, lv_obj_t *ims[3], lv_obj_t *txts[3])
 {
@@ -361,15 +364,25 @@ void detailsettingdefrost_changebt_event_cb(lv_event_t *e)
     uart_comm_trigger_change_setting();
 }
 
-void detailsettingdefrost_load_event_cb(lv_event_t *e)
+void detailsettingdefrost_loaded_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->detailsettingdefrost_title);
-        return;
-    }
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+    ui_title_anim(bk_ui->detailsettingdefrost_title);
+}
+
+void detailsettingdefrost_unload_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void detailsettingdefrost_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void detailsettingdefrost_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     uint32_t t0 = lv_tick_get();
     bk_printf(TAG "[PERF] detaildefrost load_event start\n");
 

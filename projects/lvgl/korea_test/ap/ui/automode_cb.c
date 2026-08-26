@@ -20,10 +20,11 @@
 #include <driver/aon_rtc.h>
 
 #define TAG "[automode_cb.c] "
+#include "preRenderer.h"
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
-
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
+
 extern void init_keypad_group();
 extern void memory_save_to_slot(int slot);
 
@@ -865,9 +866,17 @@ void automode_backbt_event_cb(lv_event_t *e)
     }
 
     settings_save_dirty();
+#if UI_PRENDERING_ENABLE
+    if(bk_ui->main == NULL || !lv_obj_is_valid(bk_ui->main)) {
+        bk_printf(TAG "[SCREEN] main is NULL or invalid\n");
+        init_page_main(bk_ui);
+        return;
+    }
+    ui_page_change(bk_ui->main);
+#else
     init_page_main(bk_ui);
-    // lv_scr_load(preRenderRoot);
-    // lv_refr_now(NULL);
+    lv_scr_load(bk_ui->main);
+#endif /* UI_PRENDERING_ENABLE */
     settings_set_str("saveChecking", "0");
     settings_save_dirty();
 }
@@ -1789,18 +1798,32 @@ static void _calc_completion_date(bk_lv_ui_t *bk_ui, bool from_mem)
 }
 
 
-void automode_load_event_cb(lv_event_t *e)
+void automode_loaded_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+    ui_title_anim(bk_ui->automode_title);
+    _ams_pw_start();
+    automode_mm_prewarm_start();
+    return;
+}
+
+void automode_unload_start_event_cb(lv_event_t *e)
+{
+    _ams_pw_cancel();
+    automode_mm_prewarm_cancel();
+    return; 
+}
+
+void automode_unloaded_event_cb(lv_event_t *e)
+{
+    (void)0;
+    return;
+}
+
+void automode_load_start_event_cb(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
 
-    if (code == LV_EVENT_SCREEN_UNLOAD_START) { _ams_pw_cancel(); automode_mm_prewarm_cancel(); return; }
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-        ui_title_anim(bk_ui->automode_title);
-        _ams_pw_start();
-        automode_mm_prewarm_start();
-        return;
-    }
     if (code != LV_EVENT_SCREEN_LOAD_START) return;
 
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;

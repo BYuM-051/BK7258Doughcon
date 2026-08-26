@@ -17,8 +17,8 @@
 #include <stdio.h>
 
 #define TAG "[autodrymode_cb.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
-
+#include "preRenderer.h"
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 
@@ -45,7 +45,10 @@ void autodrymode_auto_dry_min_bt_event_cb(lv_event_t *e);
 void autodrymode_auto_dry_start_event_cb(lv_event_t *e);
 void autodrymode_keypad_event_cb(lv_event_t *e);
 void autodrymode_keypadhide_event_cb(lv_event_t *e);
-void autodrymode_load_event_cb(lv_event_t *e);
+void autodrymode_load_start_event_cb(lv_event_t *e);
+void autodrymode_loaded_event_cb(lv_event_t *e);
+void autodrymode_unload_start_event_cb(lv_event_t *e);
+void autodrymode_unloaded_event_cb(lv_event_t *e);
 
 static lv_obj_t *_get_target_label_autodrymode(bk_lv_ui_t *bk_ui)
 {
@@ -653,8 +656,17 @@ void autodrymode_backbt_event_cb(lv_event_t *e)
     if (state->auto_dry_mode_start) return; /* 운전 중 나가기 차단 */
 
     if (s_ui_timer_adm) { lv_timer_delete(s_ui_timer_adm); s_ui_timer_adm = NULL; }
+#if UI_PRENDERING_ENABLE
+    if(bk_ui->main == NULL || !lv_obj_is_valid(bk_ui->main)) {
+        bk_printf(TAG "[SCREEN] main is NULL or invalid\n");
+        init_page_main(bk_ui);
+        return;
+    }
+    ui_page_change(bk_ui->main);
+#else
     init_page_main(bk_ui);
-    lv_scr_load(preRenderRoot);
+    lv_scr_load(bk_ui->main);
+#endif /* UI_PRENDERING_ENABLE */
     lv_refr_now(NULL);
 }
 
@@ -817,34 +829,50 @@ void autodrymode_keypadhide_event_cb(lv_event_t *e)
     _keypad_hide_autodrymode(bk_ui);
 }
 
-void autodrymode_load_event_cb(lv_event_t *e)
+void autodrymode_loaded_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
 
-    /* ── SCREEN_LOADED: PNG 디코드 + UI 상태 복원 — lv_task_handler (얕은 스택) ── */
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->autodrymode_title);
-        if (!lv_image_get_src(bk_ui->autodrymode_auto_dry_circle_basic)) {
-            _img_set_src_timed(bk_ui->autodrymode_auto_dry_circle_basic, "/images/auto_dry_circle_basic.png");
-        
+    ui_title_anim(bk_ui->autodrymode_title);
+    if (!lv_image_get_src(bk_ui->autodrymode_auto_dry_circle_basic)) {
+        _img_set_src_timed(bk_ui->autodrymode_auto_dry_circle_basic, "/images/auto_dry_circle_basic.png");
+    
 
-            // _img_set_src_timed(bk_ui->autodrymode_auto_dry_circle_gif,   "/images/auto_dry_circle.png");
-            /* auto_dry_txt_basic: SCREEN_LOAD_START 말미의 ui_lang_apply_autodrymode()가
-             * 언어 suffix를 포함한 올바른 경로로 이미 설정했으므로 여기서 덮어쓰지 않음. */
-            _img_set_src_timed(bk_ui->autodrymode_auto_dry_gif,          "/images/auto_dry_gif.png");
-            _img_set_src_timed(bk_ui->autodrymode_auto_dry_gif_basic,    "/images/auto_dry_gif.png");
-            lv_image_set_pivot(bk_ui->autodrymode_auto_dry_gif, 26, 26);
-        }
-        if (state->auto_dry_mode_start)
-            _ui_apply_running_adm(bk_ui);
-        else
-            _ui_apply_stopped_adm(bk_ui);
+        // _img_set_src_timed(bk_ui->autodrymode_auto_dry_circle_gif,   "/images/auto_dry_circle.png");
+        /* auto_dry_txt_basic: SCREEN_LOAD_START 말미의 ui_lang_apply_autodrymode()가
+         * 언어 suffix를 포함한 올바른 경로로 이미 설정했으므로 여기서 덮어쓰지 않음. */
+        _img_set_src_timed(bk_ui->autodrymode_auto_dry_gif,          "/images/auto_dry_gif.png");
+        _img_set_src_timed(bk_ui->autodrymode_auto_dry_gif_basic,    "/images/auto_dry_gif.png");
+        lv_image_set_pivot(bk_ui->autodrymode_auto_dry_gif, 26, 26);
+    }
+    if (state->auto_dry_mode_start)
+        _ui_apply_running_adm(bk_ui);
+    else
+        _ui_apply_stopped_adm(bk_ui);
+}
+
+void autodrymode_unload_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void autodrymode_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void autodrymode_load_start_event_cb(lv_event_t *e)
+{
+    bk_printf(TAG "[SCREEN] autodrymode_load_start_event_cb: event code %d\n", lv_event_get_code(e));
+    if(lv_event_get_code(e) == LV_EVENT_CHILD_CHANGED)
+    {
+        bk_printf(TAG "[SCREEN] autodrymode_load_start_event_cb: child changed\n");
         return;
     }
 
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+    device_state_t *state = &g_device_state;
 
     /* ── run_arc 레이어 생성 (최초 1회) ──
      * z-order (back→front): circle_gif(불투명 초록 링 PNG) → circle_basic(투명 영역으로 링이 비침) →

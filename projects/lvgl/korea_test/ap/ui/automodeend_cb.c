@@ -14,9 +14,10 @@
 #include "hardware_hal.h"
 
 #define TAG "[automodeend_cb.c] "
+#include "preRenderer.h"
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
-
 extern bk_lv_ui_t bk_lv_tool_ui;
+extern lv_obj_t *preRenderRoot;
 
 static uint32_t   last_click_time      = 0;
 static lv_timer_t *s_over_ferm_timer  = NULL;
@@ -82,7 +83,10 @@ static void _over_ferm_wait_timer_cb(lv_timer_t *t)
 }
 
 void automodeend_stopbt_event_cb(lv_event_t *e);
-void automodeend_load_event_cb(lv_event_t *e);
+void automodeend_load_start_event_cb(lv_event_t *e);
+void automodeend_loaded_event_cb(lv_event_t *e);
+void automodeend_unload_start_event_cb(lv_event_t *e);
+void automodeend_unloaded_event_cb(lv_event_t *e);
 
 /* ── 운전 기록 슬롯 관리 ──────────────────────────────────────────────
  * 슬롯 0이 가장 최신, 슬롯 4가 가장 오래된 기록 (최대 5슬롯)
@@ -248,15 +252,25 @@ void automodeend_stopbt_event_cb(lv_event_t *e)
 }
 
 /* ── 화면 로드 ────────────────────────────────────────────────────── */
-void automodeend_load_event_cb(lv_event_t *e)
+void automodeend_loaded_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->automodeend_title);
-        return;
-    }
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+    ui_title_anim(bk_ui->automodeend_title);
+}
+
+void automodeend_unload_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void automodeend_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void automodeend_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
 
     /* 영어인 경우 완료시간 레이블 15px 우측 이동 */

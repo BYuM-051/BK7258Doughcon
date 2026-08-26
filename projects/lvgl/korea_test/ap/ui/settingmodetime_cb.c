@@ -578,34 +578,42 @@ void settingmodetime_keypadhide_event_cb(lv_event_t *e)
     _keypad_hide_smt(bk_ui);
 }
 
-void settingmodetime_load_event_cb(lv_event_t *e)
+void settingmodetime_unload_start_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+    (void)e;
 
-    if (code == LV_EVENT_SCREEN_UNLOAD_START) {
-        if (s_tci_smt != 0) {
-            /* 확정 없이 화면을 벗어남 — 기존과 동일하게 편집 내용은 커밋하지 않고
-             * 키패드/언더바만 정리 (필드 라벨은 항상 표시이므로 별도 처리 불필요) */
-            _keypad_off_smt(bk_ui);
-            _underbar_all_hide_smt(bk_ui);
-            lv_obj_add_flag(bk_ui->settingmodetime_ampm_bt, LV_OBJ_FLAG_HIDDEN);
-            s_tci_smt = 0; s_edit_buf_smt[0] = '\0';
-        }
-        return;
+    if (s_tci_smt != 0) {
+        /* 확정 없이 화면을 벗어남 — 기존과 동일하게 편집 내용은 커밋하지 않고
+         * 키패드/언더바만 정리 (필드 라벨은 항상 표시이므로 별도 처리 불필요) */
+        _keypad_off_smt(bk_ui);
+        _underbar_all_hide_smt(bk_ui);
+        lv_obj_add_flag(bk_ui->settingmodetime_ampm_bt, LV_OBJ_FLAG_HIDDEN);
+        s_tci_smt = 0; s_edit_buf_smt[0] = '\0';
     }
+}
 
-    if (code == LV_EVENT_SCREEN_LOAD_START) {
-        ui_lang_apply_settingmodetime(bk_ui);
-        /* 진입 시부터 필드 분리 표시(연/월/일, 시/분, AM-PM)를 현재 RTC 값으로 채움 */
-        _init_input_from_rtc(bk_ui);
-        _reset_all_field_colors(bk_ui);
-        _update_ampm_label(bk_ui);
-        return;
-    }
+void settingmodetime_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+    (void)e;
 
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->settingmodetime_title);
-        return;
-    }
+    ui_lang_apply_settingmodetime(bk_ui);
+    /* 진입 시부터 필드 분리 표시(연/월/일, 시/분, AM-PM)를 현재 RTC 값으로 채움 */
+    _init_input_from_rtc(bk_ui);
+    _reset_all_field_colors(bk_ui);
+    _update_ampm_label(bk_ui);
+}
+
+void settingmodetime_loaded_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+    (void)e;
+
+    ui_title_anim(bk_ui->settingmodetime_title);
+}
+
+void settingmodetime_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
 }

@@ -46,7 +46,10 @@ static void _convert_current_temps(int to_fahrenheit)
 void settingmodedegree_backbt_event_cb(lv_event_t *e);
 void settingmodedegree_degree_c_bt_event_cb(lv_event_t *e);
 void settingmodedegree_degree_f_bt_event_cb(lv_event_t *e);
-void settingmodedegree_load_event_cb(lv_event_t *e);
+void settingmodedegree_load_start_event_cb(lv_event_t *e);
+void settingmodedegree_loaded_event_cb(lv_event_t *e);
+void settingmodedegree_unload_start_event_cb(lv_event_t *e);
+void settingmodedegree_unloaded_event_cb(lv_event_t *e);
 
 #define DEGREE_F "\xc2\xb0""F"
 #define DEGREE_C "\xc2\xb0""C"
@@ -62,16 +65,25 @@ static void _update_images(bk_lv_ui_t *bk_ui, int is_f)
     }
 }
 
-void settingmodedegree_load_event_cb(lv_event_t *e)
+void settingmodedegree_loaded_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->settingmodedegree_title);
-        return;
-    }
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+    ui_title_anim(bk_ui->settingmodedegree_title);
+}
 
+void settingmodedegree_unload_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void settingmodedegree_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void settingmodedegree_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     ui_lang_apply_settingmodedegree(bk_ui);
     _update_images(bk_ui, strcmp(settings_get_str("Degree"), DEGREE_F) == 0);
 }

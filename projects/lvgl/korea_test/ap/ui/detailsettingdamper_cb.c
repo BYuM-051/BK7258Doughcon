@@ -82,7 +82,10 @@ void detailsettingdamper_settingbt3_event_cb(lv_event_t *e);
 void detailsettingdamper_settingbt4_event_cb(lv_event_t *e);
 void detailsettingdamper_changebt_event_cb(lv_event_t *e);
 void detailsettingdamper_roller_event_cb(lv_event_t *e);
-void detailsettingdamper_load_event_cb(lv_event_t *e);
+void detailsettingdamper_load_start_event_cb(lv_event_t *e);
+void detailsettingdamper_loaded_event_cb(lv_event_t *e);
+void detailsettingdamper_unload_start_event_cb(lv_event_t *e);
+void detailsettingdamper_unloaded_event_cb(lv_event_t *e);
 
 static void _get_row_objs(bk_lv_ui_t *bk_ui, lv_obj_t *ims[4], lv_obj_t *txts[4])
 {
@@ -315,15 +318,25 @@ void detailsettingdamper_changebt_event_cb(lv_event_t *e)
     uart_comm_trigger_change_setting();
 }
 
-void detailsettingdamper_load_event_cb(lv_event_t *e)
+void detailsettingdamper_loaded_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->detailsettingdamper_title);
-        return;
-    }
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+    ui_title_anim(bk_ui->detailsettingdamper_title);
+}
+
+void detailsettingdamper_unload_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void detailsettingdamper_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void detailsettingdamper_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     uint32_t t0 = lv_tick_get();
     bk_printf(TAG "[PERF] detaildamper load_event start\n");
 

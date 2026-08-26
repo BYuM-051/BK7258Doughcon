@@ -12,7 +12,10 @@
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 extern void automodestart_startbt_event_cb(lv_event_t *e);
-extern void automodestart_load_event_cb(lv_event_t *e);
+extern void automodestart_load_start_event_cb(lv_event_t *e);
+extern void automodestart_loaded_event_cb(lv_event_t *e);
+extern void automodestart_unload_start_event_cb(lv_event_t *e);
+extern void automodestart_unloaded_event_cb(lv_event_t *e);
 
 static void _freeze_gif_ext_draw_cb(lv_event_t *e)
 {
@@ -50,12 +53,20 @@ void init_page_automodestart(bk_lv_ui_t * bk_ui) {
     lv_obj_set_style_bg_color(bk_ui->automodestart, lv_color_hex(0xD9D9D9), 0);
     lv_obj_set_style_bg_opa(bk_ui->automodestart, LV_OPA_COVER, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(bk_ui->automodestart, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->automodestart, automodestart_load_event_cb, LV_EVENT_ALL, NULL);
+    // 원래 LV_EVENT_ALL로 등록되어 있었음
+    lv_obj_add_event_cb(bk_ui->automodestart, automodestart_load_start_event_cb, UI_EVENT_PAGE_SHOW_START, NULL);
+    lv_obj_add_event_cb(bk_ui->automodestart, automodestart_loaded_event_cb, UI_EVENT_PAGE_SHOWN,     NULL);
+    lv_obj_add_event_cb(bk_ui->automodestart, automodestart_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+    lv_obj_add_event_cb(bk_ui->automodestart, automodestart_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN,     NULL);
 #else
     bk_ui->automodestart = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->automodestart, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->automodestart, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->automodestart, automodestart_load_event_cb, LV_EVENT_ALL, NULL);
+    // 원래 LV_EVENT_ALL로 등록되어 있었음
+    lv_obj_add_event_cb(bk_ui->automodestart, automodestart_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->automodestart, automodestart_loaded_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->automodestart, automodestart_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->automodestart, automodestart_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
 #endif /* UI_PRENDERING_ENABLE */
 
     // ImageView: auto_bg

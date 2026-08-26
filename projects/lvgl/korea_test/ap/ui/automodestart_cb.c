@@ -121,7 +121,10 @@ static lv_obj_t *s_ams_ferm2_btm      = NULL;
 static lv_obj_t *s_ams_ferm2_btm_img  = NULL;
 
 void automodestart_startbt_event_cb(lv_event_t *e);
-void automodestart_load_event_cb(lv_event_t *e);
+void automodestart_load_start_event_cb(lv_event_t *e);
+void automodestart_loaded_event_cb(lv_event_t *e);
+void automodestart_unload_start_event_cb(lv_event_t *e);
+void automodestart_unloaded_event_cb(lv_event_t *e);
 
 /* ── GIF 애니메이션 헬퍼 (수동 lv_timer, 33ms/30fps) */
 
@@ -1019,65 +1022,72 @@ void automodestart_lang_invalidate(bk_lv_ui_t *bk_ui)
     s_ams_buf_lang      = -1;
 }
 
-void automodestart_load_event_cb(lv_event_t *e)
+void automodestart_unload_start_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+    (void)e;
+    automodestart_lang_invalidate(bk_ui);
+}
 
-    /* ── SCREEN_UNLOAD_START: 타이머 정지 + static 클립 포인터 초기화 ─ */
-    if (code == LV_EVENT_SCREEN_UNLOAD_START) {
-        automodestart_lang_invalidate(bk_ui);
-        return;
-    }
+/* SCREEN_LOADED: lv_task_handler에서 호출 — 스택 깊이 얕음
+ * PNG 디코딩(_img_ensure_src)이 여기서 안전하게 실행됨.
+ * (SCREEN_LOAD_START는 이벤트 콜백 내부에서 호출 → 스택 오버플로우 위험) */
+void automodestart_loaded_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+    (void)e;
 
-    /* ── SCREEN_LOADED: lv_task_handler에서 호출 — 스택 깊이 얕음 ──────
-     * PNG 디코딩(_img_ensure_src)이 여기서 안전하게 실행됨.
-     * (SCREEN_LOAD_START는 이벤트 콜백 내부에서 호출 → 스택 오버플로우 위험) */
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->automodestart_title);
-        /* 완료 감지 statics 리셋: 이전 운전(day=1→s_end_triggered=true 등) 잔류 방지
-         * auto_mode_start가 이미 true로 설정된 채 로드되면 _refresh_running_ui의
-         * !auto_mode_start 리셋 분기가 실행되지 않으므로 여기서 명시적으로 초기화 */
-        s_ferm2_nonzero    = false;
-        s_end_triggered    = false;
-        s_ferm2_start_tick = 0;
-        s_ferm2_tick_valid = false;
-        s_over_ferm_triggered = false;
-        /* 상태 캐시 초기화 — 매 로드 시 강제 적용 */
-        s_ams_current_mode = -1;
-        s_arc_seen_mode    = -1;
-        s_mode_start_tick  = lv_tick_get();
-        s_last_show_hum = -1;
-        s_last_ui_mode  = -1;
-        s_last_arc_mode = -1;
-        s_last_arc_tick = 0;
-        s_last_pct[0] = s_last_pct[1] = s_last_pct[2] = s_last_pct[3] = -1;
-        s_last_temp_val = 0x7FFFFFFF;
-        s_last_hum_val  = 0x7FFFFFFF;
-        s_last_remain_h = -1;
-        s_last_remain_m = -1;
+    ui_title_anim(bk_ui->automodestart_title);
+    /* 완료 감지 statics 리셋: 이전 운전(day=1→s_end_triggered=true 등) 잔류 방지
+     * auto_mode_start가 이미 true로 설정된 채 로드되면 _refresh_running_ui의
+     * !auto_mode_start 리셋 분기가 실행되지 않으므로 여기서 명시적으로 초기화 */
+    s_ferm2_nonzero    = false;
+    s_end_triggered    = false;
+    s_ferm2_start_tick = 0;
+    s_ferm2_tick_valid = false;
+    s_over_ferm_triggered = false;
+    /* 상태 캐시 초기화 — 매 로드 시 강제 적용 */
+    s_ams_current_mode = -1;
+    s_arc_seen_mode    = -1;
+    s_mode_start_tick  = lv_tick_get();
+    s_last_show_hum = -1;
+    s_last_ui_mode  = -1;
+    s_last_arc_mode = -1;
+    s_last_arc_tick = 0;
+    s_last_pct[0] = s_last_pct[1] = s_last_pct[2] = s_last_pct[3] = -1;
+    s_last_temp_val = 0x7FFFFFFF;
+    s_last_hum_val  = 0x7FFFFFFF;
+    s_last_remain_h = -1;
+    s_last_remain_m = -1;
 #if AUTO_MODE_TEST
-        s_test_mode_tick = lv_tick_get();
-        s_test_op_mode   = OP_MODE_FREEZE;
-        g_device_state.current_op_mode = OP_MODE_FREEZE;
-        bk_printf(TAG "[TEST] automodestart loaded, timer reset\n");
+    s_test_mode_tick = lv_tick_get();
+    s_test_op_mode   = OP_MODE_FREEZE;
+    g_device_state.current_op_mode = OP_MODE_FREEZE;
+    bk_printf(TAG "[TEST] automodestart loaded, timer reset\n");
 #endif
-        _refresh_running_ui(bk_ui);
-        if (s_ui_timer) { lv_timer_delete(s_ui_timer); s_ui_timer = NULL; }
-        s_ui_timer = lv_timer_create(_ui_timer_cb, 1000, NULL);
-        return;
-    }
+    _refresh_running_ui(bk_ui);
+    if (s_ui_timer) { lv_timer_delete(s_ui_timer); s_ui_timer = NULL; }
+    s_ui_timer = lv_timer_create(_ui_timer_cb, 1000, NULL);
+}
 
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+void automodestart_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
 
-    /* ── SCREEN_LOAD_START: 레이블 갱신 + 클립 컨테이너 생성 ─────────
-     * PNG 디코딩 없음 — fermentation 이미지는 deferred로 처리됨. */
+/* SCREEN_LOAD_START: 레이블 갱신 + 클립 컨테이너 생성 — PNG 디코딩 없음
+ * (fermentation 이미지는 deferred로 처리됨) */
+void automodestart_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+    (void)e;
 
     /* 원본 image 객체 영구 숨김 — canvas가 대체 */
     lv_obj_add_flag(bk_ui->automodestart_AutoFreezeIm,        LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(bk_ui->automodestart_AutoDefrostIm,       LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(bk_ui->automodestart_AutoFermentation1Im, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(bk_ui->automodestart_AutoFermentation2Im, LV_OBJ_FLAG_HIDDEN);
+
 
     /* Freeze / Defrost / Fermentation — settings는 C, F 모드이면 C→F 변환 표시 */
     {

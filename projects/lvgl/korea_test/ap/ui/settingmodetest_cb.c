@@ -254,28 +254,48 @@ void settingmodetest_test_error_check_bt_event_cb(lv_event_t *e)
     popuperror_toggle(bk_ui);
 }
 
-void settingmodetest_load_event_cb(lv_event_t *e)
+void settingmodetest_unload_start_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
+    (void)e;
+
+    _stop_test_timer();
+
+    /* testmode_box canvas는 이 화면을 보는 동안만 필요 — 나갈 때 반납.
+     * settingmode로 복귀하면 그 화면의 SCREEN_LOADED가 다시 preload한다. */
+    settingmodetest_canvas_free();
+}
+
+void settingmodetest_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+    return;
+}
+
+void settingmodetest_loaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
 
-    if (code == LV_EVENT_SCREEN_UNLOAD_START) {
-        _stop_test_timer();
-        /* testmode_box canvas는 이 화면을 보는 동안만 필요 — 나갈 때 반납.
-         * settingmode로 복귀하면 그 화면의 SCREEN_LOADED가 다시 preload한다. */
-        settingmodetest_canvas_free();
-        return;
-    }
+    ui_title_anim(bk_ui->settingmodetest_title);
 
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->settingmodetest_title);
-        uint32_t tb = lv_tick_get();
-        _restore_button_imgs(bk_ui);        /* 화면 표시 후 버튼 9개 일괄 로드 */
-        bk_printf(TAG "[PERF] settingmodetest btn imgs (LOADED) +%lu ms\n", (unsigned long)lv_tick_elaps(tb));
-        return;
-    }
+    uint32_t tb = lv_tick_get();
 
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+    /* 화면 표시 후 버튼 9개 일괄 로드 */
+    _restore_button_imgs(bk_ui);
+
+    bk_printf(
+        TAG "[PERF] settingmodetest btn imgs (LOADED) +%lu ms\n",
+        (unsigned long)lv_tick_elaps(tb)
+    );
+}
+
+
+void settingmodetest_load_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
 
     /* keep-alive라 오브젝트는 재사용되지만 canvas는 나갈 때마다 free되므로,
      * 매 진입마다 canvas를 보장하고 imageview4 src를 다시 맞춘다
@@ -286,10 +306,19 @@ void settingmodetest_load_event_cb(lv_event_t *e)
     bk_printf(TAG "[PERF] settingmodetest load_event start\n");
 
     /* 재진입 시 모든 버튼 OFF 상태로 초기화 */
-    memset(g_device_state.savetesttest, 0, sizeof(g_device_state.savetesttest));
+    memset(
+        g_device_state.savetesttest,
+        0,
+        sizeof(g_device_state.savetesttest)
+    );
 
-    ui_lang_apply_settingmodetest(bk_ui);   /* loads testmode_box.jpg, title, exit_bt */
-    bk_printf(TAG "[PERF]   ui_lang_apply +%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+    /* loads testmode_box.jpg, title, exit_bt */
+    ui_lang_apply_settingmodetest(bk_ui);
+
+    bk_printf(
+        TAG "[PERF]   ui_lang_apply +%lu ms\n",
+        (unsigned long)lv_tick_elaps(t0)
+    );
 
     /* clear result labels */
     lv_label_set_text(bk_ui->settingmodetest_TestComp,              "");
@@ -307,11 +336,23 @@ void settingmodetest_load_event_cb(lv_event_t *e)
     lv_label_set_text(bk_ui->settingmodetest_TestHumidity,          "");
     lv_label_set_text(bk_ui->settingmodetest_TestErrorCode,         "");
 
-    /* 화면 진입 즉시 0x50 HW_TEST 요청 → UART 모듈 폴링 주기(~1200ms) 대기 없음 */
+    /* 화면 진입 즉시 0x50 HW_TEST 요청
+     * → UART 모듈 폴링 주기(~1200ms) 대기 없음 */
     uart_comm_trigger_hw_test();
 
     _stop_test_timer();
-    s_test_timer = lv_timer_create(_update_test_labels, 200, NULL);
-    lv_timer_ready(s_test_timer);   /* 다음 lv_task_handler에서 즉시 1회 발화 */
-    bk_printf(TAG "[PERF] settingmodetest load_event end total=%lu ms\n", (unsigned long)lv_tick_elaps(t0));
+
+    s_test_timer = lv_timer_create(
+        _update_test_labels,
+        200,
+        NULL
+    );
+
+    /* 다음 lv_task_handler에서 즉시 1회 발화 */
+    lv_timer_ready(s_test_timer);
+
+    bk_printf(
+        TAG "[PERF] settingmodetest load_event end total=%lu ms\n",
+        (unsigned long)lv_tick_elaps(t0)
+    );
 }

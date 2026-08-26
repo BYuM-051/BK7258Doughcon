@@ -74,7 +74,10 @@ void detailsettinghumidity_settingbt2_event_cb(lv_event_t *e);
 void detailsettinghumidity_settingbt3_event_cb(lv_event_t *e);
 void detailsettinghumidity_changebt_event_cb(lv_event_t *e);
 void detailsettinghumidity_roller_event_cb(lv_event_t *e);
-void detailsettinghumidity_load_event_cb(lv_event_t *e);
+void detailsettinghumidity_load_start_event_cb(lv_event_t *e);
+void detailsettinghumidity_loaded_event_cb(lv_event_t *e);
+void detailsettinghumidity_unload_start_event_cb(lv_event_t *e);
+void detailsettinghumidity_unloaded_event_cb(lv_event_t *e);
 
 static void _get_row_objs(bk_lv_ui_t *bk_ui, lv_obj_t *ims[3], lv_obj_t *txts[3])
 {
@@ -233,15 +236,25 @@ void detailsettinghumidity_changebt_event_cb(lv_event_t *e)
     uart_comm_trigger_change_setting();
 }
 
-void detailsettinghumidity_load_event_cb(lv_event_t *e)
+void detailsettinghumidity_loaded_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->detailsettinghumidity_title);
-        return;
-    }
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+    ui_title_anim(bk_ui->detailsettinghumidity_title);
+}
+
+void detailsettinghumidity_unload_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void detailsettinghumidity_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void detailsettinghumidity_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     uint32_t t0 = lv_tick_get();
     bk_printf(TAG "[PERF] detailhumidity load_event start\n");
 

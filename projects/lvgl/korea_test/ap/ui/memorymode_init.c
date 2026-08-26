@@ -23,7 +23,10 @@ extern void memorymode_memory3bt_event_cb(lv_event_t *e);
 extern void memorymode_memoryrightbt_event_cb(lv_event_t *e);
 extern void memorymode_okbt_event_cb(lv_event_t *e);
 extern void memorymode_deletebt_event_cb(lv_event_t *e);
-extern void memorymode_load_event_cb(lv_event_t *e);
+extern void memorymode_load_start_event_cb(lv_event_t *e);
+extern void memorymode_loaded_event_cb(lv_event_t *e);
+extern void memorymode_unload_start_event_cb(lv_event_t *e);
+extern void memorymode_unloaded_event_cb(lv_event_t *e);
 
 void destroy_page_memorymode(bk_lv_ui_t *bk_ui)
 {
@@ -52,12 +55,20 @@ void init_page_memorymode(bk_lv_ui_t * bk_ui) {
     lv_obj_set_pos(bk_ui->memorymode, 0, 0);
     lv_obj_set_style_radius(bk_ui->memorymode, 0, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(bk_ui->memorymode, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->memorymode, memorymode_load_event_cb, LV_EVENT_ALL, NULL);
+    // 원래 LV_EVENT_ALL로 등록되어 있었음
+    lv_obj_add_event_cb(bk_ui->memorymode, memorymode_load_start_event_cb, UI_EVENT_PAGE_SHOW_START, NULL);
+    lv_obj_add_event_cb(bk_ui->memorymode, memorymode_loaded_event_cb, UI_EVENT_PAGE_SHOWN,     NULL);
+    lv_obj_add_event_cb(bk_ui->memorymode, memorymode_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+    lv_obj_add_event_cb(bk_ui->memorymode, memorymode_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN,     NULL);
 #else
     bk_ui->memorymode = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->memorymode, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->memorymode, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->memorymode, memorymode_load_event_cb, LV_EVENT_ALL, NULL);
+    // 원래 LV_EVENT_ALL로 등록되어 있었음
+    lv_obj_add_event_cb(bk_ui->memorymode, memorymode_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->memorymode, memorymode_loaded_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->memorymode, memorymode_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->memorymode, memorymode_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
 #endif /* UI_PRENDERING_ENABLE */
     bk_ui->memorymode_bg = lv_image_create(bk_ui->memorymode);
     /* bg.jpg 대신 단색(0xd9d9d9)으로 채움 */

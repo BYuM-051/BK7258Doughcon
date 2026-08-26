@@ -221,57 +221,91 @@ void settingmode_backbt_event_cb(lv_event_t *e)
     lv_scr_load(bk_ui->main);
 }
 
-void settingmode_load_event_cb(lv_event_t *e)
+void settingmode_load_start_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
+    (void)e;
+
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
 
-    if (code == LV_EVENT_SCREEN_UNLOAD_START) {
-        /* Stop all prewarming — dummies on lv_layer_top() must not change
-         * images while another screen is active (dirty-region corruption).
-         * Also reset indices so next visit re-prewarms (LRU may have evicted). */
-        if (s_tm_bg_timer) { lv_timer_delete(s_tm_bg_timer); s_tm_bg_timer = NULL; }
-        if (s_tm_bg_dummy) { lv_obj_del(s_tm_bg_dummy);      s_tm_bg_dummy = NULL; }
-        s_tm_bg_idx = 0;
-        _pp_pw_cancel();
-        /* 팝업이 열린 채 뒤로가기 시 imageview1->src가 canvas->draw_buf를 참조중.
-         * canvas_free() 전에 팝업을 먼저 닫아야 dangling pointer 크래시 방지.
-         *
-         * UI_POPUPPASSWORD_COMBINED_BG_ENABLE=1일 때 팝업은 독립 화면이라
-         * init_page_popuppassword()의 lv_scr_load()가 지금 이 SCREEN_UNLOAD_START를
-         * 동기적으로 유발한 것일 수 있다(settingmode를 "완전히 떠난" 게 아니라
-         * "팝업을 여는 중"). popuppassword_is_screen_opening()으로 이 경우를
-         * 걸러내지 않으면, 방금 만든 팝업을 그 자리에서 바로 파괴해버리게 된다. */
-#if UI_POPUPPASSWORD_COMBINED_BG_ENABLE
-        if (!popuppassword_is_screen_opening()) {
+    ui_lang_apply_settingmode(bk_ui);
+}
+
+void settingmode_loaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+
+    ui_title_anim(bk_ui->settingmode_title);
+
+    /* password_popup.png를 canvas 영구 버퍼에 1회 decode
+     * (lv_image_cache_drop과 무관 — 팝업 열릴 때 즉시 렌더) */
+    popuppassword_bg_preload();
+
+#if UI_POPUPPASSWORD_KEYPAD_COMBINED_ENABLE
+    /* 키패드 12장을 스프라이트 canvas에 1회 decode */
+    popuppassword_keypad_preload();
 #endif
-        if (bk_ui->popuppassword && lv_obj_is_valid(bk_ui->popuppassword))
-            destroy_page_popuppassword(bk_ui);
+
+    /* testmode_box.jpg를 전용 canvas에 1회 decode
+     * — 고장진단 진입 시 즉시 렌더 */
+    settingmodetest_bg_preload();
+}
+
+void settingmode_unload_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+
+    /* Stop all prewarming — dummies on lv_layer_top() must not change
+     * images while another screen is active (dirty-region corruption).
+     * Also reset indices so next visit re-prewarms (LRU may have evicted). */
+    if (s_tm_bg_timer) {
+        lv_timer_delete(s_tm_bg_timer);
+        s_tm_bg_timer = NULL;
+    }
+
+    if (s_tm_bg_dummy) {
+        lv_obj_del(s_tm_bg_dummy);
+        s_tm_bg_dummy = NULL;
+    }
+
+    s_tm_bg_idx = 0;
+    _pp_pw_cancel();
+
+    /* 팝업이 열린 채 뒤로가기 시 imageview1->src가 canvas->draw_buf를 참조중.
+     * canvas_free() 전에 팝업을 먼저 닫아야 dangling pointer 크래시 방지.
+     *
+     * UI_POPUPPASSWORD_COMBINED_BG_ENABLE=1일 때 팝업은 독립 화면이라
+     * init_page_popuppassword()의 lv_scr_load()가 지금 이 SCREEN_UNLOAD_START를
+     * 동기적으로 유발한 것일 수 있다(settingmode를 "완전히 떠난" 게 아니라
+     * "팝업을 여는 중"). popuppassword_is_screen_opening()으로 이 경우를
+     * 걸러내지 않으면, 방금 만든 팝업을 그 자리에서 바로 파괴해버리게 된다. */
+#if UI_POPUPPASSWORD_COMBINED_BG_ENABLE
+    if (!popuppassword_is_screen_opening()) {
+#endif
+
+    if (bk_ui->popuppassword && lv_obj_is_valid(bk_ui->popuppassword)) {
+        destroy_page_popuppassword(bk_ui);
+    }
+
 #if !UI_POPUPPASSWORD_CANVAS_PERSIST_ENABLE
-        popuppassword_canvas_free();  /* 602 KB 반납 — 재진입 시 SCREEN_LOADED에서 재할당 */
+    /* 602 KB 반납 — 재진입 시 SCREEN_LOADED에서 재할당 */
+    popuppassword_canvas_free();
 #endif
+
 #if UI_POPUPPASSWORD_COMBINED_BG_ENABLE
-        }
+    }
 #endif
+
 #if UI_POPUPPASSWORD_KEYPAD_COMBINED_ENABLE
-        popuppassword_keypad_canvas_free();  /* 키패드 스프라이트 canvas 반납 */
+    /* 키패드 스프라이트 canvas 반납 */
+    popuppassword_keypad_canvas_free();
 #endif
-        return;
-    }
-    if (code == LV_EVENT_SCREEN_LOAD_START) {
-        ui_lang_apply_settingmode(bk_ui);
-        return;
-    }
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->settingmode_title);
-        /* password_popup.png를 canvas 영구 버퍼에 1회 decode
-         * (lv_image_cache_drop과 무관 — 팝업 열릴 때 즉시 렌더) */
-        popuppassword_bg_preload();
-#if UI_POPUPPASSWORD_KEYPAD_COMBINED_ENABLE
-        popuppassword_keypad_preload();  /* 키패드 12장을 스프라이트 canvas에 1회 decode */
-#endif
-        /* testmode_box.jpg를 전용 canvas에 1회 decode — 고장진단 진입 시 즉시 렌더 */
-        settingmodetest_bg_preload();
-        return;
-    }
+}
+
+void settingmode_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
 }

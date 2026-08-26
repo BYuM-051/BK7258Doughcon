@@ -21,7 +21,10 @@ void settingmodemanual_setting_manual_manualbt_event_cb(lv_event_t *e);
 void settingmodemanual_setting_manual_drybt_event_cb(lv_event_t *e);
 void settingmodemanual_setting_manual_memorybt_event_cb(lv_event_t *e);
 void settingmodemanual_setting_manual_settingbt_event_cb(lv_event_t *e);
-void settingmodemanual_load_event_cb(lv_event_t *e);
+void settingmodemanual_load_start_event_cb(lv_event_t *e);
+void settingmodemanual_loaded_event_cb(lv_event_t *e);
+void settingmodemanual_unload_start_event_cb(lv_event_t *e);
+void settingmodemanual_unloaded_event_cb(lv_event_t *e);
 
 /* Show selection box with title and numeric value (1-5).
  * Font lv_font_scdream_regular_32 is ASCII-only: use English for all languages. */
@@ -103,16 +106,25 @@ void settingmodemanual_setting_manual_settingbt_event_cb(lv_event_t *e)
     _select_mode(bk_ui, "Function Setting", "5");  /* 기능설정 */
 }
 
-void settingmodemanual_load_event_cb(lv_event_t *e)
+void settingmodemanual_loaded_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->settingmodemanual_title);
-        return;
-    }
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+    ui_title_anim(bk_ui->settingmodemanual_title);
+}
 
+void settingmodemanual_unload_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void settingmodemanual_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void settingmodemanual_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     ui_lang_apply_settingmodemanual(bk_ui);
 
     /* Hide selection box until user taps a mode button */

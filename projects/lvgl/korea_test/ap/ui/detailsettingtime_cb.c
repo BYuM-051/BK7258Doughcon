@@ -83,7 +83,10 @@ void detailsettingtime_settingbt4_event_cb(lv_event_t *e);
 void detailsettingtime_settingbt5_event_cb(lv_event_t *e);
 void detailsettingtime_changebt_event_cb(lv_event_t *e);
 void detailsettingtime_roller_event_cb(lv_event_t *e);
-void detailsettingtime_load_event_cb(lv_event_t *e);
+void detailsettingtime_load_start_event_cb(lv_event_t *e);
+void detailsettingtime_loaded_event_cb(lv_event_t *e);
+void detailsettingtime_unload_start_event_cb(lv_event_t *e);
+void detailsettingtime_unloaded_event_cb(lv_event_t *e);
 
 /* Water array index: {1,2,...,9,0} — "0" is at index 9 */
 static int _water_idx(char c)
@@ -509,15 +512,25 @@ void detailsettingtime_changebt_event_cb(lv_event_t *e)
     uart_comm_trigger_change_setting();
 }
 
-void detailsettingtime_load_event_cb(lv_event_t *e)
+void detailsettingtime_loaded_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->detailsettingtime_title);
-        return;
-    }
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+    ui_title_anim(bk_ui->detailsettingtime_title);
+}
+
+void detailsettingtime_unload_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void detailsettingtime_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void detailsettingtime_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     uint32_t t0 = lv_tick_get();
     bk_printf(TAG "[PERF] detailtime load_event start\n");
 

@@ -36,7 +36,10 @@ void memorymode_memory3bt_event_cb(lv_event_t *e);
 void memorymode_memoryrightbt_event_cb(lv_event_t *e);
 void memorymode_okbt_event_cb(lv_event_t *e);
 void memorymode_deletebt_event_cb(lv_event_t *e);
-void memorymode_load_event_cb(lv_event_t *e);
+void memorymode_load_start_event_cb(lv_event_t *e);
+void memorymode_loaded_event_cb(lv_event_t *e);
+void memorymode_unload_start_event_cb(lv_event_t *e);
+void memorymode_unloaded_event_cb(lv_event_t *e);
 
 int memorymode_get_selected_slot(void)
 {
@@ -512,45 +515,52 @@ void memorymode_clear_checking(void)
     s_checking = 0;
 }
 
-void memorymode_load_event_cb(lv_event_t *e)
+void memorymode_loaded_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
 
-    /* ── SCREEN_LOADED: 이미지 로드 + 화면 갱신 (lv_task_handler, 얕은 스택) ── */
-    if (code == LV_EVENT_SCREEN_LOADED) {
-        ui_title_anim(bk_ui->memorymode_title);
-        /* Ensure deferred static images — 0ms cache hit if prewarm completed */
-        _img_ensure_src(bk_ui->memorymode_title);
-        _img_ensure_src(bk_ui->memorymode_imageview4);   /* memory_title_line */
-        _img_ensure_src(bk_ui->memorymode_memorybox0);
-        _img_ensure_src(bk_ui->memorymode_imageview81);  /* memory_left */
-        _img_ensure_src(bk_ui->memorymode_imageview89);  /* memory_right */
-        _img_ensure_src(bk_ui->memorymode_imageview92);  /* ok */
-        _img_ensure_src(bk_ui->memorymode_deleteim);
-        /* 자동설정(불러오기/저장)에서 진입한 메모리모드에서는 삭제 버튼 숨김 —
-         * 메모리모드 메뉴로 직접 들어왔을 때(NONE)만 삭제 가능 */
-        if (g_device_state.memory_mode_check == MEMORY_MODE_NONE) {
-            lv_obj_clear_flag(bk_ui->memorymode_deleteim, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_clear_flag(bk_ui->memorymode_deletebt, LV_OBJ_FLAG_HIDDEN);
-        } else {
-            lv_obj_add_flag(bk_ui->memorymode_deleteim, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(bk_ui->memorymode_deletebt, LV_OBJ_FLAG_HIDDEN);
-        }
-        /* memorybox1-3: init에서 deferred 없이 생성 — 첫 로드 시 설정 (cache hit) */
-        if (!lv_image_get_src(bk_ui->memorymode_memorybox1)) {
-            _img_set_src_timed(bk_ui->memorymode_memorybox1, "/images/memory_box.png");
-            _img_set_src_timed(bk_ui->memorymode_memorybox2, "/images/memory_box.png");
-            _img_set_src_timed(bk_ui->memorymode_memorybox3, "/images/memory_box.png");
-        }
-        _refresh_display(bk_ui);
-        ui_lang_apply_memorymode(bk_ui);
-        return;
+    ui_title_anim(bk_ui->memorymode_title);
+    /* Ensure deferred static images — 0ms cache hit if prewarm completed */
+    _img_ensure_src(bk_ui->memorymode_title);
+    _img_ensure_src(bk_ui->memorymode_imageview4);   /* memory_title_line */
+    _img_ensure_src(bk_ui->memorymode_memorybox0);
+    _img_ensure_src(bk_ui->memorymode_imageview81);  /* memory_left */
+    _img_ensure_src(bk_ui->memorymode_imageview89);  /* memory_right */
+    _img_ensure_src(bk_ui->memorymode_imageview92);  /* ok */
+    _img_ensure_src(bk_ui->memorymode_deleteim);
+    /* 자동설정(불러오기/저장)에서 진입한 메모리모드에서는 삭제 버튼 숨김 —
+     * 메모리모드 메뉴로 직접 들어왔을 때(NONE)만 삭제 가능 */
+    if (g_device_state.memory_mode_check == MEMORY_MODE_NONE) {
+        lv_obj_clear_flag(bk_ui->memorymode_deleteim, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(bk_ui->memorymode_deletebt, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_add_flag(bk_ui->memorymode_deleteim, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(bk_ui->memorymode_deletebt, LV_OBJ_FLAG_HIDDEN);
     }
+    /* memorybox1-3: init에서 deferred 없이 생성 — 첫 로드 시 설정 (cache hit) */
+    if (!lv_image_get_src(bk_ui->memorymode_memorybox1)) {
+        _img_set_src_timed(bk_ui->memorymode_memorybox1, "/images/memory_box.png");
+        _img_set_src_timed(bk_ui->memorymode_memorybox2, "/images/memory_box.png");
+        _img_set_src_timed(bk_ui->memorymode_memorybox3, "/images/memory_box.png");
+    }
+    _refresh_display(bk_ui);
+    ui_lang_apply_memorymode(bk_ui);
+}
 
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+void memorymode_unload_start_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
 
-    /* ── SCREEN_LOAD_START: 오버레이 정리 + 상태 초기화 ── */
+void memorymode_unloaded_event_cb(lv_event_t *e)
+{
+    (void)e;
+}
+
+void memorymode_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+
     /* 잔재 오버레이 제거 (오버레이는 memorymode의 자식 — 화면 전환 없음) */
     destroy_page_popupdelete(bk_ui);
 

@@ -10,10 +10,11 @@
 #include "preRenderer.h"
 
 #define TAG "[autodrymode_init.c] "
-// #define bk_printf(fmt, ...) do {} while(0) // disable printf
-
+#include "preRenderer.h"
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
+
 extern void autodrymode_backbt_event_cb(lv_event_t *e);
 extern void autodrymode_auto_dry_temp_bt_event_cb(lv_event_t *e);
 extern void autodrymode_auto_dry_humidity_bt_event_cb(lv_event_t *e);
@@ -22,7 +23,10 @@ extern void autodrymode_auto_dry_min_bt_event_cb(lv_event_t *e);
 extern void autodrymode_auto_dry_start_event_cb(lv_event_t *e);
 extern void autodrymode_keypad_event_cb(lv_event_t *e);
 extern void autodrymode_keypadhide_event_cb(lv_event_t *e);
-extern void autodrymode_load_event_cb(lv_event_t *e);
+extern void autodrymode_load_start_event_cb(lv_event_t *e);
+extern void autodrymode_loaded_event_cb(lv_event_t *e);
+extern void autodrymode_unload_start_event_cb(lv_event_t *e);
+extern void autodrymode_unloaded_event_cb(lv_event_t *e);
 
 void destroy_page_autodrymode(bk_lv_ui_t *bk_ui)
 {
@@ -36,7 +40,11 @@ void destroy_page_autodrymode(bk_lv_ui_t *bk_ui)
 }
 
 void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
+    uint32_t _t_start = lv_tick_get();
+    uint32_t elapsed;
+    bk_printf(TAG "[IMGTIME] ===== autodrymode init start =====\n");
     if (bk_ui->autodrymode != NULL && lv_obj_is_valid(bk_ui->autodrymode)) {
+        bk_printf(TAG "[SCREEN] autodrymode is already valid, destroying and re-creating\n");
         destroy_page_autodrymode(bk_ui);
     }
 
@@ -57,27 +65,33 @@ void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
 
     ui_lang_reset_autodrymode_cache();
 
+    elapsed = lv_tick_elaps(_t_start);
+    bk_printf(TAG "[IMGTIME] ===== clear autodrymode child pointers done ===== %lu ms\n", elapsed);
+
 #if UI_PRENDERING_ENABLE
     bk_ui->autodrymode = lv_obj_create(preRenderRoot);
     lv_obj_remove_style_all(bk_ui->autodrymode);
     lv_obj_set_size(bk_ui->autodrymode, 1024, 600);
-    lv_obj_set_scrollbar_mode(bk_ui->autodrymode, LV_SCROLLBAR_MODE_OFF);
-    // TODO : 이 아래 이새끼도 loaded event구만.
-    lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_load_event_cb, LV_EVENT_ALL, NULL);
-    // bk_ui->autodrymode_bg = lv_image_create(bk_ui->autodrymode);
-    // _img_set_src_timed(bk_ui->autodrymode_bg, "./images/auto_dry_bg.jpg");
-    lv_obj_set_scrollbar_mode(bk_ui->autodrymode, LV_SCROLLBAR_MODE_OFF);
-    // lv_obj_set_style_bg_color(bk_ui->autodrymode, lv_color_hex(0x4DA212), 0);
-    // lv_obj_set_pos(bk_ui->autodrymode_bg, 0, 0);
-    lv_obj_set_style_bg_color(bk_ui->autodrymode, lv_color_hex(0x49b206), 0);
     lv_obj_set_style_radius(bk_ui->autodrymode, 0, LV_PART_MAIN);
-    lv_obj_set_style_border_width(bk_ui->autodrymode, 0, LV_PART_MAIN);
+    lv_obj_set_pos(bk_ui->autodrymode, 0, 0);
+    lv_obj_set_scrollbar_mode(bk_ui->autodrymode, LV_SCROLLBAR_MODE_OFF);
+
+    lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_load_start_event_cb, UI_EVENT_PAGE_SHOW_START, NULL);
+    lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_loaded_event_cb, UI_EVENT_PAGE_SHOWN, NULL);
+    lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+    lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN, NULL);
+
+    lv_obj_set_style_bg_color(bk_ui->autodrymode, lv_color_hex(0x49b206), 0);
     lv_obj_set_style_bg_opa(bk_ui->autodrymode, LV_OPA_COVER, LV_PART_MAIN);
 #else
     bk_ui->autodrymode = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->autodrymode, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->autodrymode, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_load_event_cb, LV_EVENT_ALL, NULL);
+    // 원래 LV_EVENT_ALL로 등록되어 있었음
+    lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_loaded_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
+    lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
     // bk_ui->autodrymode_bg = lv_image_create(bk_ui->autodrymode);
     // _img_set_src_timed(bk_ui->autodrymode_bg, "./images/auto_dry_bg.jpg");
     lv_obj_set_scrollbar_mode(bk_ui->autodrymode, LV_SCROLLBAR_MODE_OFF);
@@ -86,6 +100,8 @@ void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
     lv_obj_set_style_bg_color(bk_ui->autodrymode, lv_color_hex(0x49b206), 0);
 #endif /* UI_PRENDERING_ENABLE */
 
+    elapsed = lv_tick_elaps(_t_start);
+    bk_printf(TAG "[IMGTIME] ===== autodrymode create/init done ===== %lu ms\n", elapsed);
     // ImageView: title
     bk_ui->autodrymode_title = lv_image_create(bk_ui->autodrymode);
     _img_set_src_timed(bk_ui->autodrymode_title, "/images/autodrymode_title.png");
@@ -289,5 +305,5 @@ void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
     lv_obj_set_pos(bk_ui->autodrymode_blackout, 841, 384);
     // lv_obj_set_size(bk_ui->autodrymode_blackout, 0, 0);
     // init_keypad_group
-
+    bk_printf(TAG "[IMGTIME] ===== autodrymode init total: %lu ms =====\n", lv_tick_elaps(_t_start));
 }
