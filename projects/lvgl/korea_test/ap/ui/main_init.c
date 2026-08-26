@@ -24,7 +24,10 @@ extern void main_manualmode_event_cb(lv_event_t *e);
 extern void main_autodrymode_event_cb(lv_event_t *e);
 extern void main_memorymode_event_cb(lv_event_t *e);
 extern void main_settingmode_event_cb(lv_event_t *e);
-extern void main_load_event_cb(lv_event_t *e);
+extern void main_load_start_event_cb(lv_event_t *e);
+extern void main_loaded_event_cb(lv_event_t *e);
+extern void main_unload_start_event_cb(lv_event_t *e);
+extern void main_unloaded_event_cb(lv_event_t *e);
 
 // void destroy_page_main(bk_lv_ui_t *bk_ui)
 // {
@@ -72,17 +75,18 @@ void init_page_main(bk_lv_ui_t * bk_ui)
     lv_obj_set_pos(bk_ui->main, 0, 0);
     lv_obj_set_style_bg_opa(bk_ui->main, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(bk_ui->main, LV_SCROLLBAR_MODE_OFF);
-    // TODO : lv_event_screen_*이 더이상 동작하지 않을 예정. main은 screen이 아니니까.
-    lv_obj_add_event_cb(bk_ui->main, main_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
-    lv_obj_add_event_cb(bk_ui->main, main_load_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
-    lv_obj_add_event_cb(bk_ui->main, main_load_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->main, main_load_start_event_cb,   UI_EVENT_PAGE_SHOW_START,  NULL);
+    lv_obj_add_event_cb(bk_ui->main, main_loaded_event_cb,       UI_EVENT_PAGE_SHOWN,       NULL);
+    lv_obj_add_event_cb(bk_ui->main, main_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START,  NULL);
+    lv_obj_add_event_cb(bk_ui->main, main_unloaded_event_cb,     UI_EVENT_PAGE_HIDDEN,      NULL);
 #else
     bk_ui->main = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->main, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->main, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->main, main_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
-    lv_obj_add_event_cb(bk_ui->main, main_load_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
-    lv_obj_add_event_cb(bk_ui->main, main_load_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->main, main_load_start_event_cb,   LV_EVENT_SCREEN_LOAD_START,   NULL);
+    lv_obj_add_event_cb(bk_ui->main, main_loaded_event_cb,       LV_EVENT_SCREEN_LOADED,       NULL);
+    lv_obj_add_event_cb(bk_ui->main, main_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->main, main_unloaded_event_cb,     LV_EVENT_SCREEN_UNLOADED,     NULL);
 #endif
     bk_ui->main_bg = lv_image_create(bk_ui->main);
     
