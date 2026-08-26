@@ -29,8 +29,10 @@
 #include "lv_vendor.h"
 #include "ui_lang.h"
 
+#include "preRenderer.h"
+
 #define TAG "[beken_ui.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 bk_lv_ui_t bk_lv_tool_ui = {0};
 lv_obj_t *preRenderRoot = NULL; // renderer root 생명주기를 beken_ui.c에서 관리하도록 변경. preRenderer.c에서는 extern으로 선언만 한다.
@@ -88,6 +90,13 @@ static beken_thread_t s_flash_thread = NULL;
  * 기존 화면별 prewarm(공유 캐시, evict 가능)만으로 커버한다. */
 static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
 {
+#if 1 // warm-up 구현을 생명주기 관리자가 알아서 할 예정임 여기는 그런거 없다.
+    #define UI_EVENT_BOOT_WARMUP_EVENT UI_EVENT_PAGE_SHOWN
+    init_page_main(bk_ui);
+    lv_obj_send_event(bk_ui->main, UI_EVENT_BOOT_WARMUP_EVENT, NULL);
+    lv_obj_move_to_index(bk_ui->main, -1);
+    ui_page_change(bk_ui->main);
+#else
     uint32_t t0 = lv_tick_get();
     uint32_t ts;
 
@@ -120,17 +129,18 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
     lv_refr_now(NULL);
     bk_printf(TAG "[BOOT] warmup automode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
-    ts = lv_tick_get();
-    init_page_manualmode(bk_ui);
-    lv_obj_move_to_index(bk_ui->manualmode, -1);
-    lv_refr_now(NULL);
-    bk_printf(TAG "[BOOT] warmup manualmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+    // NOTE : 이부분은 내가 한거 -BYuM 근데 어차피 얘 호출 안 할거임. preWarm 생명주기는 다른애가 관리할 예정
+    // ts = lv_tick_get();
+    // init_page_manualmode(bk_ui);
+    // lv_obj_move_to_index(bk_ui->manualmode, -1);
+    // lv_refr_now(NULL);
+    // bk_printf(TAG "[BOOT] warmup manualmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
-    ts = lv_tick_get();
-    init_page_autodrymode(bk_ui);
-    lv_obj_move_to_index(bk_ui->autodrymode, -1);
-    lv_refr_now(NULL);
-    bk_printf(TAG "[BOOT] warmup autodrymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+    // ts = lv_tick_get();
+    // init_page_autodrymode(bk_ui);
+    // lv_obj_move_to_index(bk_ui->autodrymode, -1);
+    // lv_refr_now(NULL);
+    // bk_printf(TAG "[BOOT] warmup autodrymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
     /* main으로 최종 전환 — automode 오브젝트는 destroy하지 않고 그대로 둠:
      * 실제 진입 시 재생성 없이 재사용된다. */
@@ -141,11 +151,13 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
     lv_refr_now(NULL);
 
     bk_printf(TAG "[BOOT] warmup total: %lu ms\n", (unsigned long)lv_tick_elaps(t0));
+#endif /* 1 // warm-up 구현을 생명주기 관리자가 알아서 할 예정임 여기는 그런거 없다. */
 }
 #endif /* UI_BOOT_WARMUP_ENABLE */
 
 static void _uart_comm_task(beken_thread_arg_t arg)
 {
+    bk_printf(TAG "[BOOT] _uart_comm_task() started\n");
     (void)arg;
     uint32_t _boot_t;
 
@@ -181,19 +193,21 @@ static void _uart_comm_task(beken_thread_arg_t arg)
      * 전혀 늘지 않고 crash도 동일하게 재현됨 — LFS_PSRAM_ADDR 영역은 heap과
      * 별도로 정적 예약된 주소범위라 복사를 생략해도 힙에 반환되지 않는 것으로
      * 보임. 속도만 느려지므로 원복.) (나는 그렇게 생각 안합니다 :/) */
-    bk_printf(TAG "[BOOT] VFS copy flash->PSRAM start\n");
     lv_vendor_disp_lock();
+    bk_printf(TAG "[BOOT] VFS copy flash->PSRAM start\n");
     _boot_t = lv_tick_get();
     lvgl_vfs_copy_and_remount_psram();
     bk_printf(TAG "[BOOT] VFS copy+remount: %lu ms\n", lv_tick_elaps(_boot_t));
-#else
-    lv_vendor_disp_lock();
+    lv_vendor_disp_unlock();
 #endif /*UI_LFS_PSRAM_CACHE_ENABLE*/
 
     /* Phase 3: UI 초기화 (PSRAM VFS 기반) */
+    lv_vendor_disp_lock();
     _boot_t = lv_tick_get();
+    bk_printf(TAG "[BOOT] ui_screen_event_init() start\n");
+    ui_screen_event_init();
+    bk_printf(TAG "[BOOT] ui_screen_event_init: %lu ms\n", lv_tick_elaps(_boot_t));
 
-    // preRenderRoot를 screen으로 만들어서 셋팅빼고는 전부 preRenderRoot의 child로 만들면. z offset만 바꿔서 빠르게 전환되지 않을까
     preRenderRoot = lv_obj_create(NULL);
     lv_obj_set_scrollbar_mode(preRenderRoot, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_style_border_width(preRenderRoot, 0, 0);
@@ -205,15 +219,13 @@ static void _uart_comm_task(beken_thread_arg_t arg)
     bk_printf(TAG "[BOOT] main_activity_on_create: %lu ms\n", lv_tick_elaps(_boot_t));
 
     _boot_t = lv_tick_get();
-    init_page_main(&bk_lv_tool_ui);
-    bk_printf(TAG "[BOOT] init_page_main: %lu ms\n", lv_tick_elaps(_boot_t));
-
-    _boot_t = lv_tick_get();
     init_page_timebar(&bk_lv_tool_ui);
     ui_lang_apply_timebar(&bk_lv_tool_ui);
     bk_printf(TAG "[BOOT] init_page_timebar: %lu ms\n", lv_tick_elaps(_boot_t));
 
-    g_device_state.black_out_checking = false; // blackout check가 계속 enable되는데 조건을 아직 모르겠으니까 일단 강제로 blackout recovery 없앰
+    _boot_t = lv_tick_get();
+    init_page_main(&bk_lv_tool_ui);
+    bk_printf(TAG "[BOOT] init_page_main: %lu ms\n", lv_tick_elaps(_boot_t));
 
     if (!g_device_state.black_out_checking) {
 #if UI_BOOT_WARMUP_ENABLE
@@ -256,6 +268,7 @@ static void _emu_uart_tick(lv_timer_t *t) { (void)t; uart_comm_tick(); }
 
 void beken_ui_init(void)
 {
+    bk_printf(TAG "[BOOT] beken_ui_init() called\n");
     /* VFS flash 직접 마운트 (즉시) — intro.jpg 읽기 가능 */
     lvgl_vfs_init_flash_quick();
 
