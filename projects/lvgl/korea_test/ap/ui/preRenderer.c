@@ -210,8 +210,8 @@ void ui_page_change(lv_obj_t *newPage)
     }
     else
     {
-        /* SHOWN 이전에 외부 코드가 새 page를 삭제한 경우 stale pointer를 남기지 않는다. */
         currentPage = NULL;
     }
 
-    bk_printf(TAG "[SCREEN] ui_page_change() completed. [elapsed: %lu]\n", (unsigned long)lv_tick_elaps(startTi
+    bk_printf(TAG "[SCREEN] ui_page_change() completed. [elapsed: %lu]\n", (unsigned long)lv_tick_elaps(startTick));
+}
