@@ -18,7 +18,11 @@ extern void settingmode_setting_testbt_event_cb(lv_event_t *e);
 extern void settingmode_setting_timebt_event_cb(lv_event_t *e);
 extern void settingmode_setting_languagebt_event_cb(lv_event_t *e);
 extern void settingmode_backbt_event_cb(lv_event_t *e);
-extern void settingmode_load_event_cb(lv_event_t *e);
+extern void settingmode_loaded_event_cb(lv_event_t *e);
+extern void settingmode_unload_start_event_cb(lv_event_t *e);
+extern void settingmode_unloaded_event_cb(lv_event_t *e);
+extern void settingmode_load_start_event_cb(lv_event_t *e);
+
 
 void destroy_page_settingmode(bk_lv_ui_t *bk_ui)
 {
@@ -45,16 +49,19 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui) {
     lv_obj_set_pos(bk_ui->settingmode, 0, 0);
     lv_obj_set_style_radius(bk_ui->settingmode, 0, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(bk_ui->settingmode, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
-    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_load_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
-    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_load_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    // FIXME : 안나눠놨네. 나눠야죠. initcallback인데.
+    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_load_start_event_cb, UI_EVENT_PAGE_SHOW_START,   NULL);
+    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_loaded_event_cb,     UI_EVENT_PAGE_SHOWN,       NULL);
+    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_unloaded_event_cb,   UI_EVENT_PAGE_HIDDEN,     NULL);
 #else
     bk_ui->settingmode = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->settingmode, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->settingmode, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_load_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
-    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_load_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
-    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_load_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START,   NULL);
+    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_loaded_event_cb,     LV_EVENT_SCREEN_LOADED,       NULL);
+    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmode, settingmode_unloaded_event_cb,   LV_EVENT_SCREEN_UNLOADED,     NULL);
 #endif /* UI_PRENDERING_ENABLE */
     bk_ui->settingmode_bg = lv_image_create(bk_ui->settingmode);
 #if !UI_SETTINGMODE_COMBINED_BG_ENABLE
