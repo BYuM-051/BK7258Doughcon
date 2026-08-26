@@ -98,7 +98,8 @@ void ui_page_change(lv_obj_t *newScreen)
     if(newScreen == NULL || !lv_obj_is_valid(newScreen))
     {
         bk_printf(TAG "[SCREEN] newScreen is NULL or invalid\n");
-        //print stack trace
+        void *caller = __builtin_return_address(0);
+        bk_printf(TAG "[CALLER] %p\n", caller); // Print returning addr
         return;
     }
     if(oldPage == newScreen)
