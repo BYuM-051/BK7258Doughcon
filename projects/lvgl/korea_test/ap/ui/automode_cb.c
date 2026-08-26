@@ -1824,7 +1824,11 @@ void automode_load_start_event_cb(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
 
-    if (code != LV_EVENT_SCREEN_LOAD_START) return;
+    if (code != LV_EVENT_SCREEN_LOAD_START && code != UI_EVENT_PAGE_SHOW_START)
+    {
+        bk_printf(TAG "[WARN] automode_load_start_event_cb: unexpected event code %d\n", code);
+        return;
+    }
 
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
 

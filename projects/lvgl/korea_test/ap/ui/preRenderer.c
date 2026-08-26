@@ -214,5 +214,4 @@ void ui_page_change(lv_obj_t *newPage)
         currentPage = NULL;
     }
 
-    bk_printf(TAG "[SCREEN] ui_page_change() completed. [elapsed: %lu]\n", (unsigned long)lv_tick_elaps(startTick));
-}
+    bk_printf(TAG "[SCREEN] ui_page_change() completed. [elapsed: %lu]\n", (unsigned long)lv_tick_elaps(startTi

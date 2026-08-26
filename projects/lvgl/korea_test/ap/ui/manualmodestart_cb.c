@@ -1090,7 +1090,252 @@ void manualmodestart_keypadhide_event_cb(lv_event_t *e)
 
 void manualmodestart_load_start_event_cb(lv_event_t *e)
 {
+    lv_event_code_t code = lv_event_get_code(e);
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+    device_state_t *state = &g_device_state;
+    {
+        int _is_f = (strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0);
+#define _LT(obj, key) do { \
+    const char *_sv = settings_get_str(key); \
+    if (_is_f && _sv && _sv[0]) { \
+        char _fb[16]; snprintf(_fb, sizeof(_fb), "%02d", atoi(_sv) * 9 / 5 + 32); \
+        lv_label_set_text(obj, _fb); \
+    } else lv_label_set_text(obj, _sv ? _sv : ""); \
+} while(0)
+        _LT(bk_ui->manualmodestart_manual_freeze_temp_txt,       "ManualFreezeTemp");
+        _LT(bk_ui->manualmodestart_manual_defrost_temp_txt,      "ManualDefrostTemp");
+        /* FERM2(저온발효/과발효방지, automode에서 넘어옴)는 편집 불가(표시 전용,
+         * 아래 분기에서 버튼 숨김)이고, Android 원본(ManualModeStartFragment.java
+         * AutoModeOver 분기)도 별도 설정이 아니라 automode가 실제로 MCU에 보낸
+         * 값(sendfermation1temp/humidity)을 그대로 보여준다 — 표시가 실제 동작과
+         * 항상 일치하도록 우리도 동일하게 state->send_ferm1_temp/humidity를 사용. */
+        if (state->manual_current_mode == MANUAL_MODE_FERM2) {
+            char _fb[16];
+            int _t = _is_f ? (state->send_ferm1_temp * 9 / 5 + 32) : state->send_ferm1_temp;
+            snprintf(_fb, sizeof(_fb), "%d", _t);
+            lv_label_set_text(bk_ui->manualmodestart_manual_fermentation_temp_txt, _fb);
+            snprintf(_fb, sizeof(_fb), "%d", state->send_ferm1_humidity);
+            lv_label_set_text(bk_ui->manualmodestart_manual_fermentation_humidity_txt, _fb);
+        } else {
+            _LT(bk_ui->manualmodestart_manual_fermentation_temp_txt, "ManualFermentationTemp");
+            lv_label_set_text(bk_ui->manualmodestart_manual_fermentation_humidity_txt,
+                settings_get_str("ManualFermentationHumidity"));
+        }
+#undef _LT
+    }
 
+    /* All underbars hidden on load — shown only when editing */
+    _underbar_all_hide_mms(bk_ui);
+
+    /* Keypad not clickable on entry; activated only when a field button is pressed */
+    _keypad_off_manualmodestart(bk_ui);
+    s_tci_manualmodestart        = 0;
+    s_edit_buf_manualmodestart[0] = '\0';
+
+    /* ── 모드 색상 결정 ── */
+    lv_color_t arc_color;
+    if (state->manual_current_mode == 1) {
+        // lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0x182F99), 0);
+
+        lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0x162a9e), 0);
+        lv_obj_set_style_bg_opa(bk_ui->manualmodestart, LV_OPA_COVER, 0);
+        arc_color = lv_color_hex(0x162a9e);
+        _img_ensure_src(bk_ui->manualmodestart_manual_freeze_temp_txt);
+        lv_obj_clear_flag(bk_ui->manualmodestart_manual_freeze_temp_txt, LV_OBJ_FLAG_HIDDEN);
+        _img_ensure_src(bk_ui->manualmodestart_manual_freeze_temp_bt);
+        lv_obj_clear_flag(bk_ui->manualmodestart_manual_freeze_temp_bt,  LV_OBJ_FLAG_HIDDEN);
+    } else if (state->manual_current_mode == 2) {
+        // lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0x4CAED9), 0);
+        lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0x53bae4), 0);
+        lv_obj_set_style_bg_opa(bk_ui->manualmodestart, LV_OPA_COVER, 0);
+        arc_color = lv_color_hex(0x53bae4);
+        _img_ensure_src(bk_ui->manualmodestart_manual_defrost_temp_txt);
+        lv_obj_clear_flag(bk_ui->manualmodestart_manual_defrost_temp_txt, LV_OBJ_FLAG_HIDDEN);
+        _img_ensure_src(bk_ui->manualmodestart_manual_defrost_temp_bt);
+        lv_obj_clear_flag(bk_ui->manualmodestart_manual_defrost_temp_bt,  LV_OBJ_FLAG_HIDDEN);
+    } else if (state->manual_current_mode == MANUAL_MODE_FERM2) {
+        /* 저온발효 (과발효방지 AutoModeOver):
+         * 배경: manualmodestart_bg 위젯 (lv_image) — bg_img_src 매 프레임 JPEG 디코딩 방지
+         * arc: 0xD4A020 (저온발효 색 — 황금색, 고온발효 빨강과 구분), 라운드 없음
+         * 편집 필드 없음, 설정 온도/습도는 표시만 */
+        {
+            int _lang_f2 = settings_get_int("LANGUAGE");
+            const char *_bg = (_lang_f2 == 1) ? "/images/fermentation_bg_china.jpg" :
+                              (_lang_f2 == 2) ? "/images/fermentation_bg_english.jpg" :
+                                                "/images/fermentation_bg.jpg";
+            /* canvas bg: 최초 1회만 JPEG decode → raw buffer 유지 (매 frame decode 방지)
+             * z-order 조정은 arc 생성 블록 이후 수행 */
+            _ferm2_bg_load(bk_ui, _bg, _lang_f2);
+            arc_color = lv_color_hex(0xD4A020);  /* 저온발효 색 (automodestart OP_MODE_FERM2) */
+            /* 편집 버튼/레이블 모두 숨김 */
+            lv_obj_add_flag(bk_ui->manualmodestart_manual_freeze_temp_txt,           LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(bk_ui->manualmodestart_manual_freeze_temp_bt,            LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(bk_ui->manualmodestart_manual_defrost_temp_txt,          LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(bk_ui->manualmodestart_manual_defrost_temp_bt,           LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(bk_ui->manualmodestart_manual_fermentation_temp_bt,      LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(bk_ui->manualmodestart_manual_fermentation_humidity_bt,  LV_OBJ_FLAG_HIDDEN);
+            /* 설정 온도/습도 텍스트: 버튼 없이 표시만, 황금색 */
+            _img_ensure_src(bk_ui->manualmodestart_manual_fermentation_temp_txt);
+            lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_temp_txt,     LV_OBJ_FLAG_HIDDEN);
+            lv_obj_set_style_text_color(bk_ui->manualmodestart_manual_fermentation_temp_txt,     lv_color_hex(0xD4A020), 0);
+            _img_ensure_src(bk_ui->manualmodestart_manual_fermentation_humidity_txt);
+            lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_humidity_txt, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_set_style_text_color(bk_ui->manualmodestart_manual_fermentation_humidity_txt, lv_color_hex(0xD4A020), 0);
+            /* 과발효 방지 시간(분) 표시 — DetailOverFermentation 설정값 */
+            lv_obj_add_flag(bk_ui->manualmodestart_over_time_korea,   LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(bk_ui->manualmodestart_over_time_china,   LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(bk_ui->manualmodestart_over_time_english, LV_OBJ_FLAG_HIDDEN);
+            int _over_min = atoi(settings_get_str("DetailOverFermentation"));
+            if (_over_min > 0) {
+                char _ot[8];
+                snprintf(_ot, sizeof(_ot), "%d", _over_min);
+                lv_obj_t *_ot_lbl = (_lang_f2 == 1) ? bk_ui->manualmodestart_over_time_china :
+                                    (_lang_f2 == 2) ? bk_ui->manualmodestart_over_time_english :
+                                                       bk_ui->manualmodestart_over_time_korea;
+                if (_ot_lbl) {
+                    lv_label_set_text(_ot_lbl, _ot);
+                    lv_obj_clear_flag(_ot_lbl, LV_OBJ_FLAG_HIDDEN);
+                }
+            }
+        }
+    } else {
+        lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0xC81D25), 0);
+        lv_obj_set_style_bg_opa(bk_ui->manualmodestart, LV_OPA_COVER, 0);
+        arc_color = lv_color_hex(0xC81D25);
+        // _img_ensure_src(bk_ui->manualmodestart_manual_fermentation_temp_txt);
+        lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_temp_txt,     LV_OBJ_FLAG_HIDDEN);
+        _img_ensure_src(bk_ui->manualmodestart_manual_fermentation_humidity_txt);
+        lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_humidity_txt, LV_OBJ_FLAG_HIDDEN);
+        _img_ensure_src(bk_ui->manualmodestart_manual_fermentation_temp_bt);
+        lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_temp_bt,      LV_OBJ_FLAG_HIDDEN);
+        _img_ensure_src(bk_ui->manualmodestart_manual_fermentation_humidity_bt);
+        lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_humidity_bt,  LV_OBJ_FLAG_HIDDEN);
+    }
+
+    /* ── arc + circle_basic/circle_gif 생성 또는 업데이트 ──
+     * z-order (back→front): circle_basic → circle_gif → run_arc → 기존 버튼/레이블
+     * circle_basic : 흰색 원 + 아이콘/텍스트 PNG
+     * circle_gif    : 발효(FERM/FERM2) 전용 색 링 PNG (냉동/해동은 HIDDEN, run_arc 뒤에 위치)
+     * run_arc      : 회색 ring + 모드색 세그먼트 (중앙 투명 → circle_gif/circle_basic 보임)
+     */
+    if (!bk_ui->manualmodestart_run_arc) {
+        lv_obj_t *scr = bk_ui->manualmodestart;
+
+        bk_ui->manualmodestart_manual_circle_basic = lv_image_create(scr);
+        lv_obj_set_pos(bk_ui->manualmodestart_manual_circle_basic, 362, 117);
+        lv_obj_set_size(bk_ui->manualmodestart_manual_circle_basic, 300, 300);
+
+        /* circle_gif: 모드별 색 링 PNG(300x300) — circle_basic 바로 위, 아이콘/텍스트 레이어 아래 */
+        bk_ui->manualmodestart_manual_circle_gif = lv_image_create(scr);
+        lv_obj_set_pos(bk_ui->manualmodestart_manual_circle_gif, 362, 117);
+        lv_obj_set_size(bk_ui->manualmodestart_manual_circle_gif, 300, 300);
+        lv_obj_remove_flag(bk_ui->manualmodestart_manual_circle_gif, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_flag(bk_ui->manualmodestart_manual_circle_gif, LV_OBJ_FLAG_HIDDEN);
+
+        bk_ui->manualmodestart_manual_txt_basic = lv_image_create(scr);
+        lv_obj_set_pos(bk_ui->manualmodestart_manual_txt_basic, 362, 117);
+        lv_obj_set_size(bk_ui->manualmodestart_manual_txt_basic, 300, 300);
+
+        /* gif_basic (정지 아이콘) — 냉동 원본 52x52(Pillow 확인), 중심 유지 위해 위치 재조정 */
+        bk_ui->manualmodestart_manual_gif_basic = lv_image_create(scr);
+        lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 486, 171);
+        lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 52, 52);
+        lv_obj_remove_flag(bk_ui->manualmodestart_manual_gif_basic, LV_OBJ_FLAG_CLICKABLE);
+
+        /* gif (회전 아이콘, 운전 중 표시) — manual_freeze_gif.png 전용, 원본 52x52 */
+        bk_ui->manualmodestart_manual_gif = lv_image_create(scr);
+        lv_obj_set_pos(bk_ui->manualmodestart_manual_gif, 486, 171);
+        lv_obj_set_size(bk_ui->manualmodestart_manual_gif, 52, 52);
+        lv_obj_remove_flag(bk_ui->manualmodestart_manual_gif, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_flag(bk_ui->manualmodestart_manual_gif, LV_OBJ_FLAG_HIDDEN);
+        lv_image_set_pivot(bk_ui->manualmodestart_manual_gif, 26, 26);
+
+        /* 해동/발효 상단 클립 컨테이너 (크기는 모드 시작 시 동적으로 변경) */
+        s_mms_drop_clip = lv_obj_create(scr);
+        lv_obj_set_pos(s_mms_drop_clip, 474, 170);
+        lv_obj_set_size(s_mms_drop_clip, 76, 55);
+        lv_obj_add_flag(s_mms_drop_clip, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_remove_flag(s_mms_drop_clip, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_set_style_bg_opa(s_mms_drop_clip, LV_OPA_TRANSP, 0);
+        lv_obj_set_style_border_width(s_mms_drop_clip, 0, 0);
+        lv_obj_set_style_pad_all(s_mms_drop_clip, 0, 0);
+
+        /* 해동 전용 이미지 (drop_clip 직속 자식, 전체 55px 이동) */
+        s_mms_drop_img = lv_image_create(s_mms_drop_clip);
+        lv_obj_set_pos(s_mms_drop_img, 0, 0);
+        lv_obj_remove_flag(s_mms_drop_img, LV_OBJ_FLAG_CLICKABLE);
+
+        /* 발효 상단 내부 클립 (76×24, drop_clip 안에서 애니메이션)
+         * 내부 컨테이너가 24px 이므로 이미지 상단 24px 모양만 항상 노출됨 */
+        s_mms_ferm_inner = lv_obj_create(s_mms_drop_clip);
+        lv_obj_set_pos(s_mms_ferm_inner, 0, 0);
+        lv_obj_set_size(s_mms_ferm_inner, 76, 24);
+        lv_obj_remove_flag(s_mms_ferm_inner, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_set_style_bg_opa(s_mms_ferm_inner, LV_OPA_TRANSP, 0);
+        lv_obj_set_style_border_width(s_mms_ferm_inner, 0, 0);
+        lv_obj_set_style_pad_all(s_mms_ferm_inner, 0, 0);
+
+        s_mms_ferm_top_img = lv_image_create(s_mms_ferm_inner);
+        lv_obj_set_pos(s_mms_ferm_top_img, 0, 0);
+        lv_obj_remove_flag(s_mms_ferm_top_img, LV_OBJ_FLAG_CLICKABLE);
+
+        /* 발효 하단 고정 클립 (76×31: 이미지 하단 31px 고정 표시)
+         * 상단 클립(24px)과 이어 붙여야 정지 아이콘(76x55)과 동일한 위치가 됨
+         * 이미지 y=-24 → 컨테이너가 이미지 pixels 24~54 를 보여줌 */
+        s_mms_ferm_btm_clip = lv_obj_create(scr);
+        lv_obj_set_pos(s_mms_ferm_btm_clip, 474, 194);   /* 170 + 24 (ferm_inner 높이) */
+        lv_obj_set_size(s_mms_ferm_btm_clip, 76, 31);
+        lv_obj_add_flag(s_mms_ferm_btm_clip, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_remove_flag(s_mms_ferm_btm_clip, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_set_style_bg_opa(s_mms_ferm_btm_clip, LV_OPA_TRANSP, 0);
+        lv_obj_set_style_border_width(s_mms_ferm_btm_clip, 0, 0);
+        lv_obj_set_style_pad_all(s_mms_ferm_btm_clip, 0, 0);
+
+        s_mms_ferm_btm_img = lv_image_create(s_mms_ferm_btm_clip);
+        lv_obj_set_pos(s_mms_ferm_btm_img, 0, -24);      /* 이미지 상단 24px 잘라냄 */
+        _img_set_src_deferred(s_mms_ferm_btm_img,
+            (state->manual_current_mode == MANUAL_MODE_FERM2) ?
+                "/images/manual_fermentation1_gif.png" :
+                "/images/manual_fermentation2_gif.png");
+        lv_obj_remove_flag(s_mms_ferm_btm_img, LV_OBJ_FLAG_CLICKABLE);
+
+        /* arc 생성 (_create_run_arc 내부에서 move_background → arc[0]) */
+        bk_ui->manualmodestart_run_arc = _create_run_arc(scr, arc_color);
+
+        /* Z-order (back→front): circle_gif(불투명) → circle_basic(투명 영역으로 링이 비침) →
+         * txt_basic → gif_basic → gif → ferm_btm → drop_clip → arc → buttons */
+        lv_obj_move_background(s_mms_drop_clip);
+        lv_obj_move_background(s_mms_ferm_btm_clip);
+        lv_obj_move_background(bk_ui->manualmodestart_manual_gif);
+        lv_obj_move_background(bk_ui->manualmodestart_manual_gif_basic);
+        lv_obj_move_background(bk_ui->manualmodestart_manual_txt_basic);
+        lv_obj_move_background(bk_ui->manualmodestart_manual_circle_basic);
+        lv_obj_move_background(bk_ui->manualmodestart_manual_circle_gif);
+        if (s_ferm2_bg_img) lv_obj_move_background(s_ferm2_bg_img);
+    } else {
+        lv_obj_set_style_arc_color(bk_ui->manualmodestart_run_arc, arc_color, LV_PART_INDICATOR);
+        _arc_anim_stop(bk_ui->manualmodestart_run_arc);
+        lv_obj_add_flag(bk_ui->manualmodestart_run_arc, LV_OBJ_FLAG_HIDDEN);
+        _gif_anim_stop_mms(bk_ui);
+    }
+
+    /* 정전 복구 아이콘 */
+    if (state->black_out_checking) {
+        _img_ensure_src(bk_ui->manualmodestart_blackout);
+        lv_obj_clear_flag(bk_ui->manualmodestart_blackout, LV_OBJ_FLAG_HIDDEN);
+    } else
+        lv_obj_add_flag(bk_ui->manualmodestart_blackout,   LV_OBJ_FLAG_HIDDEN);
+
+    ui_lang_apply_manualmodestart(bk_ui);
+
+    /* FERM2(저온발효): ui_lang이 manualmode_title로 덮어쓰므로 automode_title로 재설정
+     * 온도/습도는 _refresh_running_ui_mms() °F 변환 적용 (1초 타이머) */
+    if (state->manual_current_mode == MANUAL_MODE_FERM2 && bk_ui->manualmodestart_title) {
+        int _lang = settings_get_int("LANGUAGE");
+        if      (_lang == 1) _img_set_src_timed(bk_ui->manualmodestart_title, "/images/automode_title_china.png");
+        else if (_lang == 2) _img_set_src_timed(bk_ui->manualmodestart_title, "/images/automode_title_english.png");
+        else                 _img_set_src_timed(bk_ui->manualmodestart_title, "/images/automode_title.png");
+    }
 }
 
 void manualmodestart_screen_unload_start_cb(lv_event_t *e)
@@ -1155,162 +1400,85 @@ void manualmodestart_unloaded_event_cb(lv_event_t *e)
 
 void manualmodestart_loaded_event_cb(lv_event_t *e)
 {
-    (void)e;
-
+    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
 
     ui_title_anim(bk_ui->manualmodestart_title);
-
-    if (bk_ui->manualmodestart_manual_circle_basic)
-    {
+    if (bk_ui->manualmodestart_manual_circle_basic) {
         const char *src =
-            (state->manual_current_mode == MANUAL_MODE_FREEZE) ?
-                "/images/manual_freeze_circle_basic.png" :
-            (state->manual_current_mode == MANUAL_MODE_DEFROST) ?
-                "/images/manual_defrost_circle_basic.png" :
-            (state->manual_current_mode == MANUAL_MODE_FERM2) ?
-                "/images/manual_fermentation1_circle_basic.png" :
-            (state->manual_current_mode == MANUAL_MODE_FERM) ?
-                "/images/manual_fermentation2_circle_basic.png" :
-                "/images/manual_fermentation2_circle_basic.png";
-
-        _img_set_src_timed(
-            bk_ui->manualmodestart_manual_circle_basic,
-            src
-        );
+            (state->manual_current_mode == MANUAL_MODE_FREEZE) ? "/images/manual_freeze_circle_basic.png" :
+            (state->manual_current_mode == MANUAL_MODE_DEFROST) ? "/images/manual_defrost_circle_basic.png" :
+            (state->manual_current_mode == MANUAL_MODE_FERM2) ? "/images/manual_fermentation1_circle_basic.png" :
+            (state->manual_current_mode == MANUAL_MODE_FERM) ? "/images/manual_fermentation2_circle_basic.png" :
+                                                "/images/manual_fermentation2_circle_basic.png";
+        _img_set_src_timed(bk_ui->manualmodestart_manual_circle_basic, src);
     }
-
-    /*
-     * 기존 manualmodestart_load_event_cb()의
-     * SCREEN_LOADED 블록 나머지를 여기 그대로 이동.
-     *
-     * 현재 파일 기준:
-     * 기존 line 39 ~ 100
-     */
-
-    if (bk_ui->manualmodestart_manual_gif_basic)
-    {
+    /* circle_gif(색 링): 냉동/해동은 circle_basic.png에 이미 링이 포함돼 있어 문제
+        * 없었고, 발효(FERM/FERM2)만 별도 링 이미지가 필요했던 상황 — 그 두 모드에서만
+        * 표시하고 냉동/해동에서는 숨긴다(이전 모드의 잔상 방지). */
+    // if (bk_ui->manualmodestart_manual_circle_gif) {
+    //     if (state->manual_current_mode == MANUAL_MODE_FERM ||
+    //         state->manual_current_mode == MANUAL_MODE_FERM2) {
+    //         const char *src_ring =
+    //             (state->manual_current_mode == MANUAL_MODE_FERM2) ? "/images/manual_fermentation1_circle.png" :
+    //                                                 "/images/manual_fermentation2_circle.png";
+    //         _img_set_src_timed(bk_ui->manualmodestart_manual_circle_gif, src_ring);
+    //         lv_obj_clear_flag(bk_ui->manualmodestart_manual_circle_gif, LV_OBJ_FLAG_HIDDEN);
+    //     } else {
+    //         lv_obj_add_flag(bk_ui->manualmodestart_manual_circle_gif, LV_OBJ_FLAG_HIDDEN);
+    //     }
+    // }
+    /* manual_txt_basic: SCREEN_LOAD_START 말미의 ui_lang_apply_manualmodestart()가
+        * 언어 suffix(_china/_english)를 포함한 올바른 경로로 이미 설정했으므로 여기서 덮어쓰지 않음. */
+    if (bk_ui->manualmodestart_manual_gif_basic) {
         const char *gif_src =
-            (state->manual_current_mode == 1) ?
-                "/images/manual_freeze_gif.png" :
-            (state->manual_current_mode == 2) ?
-                "/images/manual_defrost_gif.png" :
-            (state->manual_current_mode == MANUAL_MODE_FERM2) ?
-                "/images/manual_fermentation1_gif.png" :
-                "/images/manual_fermentation2_gif.png";
-
-        _img_set_src_timed(
-            bk_ui->manualmodestart_manual_gif_basic,
-            gif_src
-        );
-
-        if (state->manual_current_mode == MANUAL_MODE_FREEZE)
-        {
-            lv_obj_set_size(
-                bk_ui->manualmodestart_manual_gif_basic,
-                52,
-                52
-            );
-
-            lv_obj_set_pos(
-                bk_ui->manualmodestart_manual_gif_basic,
-                486,
-                171
-            );
+            (state->manual_current_mode == 1) ? "/images/manual_freeze_gif.png" :
+            (state->manual_current_mode == 2) ? "/images/manual_defrost_gif.png" :
+            (state->manual_current_mode == MANUAL_MODE_FERM2) ? "/images/manual_fermentation1_gif.png" :
+                                                "/images/manual_fermentation2_gif.png";
+        _img_set_src_timed(bk_ui->manualmodestart_manual_gif_basic, gif_src);
+        /* manual_gif_basic 박스 크기는 원본 PNG 크기(Pillow 확인)에 맞춰야
+            * 클리핑/중심 틀어짐이 없다: 냉동(manual_freeze_gif.png)=52x52,
+            * 해동/발효(manual_defrost/fermentation*_gif.png)=76x55. */
+        if (state->manual_current_mode == MANUAL_MODE_FREEZE) {
+            lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 52, 52);
+            lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 486, 171);
+        } else {
+            lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 76, 55);
+            lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 474, 170);
         }
-        else
-        {
-            lv_obj_set_size(
-                bk_ui->manualmodestart_manual_gif_basic,
-                76,
-                55
-            );
-
-            lv_obj_set_pos(
-                bk_ui->manualmodestart_manual_gif_basic,
-                474,
-                170
-            );
-        }
-
-        if (state->manual_current_mode == MANUAL_MODE_FREEZE)
-        {
+        if (state->manual_current_mode == MANUAL_MODE_FREEZE) {
             if (bk_ui->manualmodestart_manual_gif)
-            {
-                _img_set_src_timed(
-                    bk_ui->manualmodestart_manual_gif,
-                    gif_src
-                );
-            }
-        }
-        else if (state->manual_current_mode == MANUAL_MODE_DEFROST)
-        {
+                _img_set_src_timed(bk_ui->manualmodestart_manual_gif, gif_src);
+        } else if (state->manual_current_mode == MANUAL_MODE_DEFROST) {
             if (s_mms_drop_img)
-            {
-                _img_set_src_timed(
-                    s_mms_drop_img,
-                    gif_src
-                );
-            }
-        }
-        else
-        {
+                _img_set_src_timed(s_mms_drop_img, gif_src);
+        } else {
             if (s_mms_ferm_top_img)
-            {
-                _img_set_src_timed(
-                    s_mms_ferm_top_img,
-                    gif_src
-                );
-            }
+                _img_set_src_timed(s_mms_ferm_top_img, gif_src);
         }
     }
-
-    if (state->manual_start || state->auto_mode_over)
-    {
+    if (state->manual_start || state->auto_mode_over) {
         _ui_apply_running_mms(bk_ui);
-
-        if (state->auto_mode_over)
-        {
-            if (bk_ui->manualmodestart_startbt &&
-                lv_obj_is_valid(bk_ui->manualmodestart_startbt))
-            {
-                lv_obj_add_flag(
-                    bk_ui->manualmodestart_startbt,
-                    LV_OBJ_FLAG_HIDDEN
-                );
-            }
-
-            if (bk_ui->manualmodestart_startim &&
-                lv_obj_is_valid(bk_ui->manualmodestart_startim))
-            {
-                lv_obj_add_flag(
-                    bk_ui->manualmodestart_startim,
-                    LV_OBJ_FLAG_HIDDEN
-                );
-            }
-
-            if (bk_ui->manualmodestart_backim &&
-                lv_obj_is_valid(bk_ui->manualmodestart_backim))
-            {
-                lv_obj_clear_flag(
-                    bk_ui->manualmodestart_backim,
-                    LV_OBJ_FLAG_HIDDEN
-                );
-            }
-
-            if (bk_ui->manualmodestart_backbt &&
-                lv_obj_is_valid(bk_ui->manualmodestart_backbt))
-            {
-                lv_obj_clear_flag(
-                    bk_ui->manualmodestart_backbt,
-                    LV_OBJ_FLAG_HIDDEN
-                );
-            }
+        if (state->auto_mode_over) {
+            /* Android AutoModeOver (FERM2 저온발효 모드):
+                * StartBt INVISIBLE, 나가기 버튼 복원 (자동운전 화면으로 이동 가능) */
+            if (bk_ui->manualmodestart_startbt && lv_obj_is_valid(bk_ui->manualmodestart_startbt))
+                lv_obj_add_flag(bk_ui->manualmodestart_startbt, LV_OBJ_FLAG_HIDDEN);
+            if (bk_ui->manualmodestart_startim && lv_obj_is_valid(bk_ui->manualmodestart_startim))
+                lv_obj_add_flag(bk_ui->manualmodestart_startim, LV_OBJ_FLAG_HIDDEN);
+            /* 나가기 버튼 표시 (_ui_apply_running_mms 에서 숨겼으므로 복원) */
+            if (bk_ui->manualmodestart_backim && lv_obj_is_valid(bk_ui->manualmodestart_backim))
+                lv_obj_clear_flag(bk_ui->manualmodestart_backim, LV_OBJ_FLAG_HIDDEN);
+            if (bk_ui->manualmodestart_backbt && lv_obj_is_valid(bk_ui->manualmodestart_backbt))
+                lv_obj_clear_flag(bk_ui->manualmodestart_backbt, LV_OBJ_FLAG_HIDDEN);
         }
-    }
+    } 
     else
     {
         _ui_apply_stopped_mms(bk_ui);
     }
+        
+    return;
 }
