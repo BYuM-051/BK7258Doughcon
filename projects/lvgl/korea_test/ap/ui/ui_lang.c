@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "preRenderer.h"
 #define TAG "[ui_lang.c] "
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
@@ -940,8 +941,11 @@ extern void automodestart_lang_invalidate(bk_lv_ui_t *bk_ui);
 
 void ui_lang_invalidate_cached_screens(bk_lv_ui_t *bk_ui)
 {
+#if UI_PRENDERING_ENABLE
+    lv_obj_t *active = ui_get_current_page();
+#else
     lv_obj_t *active = lv_scr_act();
-
+#endif /* UI_PRENDERING_ENABLE */
     /* lv_obj_del은 SCREEN_UNLOAD_START를 우회하므로 prewarm 타이머와
      * automodestart 내부 타이머를 여기서 명시적으로 취소 */
     automode_ams_prewarm_reset();

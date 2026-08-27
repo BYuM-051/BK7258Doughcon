@@ -253,3 +253,8 @@ static void uiPagePreRender(lv_obj_t *page)
 
     return;
 }
+
+lv_obj_t *ui_get_current_page(void)
+{
+    return currentPage;
+}

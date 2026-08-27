@@ -19,6 +19,7 @@ extern lv_event_code_t UI_EVENT_PAGE_HIDDEN;
 extern void ui_screen_event_init(void);
 extern bool ui_screen_event_initialized(void);
 extern void ui_page_change(pageId_t newPageID);
+extern lv_obj_t *ui_get_current_page(void);
 
 #ifdef __cplusplus
 }
