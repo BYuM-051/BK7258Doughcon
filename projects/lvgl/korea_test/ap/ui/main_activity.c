@@ -34,6 +34,7 @@
 #include "uart_comm.h"
 #include "lv_vendor.h"
 #include <os/os.h>
+#include "preRenderer.h"
 
 /* CN2 확장보드 Lock/Power/Lamp 물리 키 — 공식 key 컴포넌트(CONFIG_BUTTON,
  * multi_button 기반)로 GPIO 27/28/29(회로도 원본 배정, active-low)를 구동.
@@ -124,7 +125,9 @@ static void _apply_ui_scale(lv_obj_t *scr)
     // lv_obj_set_style_transform_pivot_y(scr, 0, 0);
 }
 
-/* 화면 전환: screen_id → init_page + lv_scr_load */
+/* 기존 : 화면 전환: screen_id → init_page + lv_scr_load */
+/* 변경 : 화면 전환: screen_id → page lifecycle manager */
+// REFATOR : 아마 이거 안쓰는 부분 같은데, 중복 매니저니까 확인해보고 지워도 되면 리팩터링 할 때 지우자
 static void _load_screen(int screen_id)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
@@ -132,8 +135,12 @@ static void _load_screen(int screen_id)
     bk_printf(TAG "[SCREEN] _load_screen(%d) start\n", screen_id);
     switch (screen_id) {
         case SCR_MAIN:
+#if UI_PRENDERING_ENABLE
+            ui_page_change(PAGE_MAIN);
+#else
             init_page_main(bk_ui);
             lv_scr_load(bk_ui->main);
+#endif /* UI_PRENDERING_ENABLE */
             _apply_ui_scale(bk_ui->main);
             break;
         // case SCR_MAIN_CHINA:
@@ -145,28 +152,48 @@ static void _load_screen(int screen_id)
         //     lv_scr_load(bk_ui->mainenglish);
             // break;
         case SCR_AUTOMODE_START:
+#if UI_PRENDERING_ENABLE
+            ui_page_change(PAGE_AUTOMODESTART);
+#else
             init_page_automodestart(bk_ui);
             lv_scr_load(bk_ui->automodestart);
+#endif /* UI_PRENDERING_ENABLE */
             _apply_ui_scale(bk_ui->automodestart);
             break;
         case SCR_AUTOMODE_END:
+#if UI_PRENDERING_ENABLE
+            ui_page_change(PAGE_AUTOMODEEND);
+#else
             init_page_automodeend(bk_ui);
             lv_scr_load(bk_ui->automodeend);
+#endif /* UI_PRENDERING_ENABLE */
             _apply_ui_scale(bk_ui->automodeend);
             break;
         case SCR_AUTODRYMODE:
+#if UI_PRENDERING_ENABLE
+            ui_page_change(PAGE_AUTODRYMODE);
+#else
             init_page_autodrymode(bk_ui);
             lv_scr_load(bk_ui->autodrymode);
+#endif /* UI_PRENDERING_ENABLE */
             _apply_ui_scale(bk_ui->autodrymode);
             break;
         case SCR_MANUAL_START:
+#if UI_PRENDERING_ENABLE
+            ui_page_change(PAGE_MANUALMODESTART);
+#else
             init_page_manualmodestart(bk_ui);
             lv_scr_load(bk_ui->manualmodestart);
+#endif /* UI_PRENDERING_ENABLE */
             _apply_ui_scale(bk_ui->manualmodestart);
             break;
         case SCR_MANUAL_MODE:
+#if UI_PRENDERING_ENABLE
+            ui_page_change(PAGE_MANUALMODE);
+#else
             init_page_manualmode(bk_ui);
             lv_scr_load(bk_ui->manualmode);
+#endif /* UI_PRENDERING_ENABLE */
             _apply_ui_scale(bk_ui->manualmode);
             break;
         default:
