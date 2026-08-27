@@ -77,8 +77,12 @@ static void _over_ferm_wait_timer_cb(lv_timer_t *t)
     /* FERM/FERM2 혼용 방지: 이전 수동운전(FERM 등) 화면 재사용하지 않고 항상 새로 생성 */
     if (bk_ui->manualmodestart && lv_obj_is_valid(bk_ui->manualmodestart))
         destroy_page_manualmodestart(bk_ui);
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_MANUALMODESTART);
+#else
     init_page_manualmodestart(bk_ui);
     lv_scr_load(bk_ui->manualmodestart);
+    #endif /* UI_PRENDERING_ENABLE */
     bk_printf(TAG "[OVER_FERM] jeon_started → manualmodestart 발효 화면 (AutoModeOver=true)\n");
 }
 
@@ -221,11 +225,13 @@ void automodeend_stopbt_event_cb(lv_event_t *e)
     if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
-
+#ifdef UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_AUTOMODE);
+#else
     if (bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))
         init_page_automode(bk_ui);
     lv_scr_load(bk_ui->automode);
-
+#endif /* UI_PRENDERING_ENABLE */
     /* 과발효방지 타이머 정리 */
     if (s_over_ferm_timer) {
         lv_timer_delete(s_over_ferm_timer);

@@ -506,8 +506,12 @@ static void _adm_end(bk_lv_ui_t *bk_ui)
     settings_save_dirty();
     uart_comm_trigger_change_setting();
     hal_buzzer_complete();
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_MAIN);
+#else
     init_page_main(bk_ui);
     lv_scr_load(bk_ui->main);
+#endif /* UI_PRENDERING_ENABLE */
     bk_printf(TAG "[DRY END] complete buzzer started, → main\n");
 }
 
