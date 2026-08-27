@@ -87,7 +87,7 @@ void init_page_automodeend(bk_lv_ui_t * bk_ui) {
 
     // ImageView: title
     bk_ui->automodeend_title = lv_image_create(bk_ui->automodeend);
-    _img_set_src_timed(bk_ui->automodeend_title, "/images/automode_title.png");
+    ui_page_build_set_image_src(bk_ui->automodeend_title, "/images/automode_title.png");
     lv_obj_set_pos(bk_ui->automodeend_title, 0, 10);
     lv_obj_set_size(bk_ui->automodeend_title, 380, 80);
     lv_image_set_inner_align(bk_ui->automodeend_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -104,7 +104,7 @@ void init_page_automodeend(bk_lv_ui_t * bk_ui) {
 
     // ImageView: imageview5
     bk_ui->automodeend_imageview5 = lv_image_create(bk_ui->automodeend);
-    _img_set_src_timed(bk_ui->automodeend_imageview5, "/images/stop_bt.png");
+    ui_page_build_set_image_src(bk_ui->automodeend_imageview5, "/images/stop_bt.png");
     lv_obj_set_pos(bk_ui->automodeend_imageview5, 847, 445);
     lv_obj_set_size(bk_ui->automodeend_imageview5, 164, 74);
 

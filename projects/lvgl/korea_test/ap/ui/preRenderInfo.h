@@ -42,17 +42,21 @@ typedef enum
 } pageId_t;
 
 typedef void (*pageLifecycleFunc_t)(bk_lv_ui_t *ui);
+typedef bool (*pageInitStepFunc_t)(uint32_t step);
+
 typedef struct
 {
     lv_obj_t **page;
     pageId_t pageId;
-    pageLifecycleFunc_t init_func;
-    pageLifecycleFunc_t deinit_func;
+    pageLifecycleFunc_t initBase;
+    pageInitStepFunc_t initStep;
+    pageLifecycleFunc_t destroy;
 } preRendererPageInfo_t;
 
 extern const preRendererPageInfo_t preRenderPageInfo[PAGE_COUNT];
 
 pageLifecycleFunc_t getPageInitFunc(pageId_t pageId);
+pageInitStepFunc_t getPageInitStepFunc(pageId_t pageId);
 pageLifecycleFunc_t getPageDeinitFunc(pageId_t pageId);
 
 #ifdef __cplusplus

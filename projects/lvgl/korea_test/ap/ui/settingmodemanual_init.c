@@ -66,7 +66,7 @@ void init_page_settingmodemanual(bk_lv_ui_t * bk_ui) {
 
     // ImageView: title
     bk_ui->settingmodemanual_title = lv_image_create(bk_ui->settingmodemanual);
-    _img_set_src_timed(bk_ui->settingmodemanual_title, "/images/usermanual_title.png");
+    ui_page_build_set_image_src(bk_ui->settingmodemanual_title, "/images/usermanual_title.png");
     lv_obj_set_pos(bk_ui->settingmodemanual_title, 0, 10);
     lv_obj_set_size(bk_ui->settingmodemanual_title, 380, 80);
     lv_image_set_inner_align(bk_ui->settingmodemanual_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -83,13 +83,13 @@ void init_page_settingmodemanual(bk_lv_ui_t * bk_ui) {
 
     // ImageView: imageview3
     bk_ui->settingmodemanual_imageview3 = lv_image_create(bk_ui->settingmodemanual);
-    _img_set_src_timed(bk_ui->settingmodemanual_imageview3, "/images/exit_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmodemanual_imageview3, "/images/exit_bt.png");
     lv_obj_set_pos(bk_ui->settingmodemanual_imageview3, 825, 13);
     lv_obj_set_size(bk_ui->settingmodemanual_imageview3, 179, 74);
 
     // ImageView: setting_manual_autoim
     bk_ui->settingmodemanual_setting_manual_autoim = lv_image_create(bk_ui->settingmodemanual);
-    _img_set_src_timed(bk_ui->settingmodemanual_setting_manual_autoim, "/images/setting_manual_auto_off.png");
+    ui_page_build_set_image_src(bk_ui->settingmodemanual_setting_manual_autoim, "/images/setting_manual_auto_off.png");
     lv_obj_set_pos(bk_ui->settingmodemanual_setting_manual_autoim, 23, 120);
     lv_obj_set_size(bk_ui->settingmodemanual_setting_manual_autoim, 445, 66);
 
@@ -105,7 +105,7 @@ void init_page_settingmodemanual(bk_lv_ui_t * bk_ui) {
 
     // ImageView: setting_manual_manualim
     bk_ui->settingmodemanual_setting_manual_manualim = lv_image_create(bk_ui->settingmodemanual);
-    _img_set_src_timed(bk_ui->settingmodemanual_setting_manual_manualim, "/images/setting_manual_manual_off.png");
+    ui_page_build_set_image_src(bk_ui->settingmodemanual_setting_manual_manualim, "/images/setting_manual_manual_off.png");
     lv_obj_set_pos(bk_ui->settingmodemanual_setting_manual_manualim, 23, 198);
     lv_obj_set_size(bk_ui->settingmodemanual_setting_manual_manualim, 445, 66);
 
@@ -121,7 +121,7 @@ void init_page_settingmodemanual(bk_lv_ui_t * bk_ui) {
 
     // ImageView: setting_manual_dryim
     bk_ui->settingmodemanual_setting_manual_dryim = lv_image_create(bk_ui->settingmodemanual);
-    _img_set_src_timed(bk_ui->settingmodemanual_setting_manual_dryim, "/images/setting_manual_dry_off.png");
+    ui_page_build_set_image_src(bk_ui->settingmodemanual_setting_manual_dryim, "/images/setting_manual_dry_off.png");
     lv_obj_set_pos(bk_ui->settingmodemanual_setting_manual_dryim, 23, 276);
     lv_obj_set_size(bk_ui->settingmodemanual_setting_manual_dryim, 445, 66);
 
@@ -137,7 +137,7 @@ void init_page_settingmodemanual(bk_lv_ui_t * bk_ui) {
 
     // ImageView: setting_manual_memoryim
     bk_ui->settingmodemanual_setting_manual_memoryim = lv_image_create(bk_ui->settingmodemanual);
-    _img_set_src_timed(bk_ui->settingmodemanual_setting_manual_memoryim, "/images/setting_manual_memory_off.png");
+    ui_page_build_set_image_src(bk_ui->settingmodemanual_setting_manual_memoryim, "/images/setting_manual_memory_off.png");
     lv_obj_set_pos(bk_ui->settingmodemanual_setting_manual_memoryim, 23, 354);
     lv_obj_set_size(bk_ui->settingmodemanual_setting_manual_memoryim, 445, 66);
 
@@ -153,7 +153,7 @@ void init_page_settingmodemanual(bk_lv_ui_t * bk_ui) {
 
     // ImageView: setting_manual_settingim
     bk_ui->settingmodemanual_setting_manual_settingim = lv_image_create(bk_ui->settingmodemanual);
-    _img_set_src_timed(bk_ui->settingmodemanual_setting_manual_settingim, "/images/setting_manual_setting_off.png");
+    ui_page_build_set_image_src(bk_ui->settingmodemanual_setting_manual_settingim, "/images/setting_manual_setting_off.png");
     lv_obj_set_pos(bk_ui->settingmodemanual_setting_manual_settingim, 23, 432);
     lv_obj_set_size(bk_ui->settingmodemanual_setting_manual_settingim, 445, 66);
 

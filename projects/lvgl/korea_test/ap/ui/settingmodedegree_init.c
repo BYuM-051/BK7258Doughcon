@@ -66,7 +66,7 @@ void init_page_settingmodedegree(bk_lv_ui_t * bk_ui) {
 
     // ImageView: title
     bk_ui->settingmodedegree_title = lv_image_create(bk_ui->settingmodedegree);
-    _img_set_src_timed(bk_ui->settingmodedegree_title, "/images/symbol_title.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedegree_title, "/images/symbol_title.png");
     lv_obj_set_pos(bk_ui->settingmodedegree_title, 0, 10);
     lv_obj_set_size(bk_ui->settingmodedegree_title, 380, 80);
     lv_image_set_inner_align(bk_ui->settingmodedegree_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -83,7 +83,7 @@ void init_page_settingmodedegree(bk_lv_ui_t * bk_ui) {
 
     // ImageView: imageview3
     bk_ui->settingmodedegree_imageview3 = lv_image_create(bk_ui->settingmodedegree);
-    _img_set_src_timed(bk_ui->settingmodedegree_imageview3, "/images/exit_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedegree_imageview3, "/images/exit_bt.png");
     lv_obj_set_pos(bk_ui->settingmodedegree_imageview3, 825, 13);
     lv_obj_set_size(bk_ui->settingmodedegree_imageview3, 179, 74);
 
@@ -99,7 +99,7 @@ void init_page_settingmodedegree(bk_lv_ui_t * bk_ui) {
 
     // ImageView: degree_c_im
     bk_ui->settingmodedegree_degree_c_im = lv_image_create(bk_ui->settingmodedegree);
-    _img_set_src_timed(bk_ui->settingmodedegree_degree_c_im, "/images/degree_bt_c_off.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedegree_degree_c_im, "/images/degree_bt_c_off.png");
     lv_obj_set_pos(bk_ui->settingmodedegree_degree_c_im, 148, 192);
     lv_obj_set_size(bk_ui->settingmodedegree_degree_c_im, 296, 156);
 
@@ -115,7 +115,7 @@ void init_page_settingmodedegree(bk_lv_ui_t * bk_ui) {
 
     // ImageView: degree_f_im
     bk_ui->settingmodedegree_degree_f_im = lv_image_create(bk_ui->settingmodedegree);
-    _img_set_src_timed(bk_ui->settingmodedegree_degree_f_im, "/images/degree_bt_f_off.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedegree_degree_f_im, "/images/degree_bt_f_off.png");
     lv_obj_set_pos(bk_ui->settingmodedegree_degree_f_im, 580, 192);
     lv_obj_set_size(bk_ui->settingmodedegree_degree_f_im, 296, 156);
 

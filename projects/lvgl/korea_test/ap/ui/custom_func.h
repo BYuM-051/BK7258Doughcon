@@ -35,11 +35,14 @@ extern "C" {
 #include "ui_config.h"
 
 // add custom functions here
+void ui_page_build_set_image_src(lv_obj_t *obj, const void *src);
+void ui_page_build_enqueue_task(void (*task)(void), const char *name);
+
 #if UI_IMG_TIMED_ENABLE
-/* [IMGTIME] 로그 출력 래퍼. UI_IMG_TIMED_ENABLE=0 이면 lv_image_set_src 직접 호출로 대체됨 */
+/* [IMGTIME] 로그 출력 래퍼. 비활성화해도 page-build capture는 유지됨. */
 void _img_set_src_timed(lv_obj_t *obj, const void *src);
 #else
-#define _img_set_src_timed(obj, src)  lv_image_set_src((obj), (src))
+#define _img_set_src_timed(obj, src)  ui_page_build_set_image_src((obj), (src))
 #endif
 
 /* Deferred image loading — stores src path without loading.

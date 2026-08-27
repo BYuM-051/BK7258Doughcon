@@ -368,9 +368,12 @@ void main_loaded_event_cb(lv_event_t *e)
     _periodic_cache_drop_if_due();
 #endif /* NOT UI_PRENDERING_ENABLE */
 
-    _sm_prewarm_start();
-    automode_mm_prewarm_start();
-    _am_prewarm_start();
+    ui_page_build_enqueue_task(_sm_prewarm_start,
+                               "settingmode prewarm start");
+    ui_page_build_enqueue_task(automode_mm_prewarm_start,
+                               "memorymode prewarm start");
+    ui_page_build_enqueue_task(_am_prewarm_start,
+                               "automode prewarm start");
 }
 
 void main_unload_start_event_cb(lv_event_t *e)

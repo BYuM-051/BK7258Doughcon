@@ -47,7 +47,7 @@ void init_page_neurosys(bk_lv_ui_t * bk_ui) {
 #endif /* UI_PRENDERING_ENABLE */
     // ImageView: allim
     bk_ui->neurosys_allim = lv_image_create(bk_ui->neurosys);
-    _img_set_src_timed(bk_ui->neurosys_allim, "/images/red.png");
+    ui_page_build_set_image_src(bk_ui->neurosys_allim, "/images/red.png");
     lv_obj_set_pos(bk_ui->neurosys_allim, 0, 0);
     lv_obj_set_size(bk_ui->neurosys_allim, LV_PCT(100), LV_PCT(100));
 

@@ -265,16 +265,19 @@ void settingmode_loaded_event_cb(lv_event_t *e)
 
     /* password_popup.png를 canvas 영구 버퍼에 1회 decode
      * (lv_image_cache_drop과 무관 — 팝업 열릴 때 즉시 렌더) */
-    popuppassword_bg_preload();
+    ui_page_build_enqueue_task(popuppassword_bg_preload,
+                               "popuppassword background preload");
 
 #if UI_POPUPPASSWORD_KEYPAD_COMBINED_ENABLE
     /* 키패드 12장을 스프라이트 canvas에 1회 decode */
-    popuppassword_keypad_preload();
+    ui_page_build_enqueue_task(popuppassword_keypad_preload,
+                               "popuppassword keypad preload");
 #endif
 
     /* testmode_box.jpg를 전용 canvas에 1회 decode
      * — 고장진단 진입 시 즉시 렌더 */
-    settingmodetest_bg_preload();
+    ui_page_build_enqueue_task(settingmodetest_bg_preload,
+                               "settingmodetest background preload");
 }
 
 void settingmode_unload_start_event_cb(lv_event_t *e)

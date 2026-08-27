@@ -72,7 +72,7 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui) {
     // ImageView: title
 #if !UI_SETTINGMODE_COMBINED_BG_ENABLE
     bk_ui->settingmode_title = lv_image_create(bk_ui->settingmode);
-    _img_set_src_timed(bk_ui->settingmode_title, "/images/setting_title.png");
+    ui_page_build_set_image_src(bk_ui->settingmode_title, "/images/setting_title.png");
     lv_obj_set_pos(bk_ui->settingmode_title, 0, 10);
     lv_obj_set_size(bk_ui->settingmode_title, 380, 80);
     lv_image_set_inner_align(bk_ui->settingmode_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -91,7 +91,7 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview3
 #if !UI_SETTINGMODE_COMBINED_BG_ENABLE
     bk_ui->settingmode_imageview3 = lv_image_create(bk_ui->settingmode);
-    _img_set_src_timed(bk_ui->settingmode_imageview3, "/images/setting_mode_detailsetting.png");
+    ui_page_build_set_image_src(bk_ui->settingmode_imageview3, "/images/setting_mode_detailsetting.png");
     lv_obj_set_pos(bk_ui->settingmode_imageview3, 408, 320);
     lv_obj_set_size(bk_ui->settingmode_imageview3, 207, 182);
 #endif
@@ -109,7 +109,7 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview5
 #if !UI_SETTINGMODE_COMBINED_BG_ENABLE
     bk_ui->settingmode_imageview5 = lv_image_create(bk_ui->settingmode);
-    _img_set_src_timed(bk_ui->settingmode_imageview5, "/images/setting_mode_degree.png");
+    ui_page_build_set_image_src(bk_ui->settingmode_imageview5, "/images/setting_mode_degree.png");
     lv_obj_set_pos(bk_ui->settingmode_imageview5, 703, 120);
     lv_obj_set_size(bk_ui->settingmode_imageview5, 207, 182);
 #endif
@@ -127,7 +127,7 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview7
 #if !UI_SETTINGMODE_COMBINED_BG_ENABLE
     bk_ui->settingmode_imageview7 = lv_image_create(bk_ui->settingmode);
-    _img_set_src_timed(bk_ui->settingmode_imageview7, "/images/setting_mode_record.png");
+    ui_page_build_set_image_src(bk_ui->settingmode_imageview7, "/images/setting_mode_record.png");
     lv_obj_set_pos(bk_ui->settingmode_imageview7, 703, 320);
     lv_obj_set_size(bk_ui->settingmode_imageview7, 207, 182);
 #endif
@@ -145,7 +145,7 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview9
 #if !UI_SETTINGMODE_COMBINED_BG_ENABLE
     bk_ui->settingmode_imageview9 = lv_image_create(bk_ui->settingmode);
-    _img_set_src_timed(bk_ui->settingmode_imageview9, "/images/setting_mode_test.png");
+    ui_page_build_set_image_src(bk_ui->settingmode_imageview9, "/images/setting_mode_test.png");
     lv_obj_set_pos(bk_ui->settingmode_imageview9, 113, 320);
     lv_obj_set_size(bk_ui->settingmode_imageview9, 207, 182);
 #endif
@@ -163,7 +163,7 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview11
 #if !UI_SETTINGMODE_COMBINED_BG_ENABLE
     bk_ui->settingmode_imageview11 = lv_image_create(bk_ui->settingmode);
-    _img_set_src_timed(bk_ui->settingmode_imageview11, "/images/setting_mode_time.png");
+    ui_page_build_set_image_src(bk_ui->settingmode_imageview11, "/images/setting_mode_time.png");
     lv_obj_set_pos(bk_ui->settingmode_imageview11, 113, 120);
     lv_obj_set_size(bk_ui->settingmode_imageview11, 207, 182);
 #endif
@@ -181,7 +181,7 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview13
 #if !UI_SETTINGMODE_COMBINED_BG_ENABLE
     bk_ui->settingmode_imageview13 = lv_image_create(bk_ui->settingmode);
-    _img_set_src_timed(bk_ui->settingmode_imageview13, "/images/setting_mode_language.png");
+    ui_page_build_set_image_src(bk_ui->settingmode_imageview13, "/images/setting_mode_language.png");
     lv_obj_set_pos(bk_ui->settingmode_imageview13, 408, 120);
     lv_obj_set_size(bk_ui->settingmode_imageview13, 207, 182);
 #endif
@@ -199,7 +199,7 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview15
 #if !UI_SETTINGMODE_COMBINED_BG_ENABLE
     bk_ui->settingmode_imageview15 = lv_image_create(bk_ui->settingmode);
-    _img_set_src_timed(bk_ui->settingmode_imageview15, "/images/exit_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmode_imageview15, "/images/exit_bt.png");
     lv_obj_set_pos(bk_ui->settingmode_imageview15, 825, 13);
     lv_obj_set_size(bk_ui->settingmode_imageview15, 179, 74);
 #endif

@@ -65,14 +65,14 @@ void init_page_settingmoderecord(bk_lv_ui_t * bk_ui) {
 
     // ImageView: title
     bk_ui->settingmoderecord_title = lv_image_create(bk_ui->settingmoderecord);
-    _img_set_src_timed(bk_ui->settingmoderecord_title, "/images/record_title.png");
+    ui_page_build_set_image_src(bk_ui->settingmoderecord_title, "/images/record_title.png");
     lv_obj_set_pos(bk_ui->settingmoderecord_title, 0, 10);
     lv_obj_set_size(bk_ui->settingmoderecord_title, 380, 80);
     lv_image_set_inner_align(bk_ui->settingmoderecord_title, LV_IMAGE_ALIGN_TOP_LEFT);
 
     // ImageView: imageview2
     bk_ui->settingmoderecord_imageview2 = lv_image_create(bk_ui->settingmoderecord);
-    _img_set_src_timed(bk_ui->settingmoderecord_imageview2, "/images/deleteall_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmoderecord_imageview2, "/images/deleteall_bt.png");
     lv_obj_set_pos(bk_ui->settingmoderecord_imageview2, 647, 13);
     lv_obj_set_size(bk_ui->settingmoderecord_imageview2, 179, 74);
 
@@ -98,43 +98,43 @@ void init_page_settingmoderecord(bk_lv_ui_t * bk_ui) {
 
     // ImageView: imageview5
     bk_ui->settingmoderecord_imageview5 = lv_image_create(bk_ui->settingmoderecord);
-    _img_set_src_timed(bk_ui->settingmoderecord_imageview5, "/images/exit_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmoderecord_imageview5, "/images/exit_bt.png");
     lv_obj_set_pos(bk_ui->settingmoderecord_imageview5, 825, 13);
     lv_obj_set_size(bk_ui->settingmoderecord_imageview5, 179, 74);
 
     // ImageView: imageview6
     bk_ui->settingmoderecord_imageview6 = lv_image_create(bk_ui->settingmoderecord);
-    _img_set_src_timed(bk_ui->settingmoderecord_imageview6, "/images/setting_record_chart_title.png");
+    ui_page_build_set_image_src(bk_ui->settingmoderecord_imageview6, "/images/setting_record_chart_title.png");
     lv_obj_set_pos(bk_ui->settingmoderecord_imageview6, 12, 93);
     lv_obj_set_size(bk_ui->settingmoderecord_imageview6, 1000, 66);
 
     // ImageView: chartbox0
     bk_ui->settingmoderecord_chartbox0 = lv_image_create(bk_ui->settingmoderecord);
-    _img_set_src_timed(bk_ui->settingmoderecord_chartbox0, "/images/setting_record_chart_box.png");
+    ui_page_build_set_image_src(bk_ui->settingmoderecord_chartbox0, "/images/setting_record_chart_box.png");
     lv_obj_set_pos(bk_ui->settingmoderecord_chartbox0, 12, 161);
     lv_obj_set_size(bk_ui->settingmoderecord_chartbox0, 1000, 66);
 
     // ImageView: chartbox1
     bk_ui->settingmoderecord_chartbox1 = lv_image_create(bk_ui->settingmoderecord);
-    _img_set_src_timed(bk_ui->settingmoderecord_chartbox1, "/images/setting_record_chart_box.png");
+    ui_page_build_set_image_src(bk_ui->settingmoderecord_chartbox1, "/images/setting_record_chart_box.png");
     lv_obj_set_pos(bk_ui->settingmoderecord_chartbox1, 12, 231);
     lv_obj_set_size(bk_ui->settingmoderecord_chartbox1, 1000, 66);
 
     // ImageView: chartbox2
     bk_ui->settingmoderecord_chartbox2 = lv_image_create(bk_ui->settingmoderecord);
-    _img_set_src_timed(bk_ui->settingmoderecord_chartbox2, "/images/setting_record_chart_box.png");
+    ui_page_build_set_image_src(bk_ui->settingmoderecord_chartbox2, "/images/setting_record_chart_box.png");
     lv_obj_set_pos(bk_ui->settingmoderecord_chartbox2, 12, 301);
     lv_obj_set_size(bk_ui->settingmoderecord_chartbox2, 1000, 66);
 
     // ImageView: chartbox3
     bk_ui->settingmoderecord_chartbox3 = lv_image_create(bk_ui->settingmoderecord);
-    _img_set_src_timed(bk_ui->settingmoderecord_chartbox3, "/images/setting_record_chart_box.png");
+    ui_page_build_set_image_src(bk_ui->settingmoderecord_chartbox3, "/images/setting_record_chart_box.png");
     lv_obj_set_pos(bk_ui->settingmoderecord_chartbox3, 12, 371);
     lv_obj_set_size(bk_ui->settingmoderecord_chartbox3, 1000, 66);
 
     // ImageView: chartbox4
     bk_ui->settingmoderecord_chartbox4 = lv_image_create(bk_ui->settingmoderecord);
-    _img_set_src_timed(bk_ui->settingmoderecord_chartbox4, "/images/setting_record_chart_box.png");
+    ui_page_build_set_image_src(bk_ui->settingmoderecord_chartbox4, "/images/setting_record_chart_box.png");
     lv_obj_set_pos(bk_ui->settingmoderecord_chartbox4, 12, 441);
     lv_obj_set_size(bk_ui->settingmoderecord_chartbox4, 1000, 66);
 

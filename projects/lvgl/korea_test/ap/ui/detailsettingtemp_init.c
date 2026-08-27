@@ -192,7 +192,7 @@ void init_page_detailsettingtemp(bk_lv_ui_t * bk_ui) {
 
     // ImageView: imageview16
     bk_ui->detailsettingtemp_imageview16 = lv_image_create(bk_ui->detailsettingtemp);
-    _img_set_src_timed(bk_ui->detailsettingtemp_imageview16, "/images/left_bt.png");
+    ui_page_build_set_image_src(bk_ui->detailsettingtemp_imageview16, "/images/left_bt.png");
     lv_obj_set_pos(bk_ui->detailsettingtemp_imageview16, 19, 429);
     lv_obj_set_size(bk_ui->detailsettingtemp_imageview16, 106, 72);
 
@@ -214,7 +214,7 @@ void init_page_detailsettingtemp(bk_lv_ui_t * bk_ui) {
 
     // ImageView: imageview19
     bk_ui->detailsettingtemp_imageview19 = lv_image_create(bk_ui->detailsettingtemp);
-    _img_set_src_timed(bk_ui->detailsettingtemp_imageview19, "/images/right_bt.png");
+    ui_page_build_set_image_src(bk_ui->detailsettingtemp_imageview19, "/images/right_bt.png");
     lv_obj_set_pos(bk_ui->detailsettingtemp_imageview19, 457, 429);
     lv_obj_set_size(bk_ui->detailsettingtemp_imageview19, 106, 72);
 

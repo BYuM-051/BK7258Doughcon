@@ -147,7 +147,7 @@ void init_page_settingmodetime(bk_lv_ui_t *bk_ui)
 
     /* 타이틀 */
     bk_ui->settingmodetime_title = lv_image_create(bk_ui->settingmodetime);
-    _img_set_src_timed(bk_ui->settingmodetime_title, "/images/detail_time_title.png");
+    ui_page_build_set_image_src(bk_ui->settingmodetime_title, "/images/detail_time_title.png");
     lv_obj_set_pos(bk_ui->settingmodetime_title, 0, 10);
     lv_obj_set_size(bk_ui->settingmodetime_title, 380, 80);
     lv_image_set_inner_align(bk_ui->settingmodetime_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -163,13 +163,13 @@ void init_page_settingmodetime(bk_lv_ui_t *bk_ui)
     lv_obj_set_size(bk_ui->settingmodetime_backbt, 179, 74);
 
     bk_ui->settingmodetime_exitim = lv_image_create(bk_ui->settingmodetime);
-    _img_set_src_timed(bk_ui->settingmodetime_exitim, "/images/exit_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmodetime_exitim, "/images/exit_bt.png");
     lv_obj_set_pos(bk_ui->settingmodetime_exitim, 825, 13);
     lv_obj_set_size(bk_ui->settingmodetime_exitim, 179, 74);
 
     /* ── 날짜 행 (y=165~251) ─────────────────────────────────────────── */
     bk_ui->settingmodetime_imageview4 = lv_image_create(bk_ui->settingmodetime);
-    _img_set_src_timed(bk_ui->settingmodetime_imageview4, "/images/setting_time_date.png");
+    ui_page_build_set_image_src(bk_ui->settingmodetime_imageview4, "/images/setting_time_date.png");
     lv_obj_set_pos(bk_ui->settingmodetime_imageview4, 112, 165);
     lv_obj_set_size(bk_ui->settingmodetime_imageview4, 800, 86);
 
@@ -224,7 +224,7 @@ void init_page_settingmodetime(bk_lv_ui_t *bk_ui)
 
     /* ── 시간 행 (y=325~411) ─────────────────────────────────────────── */
     bk_ui->settingmodetime_imageview7 = lv_image_create(bk_ui->settingmodetime);
-    _img_set_src_timed(bk_ui->settingmodetime_imageview7, "/images/setting_time_clock.png");
+    ui_page_build_set_image_src(bk_ui->settingmodetime_imageview7, "/images/setting_time_clock.png");
     lv_obj_set_pos(bk_ui->settingmodetime_imageview7, 112, 325);
     lv_obj_set_size(bk_ui->settingmodetime_imageview7, 800, 86);
 

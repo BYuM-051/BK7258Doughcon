@@ -1808,8 +1808,10 @@ void automode_loaded_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     ui_title_anim(bk_ui->automode_title);
-    _ams_pw_start();
-    automode_mm_prewarm_start();
+    ui_page_build_enqueue_task(_ams_pw_start,
+                               "automodestart prewarm start");
+    ui_page_build_enqueue_task(automode_mm_prewarm_start,
+                               "memorymode prewarm start");
     return;
 }
 

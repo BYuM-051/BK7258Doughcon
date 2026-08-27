@@ -69,7 +69,7 @@ void init_page_settingmodelanguage(bk_lv_ui_t * bk_ui) {
 
     // ImageView: title
     bk_ui->settingmodelanguage_title = lv_image_create(bk_ui->settingmodelanguage);
-    _img_set_src_timed(bk_ui->settingmodelanguage_title, "/images/language_title.png");
+    ui_page_build_set_image_src(bk_ui->settingmodelanguage_title, "/images/language_title.png");
     lv_obj_set_pos(bk_ui->settingmodelanguage_title, 0, 10);
     lv_obj_set_size(bk_ui->settingmodelanguage_title, 380, 80);
     lv_image_set_inner_align(bk_ui->settingmodelanguage_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -86,7 +86,7 @@ void init_page_settingmodelanguage(bk_lv_ui_t * bk_ui) {
 
     // ImageView: exitim
     bk_ui->settingmodelanguage_exitim = lv_image_create(bk_ui->settingmodelanguage);
-    _img_set_src_timed(bk_ui->settingmodelanguage_exitim, "/images/exit_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmodelanguage_exitim, "/images/exit_bt.png");
     lv_obj_set_pos(bk_ui->settingmodelanguage_exitim, 825, 13);
     lv_obj_set_size(bk_ui->settingmodelanguage_exitim, 179, 74);
 
@@ -102,7 +102,7 @@ void init_page_settingmodelanguage(bk_lv_ui_t * bk_ui) {
 
     // ImageView: koreanim
     bk_ui->settingmodelanguage_koreanim = lv_image_create(bk_ui->settingmodelanguage);
-    _img_set_src_timed(bk_ui->settingmodelanguage_koreanim, "/images/language_korean_off.png");
+    ui_page_build_set_image_src(bk_ui->settingmodelanguage_koreanim, "/images/language_korean_off.png");
     lv_obj_set_pos(bk_ui->settingmodelanguage_koreanim, 711, 192);
     lv_obj_set_size(bk_ui->settingmodelanguage_koreanim, 296, 156);
     //  bk_ui->settingmodelanguage_koreanim = lv_image_create(bk_ui->settingmodelanguage);
@@ -125,7 +125,7 @@ void init_page_settingmodelanguage(bk_lv_ui_t * bk_ui) {
 
     // ImageView: englishim
     bk_ui->settingmodelanguage_englishim = lv_image_create(bk_ui->settingmodelanguage);
-    _img_set_src_timed(bk_ui->settingmodelanguage_englishim, "/images/language_english_off.png");
+    ui_page_build_set_image_src(bk_ui->settingmodelanguage_englishim, "/images/language_english_off.png");
     lv_obj_set_pos(bk_ui->settingmodelanguage_englishim, 365, 192);
     lv_obj_set_size(bk_ui->settingmodelanguage_englishim, 296, 156);
     //  bk_ui->settingmodelanguage_englishim = lv_image_create(bk_ui->settingmodelanguage);
@@ -145,10 +145,9 @@ void init_page_settingmodelanguage(bk_lv_ui_t * bk_ui) {
 
     // ImageView: chinaim
     bk_ui->settingmodelanguage_chinaim = lv_image_create(bk_ui->settingmodelanguage);
-    _img_set_src_timed(bk_ui->settingmodelanguage_chinaim, "/images/language_china_off.png");
+    ui_page_build_set_image_src(bk_ui->settingmodelanguage_chinaim, "/images/language_china_off.png");
     lv_obj_set_pos(bk_ui->settingmodelanguage_chinaim, 19, 192);
     lv_obj_set_size(bk_ui->settingmodelanguage_chinaim, 296, 156);
     _update_language_ui();
 
 }
-

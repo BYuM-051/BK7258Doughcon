@@ -116,7 +116,7 @@ void init_page_manualmodestart(bk_lv_ui_t * bk_ui) {
 
     // ImageView: title
     bk_ui->manualmodestart_title = lv_image_create(bk_ui->manualmodestart);
-    _img_set_src_timed(bk_ui->manualmodestart_title, "/images/manualmode_title.png");
+    ui_page_build_set_image_src(bk_ui->manualmodestart_title, "/images/manualmode_title.png");
     lv_obj_set_pos(bk_ui->manualmodestart_title, 0, 10);
     lv_obj_set_size(bk_ui->manualmodestart_title, 380, 80);
     lv_image_set_inner_align(bk_ui->manualmodestart_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -166,7 +166,7 @@ void init_page_manualmodestart(bk_lv_ui_t * bk_ui) {
 
     // ImageView: backim
     bk_ui->manualmodestart_backim = lv_image_create(bk_ui->manualmodestart);
-    _img_set_src_timed(bk_ui->manualmodestart_backim, "/images/exit_bt.png");
+    ui_page_build_set_image_src(bk_ui->manualmodestart_backim, "/images/exit_bt.png");
     lv_obj_set_pos(bk_ui->manualmodestart_backim, 13, 445);
     lv_obj_set_size(bk_ui->manualmodestart_backim, 179, 74);
 
@@ -182,7 +182,7 @@ void init_page_manualmodestart(bk_lv_ui_t * bk_ui) {
 
     // ImageView: startim
     bk_ui->manualmodestart_startim = lv_image_create(bk_ui->manualmodestart);
-    _img_set_src_timed(bk_ui->manualmodestart_startim, "/images/start_bt.png");
+    ui_page_build_set_image_src(bk_ui->manualmodestart_startim, "/images/start_bt.png");
     lv_obj_set_pos(bk_ui->manualmodestart_startim, 847, 445);
     lv_obj_set_size(bk_ui->manualmodestart_startim, 164, 74);
 

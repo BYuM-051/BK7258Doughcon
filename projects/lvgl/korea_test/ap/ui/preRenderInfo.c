@@ -55,40 +55,60 @@ extern void destroy_page_neurosys(bk_lv_ui_t *bk_ui);
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 
+#define PAGE_INFO(id, member, initFunc, destroyFunc) \
+    [id] = { \
+        .page = &bk_lv_tool_ui.member, \
+        .pageId = id, \
+        .initBase = initFunc, \
+        .initStep = ui_page_build_step, \
+        .destroy = destroyFunc \
+    }
+
 const preRendererPageInfo_t preRenderPageInfo[PAGE_COUNT] =
 {
-    [PAGE_MAIN] = {&bk_lv_tool_ui.main, PAGE_MAIN, init_page_main, destroy_page_main},
-    [PAGE_AUTOMODE] = {&bk_lv_tool_ui.automode, PAGE_AUTOMODE, init_page_automode, destroy_page_automode},
-    [PAGE_AUTOMODESTART] = {&bk_lv_tool_ui.automodestart, PAGE_AUTOMODESTART, init_page_automodestart, destroy_page_automodestart},
-    [PAGE_AUTOMODEEND] = {&bk_lv_tool_ui.automodeend, PAGE_AUTOMODEEND, init_page_automodeend, destroy_page_automodeend},
-    [PAGE_MANUALMODE] = {&bk_lv_tool_ui.manualmode, PAGE_MANUALMODE, init_page_manualmode, destroy_page_manualmode},
-    [PAGE_MANUALMODESTART] = {&bk_lv_tool_ui.manualmodestart, PAGE_MANUALMODESTART, init_page_manualmodestart, destroy_page_manualmodestart},
-    [PAGE_AUTODRYMODE] = {&bk_lv_tool_ui.autodrymode, PAGE_AUTODRYMODE, init_page_autodrymode, destroy_page_autodrymode},
-    [PAGE_MEMORYMODE] = {&bk_lv_tool_ui.memorymode, PAGE_MEMORYMODE, init_page_memorymode, destroy_page_memorymode},
-    [PAGE_SETTINGMODE] = {&bk_lv_tool_ui.settingmode, PAGE_SETTINGMODE, init_page_settingmode, destroy_page_settingmode},
-    [PAGE_SETTINGMODEDETAILSETTING] = {&bk_lv_tool_ui.settingmodedetailsetting, PAGE_SETTINGMODEDETAILSETTING, init_page_settingmodedetailsetting, destroy_page_settingmodedetailsetting},
-    [PAGE_SETTINGMODEDEGREE] = {&bk_lv_tool_ui.settingmodedegree, PAGE_SETTINGMODEDEGREE, init_page_settingmodedegree, destroy_page_settingmodedegree},
-    [PAGE_SETTINGMODERECORD] = {&bk_lv_tool_ui.settingmoderecord, PAGE_SETTINGMODERECORD, init_page_settingmoderecord, destroy_page_settingmoderecord},
-    [PAGE_SETTINGMODETEST] = {&bk_lv_tool_ui.settingmodetest, PAGE_SETTINGMODETEST, init_page_settingmodetest, destroy_page_settingmodetest},
-    [PAGE_SETTINGMODETIME] = {&bk_lv_tool_ui.settingmodetime, PAGE_SETTINGMODETIME, init_page_settingmodetime, destroy_page_settingmodetime},
-    [PAGE_SETTINGMODELANGUAGE] = {&bk_lv_tool_ui.settingmodelanguage, PAGE_SETTINGMODELANGUAGE, init_page_settingmodelanguage, destroy_page_settingmodelanguage},
-    [PAGE_SETTINGMODEMANUAL] = {&bk_lv_tool_ui.settingmodemanual, PAGE_SETTINGMODEMANUAL, init_page_settingmodemanual, destroy_page_settingmodemanual},
-    [PAGE_SETTINGMODEDEFROST] = {&bk_lv_tool_ui.settingmodedefrost, PAGE_SETTINGMODEDEFROST, init_page_settingmodedefrost, destroy_page_settingmodedefrost},
-    [PAGE_DETAILSETTINGTEMP] = {&bk_lv_tool_ui.detailsettingtemp, PAGE_DETAILSETTINGTEMP, init_page_detailsettingtemp, destroy_page_detailsettingtemp},
-    [PAGE_DETAILSETTINGHUMIDITY] = {&bk_lv_tool_ui.detailsettinghumidity, PAGE_DETAILSETTINGHUMIDITY, init_page_detailsettinghumidity, destroy_page_detailsettinghumidity},
-    [PAGE_DETAILSETTINGTIME] = {&bk_lv_tool_ui.detailsettingtime, PAGE_DETAILSETTINGTIME, init_page_detailsettingtime, destroy_page_detailsettingtime},
-    [PAGE_DETAILSETTINGDAMPER] = {&bk_lv_tool_ui.detailsettingdamper, PAGE_DETAILSETTINGDAMPER, init_page_detailsettingdamper, destroy_page_detailsettingdamper},
-    [PAGE_DETAILSETTINGDEFROST] = {&bk_lv_tool_ui.detailsettingdefrost, PAGE_DETAILSETTINGDEFROST, init_page_detailsettingdefrost, destroy_page_detailsettingdefrost},
-    [PAGE_NEUROSYS] = {&bk_lv_tool_ui.neurosys, PAGE_NEUROSYS, init_page_neurosys, destroy_page_neurosys}
+    PAGE_INFO(PAGE_MAIN, main, init_page_main, destroy_page_main),
+    PAGE_INFO(PAGE_AUTOMODE, automode, init_page_automode, destroy_page_automode),
+    PAGE_INFO(PAGE_AUTOMODESTART, automodestart, init_page_automodestart, destroy_page_automodestart),
+    PAGE_INFO(PAGE_AUTOMODEEND, automodeend, init_page_automodeend, destroy_page_automodeend),
+    PAGE_INFO(PAGE_MANUALMODE, manualmode, init_page_manualmode, destroy_page_manualmode),
+    PAGE_INFO(PAGE_MANUALMODESTART, manualmodestart, init_page_manualmodestart, destroy_page_manualmodestart),
+    PAGE_INFO(PAGE_AUTODRYMODE, autodrymode, init_page_autodrymode, destroy_page_autodrymode),
+    PAGE_INFO(PAGE_MEMORYMODE, memorymode, init_page_memorymode, destroy_page_memorymode),
+    PAGE_INFO(PAGE_SETTINGMODE, settingmode, init_page_settingmode, destroy_page_settingmode),
+    PAGE_INFO(PAGE_SETTINGMODEDETAILSETTING, settingmodedetailsetting, init_page_settingmodedetailsetting, destroy_page_settingmodedetailsetting),
+    PAGE_INFO(PAGE_SETTINGMODEDEGREE, settingmodedegree, init_page_settingmodedegree, destroy_page_settingmodedegree),
+    PAGE_INFO(PAGE_SETTINGMODERECORD, settingmoderecord, init_page_settingmoderecord, destroy_page_settingmoderecord),
+    PAGE_INFO(PAGE_SETTINGMODETEST, settingmodetest, init_page_settingmodetest, destroy_page_settingmodetest),
+    PAGE_INFO(PAGE_SETTINGMODETIME, settingmodetime, init_page_settingmodetime, destroy_page_settingmodetime),
+    PAGE_INFO(PAGE_SETTINGMODELANGUAGE, settingmodelanguage, init_page_settingmodelanguage, destroy_page_settingmodelanguage),
+    PAGE_INFO(PAGE_SETTINGMODEMANUAL, settingmodemanual, init_page_settingmodemanual, destroy_page_settingmodemanual),
+    PAGE_INFO(PAGE_SETTINGMODEDEFROST, settingmodedefrost, init_page_settingmodedefrost, destroy_page_settingmodedefrost),
+    PAGE_INFO(PAGE_DETAILSETTINGTEMP, detailsettingtemp, init_page_detailsettingtemp, destroy_page_detailsettingtemp),
+    PAGE_INFO(PAGE_DETAILSETTINGHUMIDITY, detailsettinghumidity, init_page_detailsettinghumidity, destroy_page_detailsettinghumidity),
+    PAGE_INFO(PAGE_DETAILSETTINGTIME, detailsettingtime, init_page_detailsettingtime, destroy_page_detailsettingtime),
+    PAGE_INFO(PAGE_DETAILSETTINGDAMPER, detailsettingdamper, init_page_detailsettingdamper, destroy_page_detailsettingdamper),
+    PAGE_INFO(PAGE_DETAILSETTINGDEFROST, detailsettingdefrost, init_page_detailsettingdefrost, destroy_page_detailsettingdefrost),
+    PAGE_INFO(PAGE_NEUROSYS, neurosys, init_page_neurosys, destroy_page_neurosys)
 };
+
+#undef PAGE_INFO
 
 pageLifecycleFunc_t getPageInitFunc(pageId_t pageId)
 {
     bk_printf(TAG "[SCREEN] getPageInitFunc(%d)\n", pageId);
     if(pageId >= 0 && pageId < PAGE_COUNT)
     {
-        bk_printf(TAG "[SCREEN] getPageInitFunc was %d for pageId %d\n", preRenderPageInfo[pageId].init_func != NULL, pageId);
-        return preRenderPageInfo[pageId].init_func;
+        bk_printf(TAG "[SCREEN] getPageInitFunc was %d for pageId %d\n", preRenderPageInfo[pageId].initBase != NULL, pageId);
+        return preRenderPageInfo[pageId].initBase;
+    }
+    return NULL;
+}
+
+pageInitStepFunc_t getPageInitStepFunc(pageId_t pageId)
+{
+    if(pageId >= 0 && pageId < PAGE_COUNT)
+    {
+        return preRenderPageInfo[pageId].initStep;
     }
     return NULL;
 }
@@ -98,8 +118,8 @@ pageLifecycleFunc_t getPageDeinitFunc(pageId_t pageId)
     bk_printf(TAG "[SCREEN] getPageDeinitFunc(%d)\n", pageId);
     if(pageId >= 0 && pageId < PAGE_COUNT)
     {
-        bk_printf(TAG "[SCREEN] getPageDeinitFunc was %d for pageId %d\n", preRenderPageInfo[pageId].deinit_func != NULL, pageId);
-        return preRenderPageInfo[pageId].deinit_func;
+        bk_printf(TAG "[SCREEN] getPageDeinitFunc was %d for pageId %d\n", preRenderPageInfo[pageId].destroy != NULL, pageId);
+        return preRenderPageInfo[pageId].destroy;
     }
     return NULL;
 }

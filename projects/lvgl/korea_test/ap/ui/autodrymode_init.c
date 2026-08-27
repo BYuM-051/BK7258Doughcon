@@ -104,7 +104,7 @@ void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
     bk_printf(TAG "[IMGTIME] ===== autodrymode create/init done ===== %lu ms\n", elapsed);
     // ImageView: title
     bk_ui->autodrymode_title = lv_image_create(bk_ui->autodrymode);
-    _img_set_src_timed(bk_ui->autodrymode_title, "/images/autodrymode_title.png");
+    ui_page_build_set_image_src(bk_ui->autodrymode_title, "/images/autodrymode_title.png");
     lv_obj_set_pos(bk_ui->autodrymode_title, 0, 10);
     lv_obj_set_size(bk_ui->autodrymode_title, 380, 80);
     lv_image_set_inner_align(bk_ui->autodrymode_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -121,7 +121,7 @@ void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
 
     // ImageView: backim
     bk_ui->autodrymode_backim = lv_image_create(bk_ui->autodrymode);
-    _img_set_src_timed(bk_ui->autodrymode_backim, "/images/exit_bt.png");
+    ui_page_build_set_image_src(bk_ui->autodrymode_backim, "/images/exit_bt.png");
     lv_obj_set_pos(bk_ui->autodrymode_backim, 13, 445);
     lv_obj_set_size(bk_ui->autodrymode_backim, 179, 74);
 
@@ -204,7 +204,7 @@ void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
 
     // ImageView: imageview16
     bk_ui->autodrymode_imageview16 = lv_image_create(bk_ui->autodrymode);
-    _img_set_src_timed(bk_ui->autodrymode_imageview16, "/images/auto_dry_time_box.png");
+    ui_page_build_set_image_src(bk_ui->autodrymode_imageview16, "/images/auto_dry_time_box.png");
     lv_obj_set_pos(bk_ui->autodrymode_imageview16, 705, 237);
     lv_obj_set_size(bk_ui->autodrymode_imageview16, 302, 66);
 
@@ -292,7 +292,7 @@ void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
 
     // ImageView: auto_dry_startim
     bk_ui->autodrymode_auto_dry_startim = lv_image_create(bk_ui->autodrymode);
-    _img_set_src_timed(bk_ui->autodrymode_auto_dry_startim, "/images/start_bt.png");
+    ui_page_build_set_image_src(bk_ui->autodrymode_auto_dry_startim, "/images/start_bt.png");
     lv_obj_set_pos(bk_ui->autodrymode_auto_dry_startim, 847, 445);
     lv_obj_set_size(bk_ui->autodrymode_auto_dry_startim, 164, 74);
 
