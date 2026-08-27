@@ -14,6 +14,7 @@
 #include "ui_lang.h"
 #include "hardware_hal.h"
 #include "uart_comm.h"
+#include "preRenderer.h"
 
 #define TAG "[automodestart_cb.c] "
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
@@ -411,6 +412,14 @@ static void _go_to_automodeend(bk_lv_ui_t *bk_ui)
      * 여기서 미리 클리어하면 _record_save_slot0이 bo_*_total_min(원래 설정 시간)을
      * 참조하지 못해 정전복구 후 완료된 기록에 잔여분(0)이 저장되는 버그 발생. */
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_AUTOMODEEND);
+    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteYear,  settings_get_str("CurrentCompleteYear"));
+    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteMonth, settings_get_str("CurrentCompleteMonth"));
+    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteDay,   settings_get_str("CurrentCompleteDay"));
+    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteHour,  settings_get_str("CurrentCompleteHour"));
+    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteMin,   settings_get_str("CurrentCompleteMin"));
+#else
     init_page_automodeend(bk_ui);
     lv_label_set_text(bk_ui->automodeend_AutoModeCompleteYear,  settings_get_str("CurrentCompleteYear"));
     lv_label_set_text(bk_ui->automodeend_AutoModeCompleteMonth, settings_get_str("CurrentCompleteMonth"));
@@ -419,6 +428,7 @@ static void _go_to_automodeend(bk_lv_ui_t *bk_ui)
     lv_label_set_text(bk_ui->automodeend_AutoModeCompleteMin,   settings_get_str("CurrentCompleteMin"));
     lv_scr_load(bk_ui->automodeend);
     destroy_page_automodestart(bk_ui);
+#endif /* UI_PRENDERING_ENABLE */
 
     settings_set_str("saveChecking", "0");
     settings_save_dirty();
@@ -447,6 +457,14 @@ static void _go_to_automodeend1(bk_lv_ui_t *bk_ui)
      * 여기서 미리 클리어하면 _record_save_slot0이 bo_*_total_min(원래 설정 시간)을
      * 참조하지 못해 정전복구 후 완료된 기록에 잔여분(0)이 저장되는 버그 발생. */
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_AUTOMODEEND);
+    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteYear,  settings_get_str("CurrentCompleteYear"));
+    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteMonth, settings_get_str("CurrentCompleteMonth"));
+    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteDay,   settings_get_str("CurrentCompleteDay"));
+    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteHour,  settings_get_str("CurrentCompleteHour"));
+    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteMin,   settings_get_str("CurrentCompleteMin"));
+#else
     init_page_automodeend(bk_ui);
     lv_label_set_text(bk_ui->automodeend_AutoModeCompleteYear,  settings_get_str("CurrentCompleteYear"));
     lv_label_set_text(bk_ui->automodeend_AutoModeCompleteMonth, settings_get_str("CurrentCompleteMonth"));
@@ -455,6 +473,7 @@ static void _go_to_automodeend1(bk_lv_ui_t *bk_ui)
     lv_label_set_text(bk_ui->automodeend_AutoModeCompleteMin,   settings_get_str("CurrentCompleteMin"));
     lv_scr_load(bk_ui->automodeend);
     destroy_page_automodestart(bk_ui);
+#endif /* UI_PRENDERING_ENABLE */
 
     settings_set_str("saveChecking", "0");
     settings_save_dirty();
@@ -488,7 +507,7 @@ static void _refresh_running_ui(bk_lv_ui_t *bk_ui)
                 bk_printf(TAG "[TEST] mode -> %d\n", s_test_op_mode);
             } else {
                 /* FERM2 완료 → automodeend */
-                _go_to_automodeend(bk_ui);
+                _go_to_automodeend1(bk_ui);
                 return;
             }
         }
@@ -625,6 +644,14 @@ static void _refresh_running_ui(bk_lv_ui_t *bk_ui)
                     /* 부저+기록저장: lv_scr_load 전에 처리 (SCREEN_LOAD_START 콜백 밖에서)
                      * uart_comm.c RX 0x34 → over_ferm_jeon_started → manualmodestart 전환 */
                     automodeend_save_record_and_buzzer(state);
+#if UI_PRENDERING_ENABLE
+                    ui_page_change(PAGE_AUTOMODEEND);
+                    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteYear,  settings_get_str("CurrentCompleteYear"));
+                    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteMonth, settings_get_str("CurrentCompleteMonth"));
+                    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteDay,   settings_get_str("CurrentCompleteDay"));
+                    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteHour,  settings_get_str("CurrentCompleteHour"));
+                    lv_label_set_text(bk_ui->automodeend_AutoModeCompleteMin,   settings_get_str("CurrentCompleteMin"));
+#else
                     init_page_automodeend(bk_ui);
                     lv_label_set_text(bk_ui->automodeend_AutoModeCompleteYear,  settings_get_str("CurrentCompleteYear"));
                     lv_label_set_text(bk_ui->automodeend_AutoModeCompleteMonth, settings_get_str("CurrentCompleteMonth"));
@@ -632,6 +659,7 @@ static void _refresh_running_ui(bk_lv_ui_t *bk_ui)
                     lv_label_set_text(bk_ui->automodeend_AutoModeCompleteHour,  settings_get_str("CurrentCompleteHour"));
                     lv_label_set_text(bk_ui->automodeend_AutoModeCompleteMin,   settings_get_str("CurrentCompleteMin"));
                     lv_scr_load(bk_ui->automodeend);
+#endif /* UI_PRENDERING_ENABLE */
                     return;
                 }
                 /* 과발효방지 진행 중(over_ferm_active=true): MCU 완료 신호 대기 */
@@ -876,9 +904,13 @@ void automodestart_startbt_event_cb(lv_event_t *e)
     settings_set_str("saveChecking", "0");
     settings_save_dirty();
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_AUTOMODE);
+#else
     if (bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))
         init_page_automode(bk_ui);
     lv_scr_load(bk_ui->automode);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 static void _anim_toggle_event_cb(lv_event_t *e)
