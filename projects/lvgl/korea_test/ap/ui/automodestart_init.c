@@ -71,14 +71,14 @@ void init_page_automodestart(bk_lv_ui_t * bk_ui) {
 
     // ImageView: auto_bg
     bk_ui->automodestart_auto_bg = lv_image_create(bk_ui->automodestart);
-    _img_set_src_timed(bk_ui->automodestart_auto_bg, "/images/auto_mode_start_bgi.jpg");
+    ui_page_build_set_image_src(bk_ui->automodestart_auto_bg, "/images/auto_mode_start_bgi.jpg");
     lv_obj_set_pos(bk_ui->automodestart_auto_bg, 0, 0);
     lv_obj_set_size(bk_ui->automodestart_auto_bg, 1024, 540);
 
 
     // ImageView: title
     bk_ui->automodestart_title = lv_image_create(bk_ui->automodestart);
-    _img_set_src_timed(bk_ui->automodestart_title, "/images/automode_title.png");
+    ui_page_build_set_image_src(bk_ui->automodestart_title, "/images/automode_title.png");
     lv_obj_set_pos(bk_ui->automodestart_title, 0, 10);
     lv_obj_set_size(bk_ui->automodestart_title, 380, 80);
     lv_image_set_inner_align(bk_ui->automodestart_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -125,13 +125,13 @@ void init_page_automodestart(bk_lv_ui_t * bk_ui) {
 
     // ImageView: imageview8
     bk_ui->automodestart_imageview8 = lv_image_create(bk_ui->automodestart);
-    _img_set_src_timed(bk_ui->automodestart_imageview8, "/images/stop_bt.png");
+    ui_page_build_set_image_src(bk_ui->automodestart_imageview8, "/images/stop_bt.png");
     lv_obj_set_pos(bk_ui->automodestart_imageview8, 847, 445);
     lv_obj_set_size(bk_ui->automodestart_imageview8, 164, 74);
 
     // ImageView: auto_tempbox
     bk_ui->automodestart_auto_tempbox = lv_image_create(bk_ui->automodestart);
-    _img_set_src_timed(bk_ui->automodestart_auto_tempbox, "/images/tempbox.png");
+    ui_page_build_set_image_src(bk_ui->automodestart_auto_tempbox, "/images/tempbox.png");
     lv_obj_set_pos(bk_ui->automodestart_auto_tempbox, 222, 445);
     lv_obj_set_size(bk_ui->automodestart_auto_tempbox, 580, 74);
 
@@ -160,7 +160,7 @@ void init_page_automodestart(bk_lv_ui_t * bk_ui) {
 
     // ImageView: imageview12
     bk_ui->automodestart_imageview12 = lv_image_create(bk_ui->automodestart);
-    _img_set_src_timed(bk_ui->automodestart_imageview12, "/images/auto_mode_start_box_time.png");
+    ui_page_build_set_image_src(bk_ui->automodestart_imageview12, "/images/auto_mode_start_box_time.png");
     lv_obj_set_pos(bk_ui->automodestart_imageview12, 479, 15);
     lv_obj_set_size(bk_ui->automodestart_imageview12, 528, 70);
 
@@ -261,7 +261,7 @@ void init_page_automodestart(bk_lv_ui_t * bk_ui) {
 
     // ImageView: freeze_gif_basic
     bk_ui->automodestart_freeze_gif_basic = lv_image_create(bk_ui->automodestart);
-    _img_set_src_timed(bk_ui->automodestart_freeze_gif_basic, "/images/freeze_gif.png");
+    ui_page_build_set_image_src(bk_ui->automodestart_freeze_gif_basic, "/images/freeze_gif.png");
     lv_obj_set_pos(bk_ui->automodestart_freeze_gif_basic, 449, 185);
     lv_obj_set_size(bk_ui->automodestart_freeze_gif_basic, 45, 45);
 
@@ -274,7 +274,7 @@ void init_page_automodestart(bk_lv_ui_t * bk_ui) {
 
     // ImageView: defrost_gif_basic
     bk_ui->automodestart_defrost_gif_basic = lv_image_create(bk_ui->automodestart);
-    _img_set_src_timed(bk_ui->automodestart_defrost_gif_basic, "/images/defrost_gif.png");
+    ui_page_build_set_image_src(bk_ui->automodestart_defrost_gif_basic, "/images/defrost_gif.png");
     lv_obj_set_pos(bk_ui->automodestart_defrost_gif_basic, 522, 188-3);
     lv_obj_set_size(bk_ui->automodestart_defrost_gif_basic, 63, 45);
 

@@ -55,6 +55,15 @@ extern void destroy_page_neurosys(bk_lv_ui_t *bk_ui);
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 
+#define PAGE_INFO(id, member, initFunc, destroyFunc) \
+    [id] = { \
+        .page = &bk_lv_tool_ui.member, \
+        .pageId = id, \
+        .initBase = initFunc, \
+        .initStep = ui_page_build_step, \
+        .destroy = destroyFunc \
+    }
+
 const preRendererPageInfo_t preRenderPageInfo[PAGE_COUNT] =
 {
     [PAGE_MAIN] = 
@@ -214,13 +223,24 @@ const preRendererPageInfo_t preRenderPageInfo[PAGE_COUNT] =
     [PAGE_NEUROSYS] = {&bk_lv_tool_ui.neurosys, PAGE_NEUROSYS, init_page_neurosys, destroy_page_neurosys, NULL, 0}
 };
 
+#undef PAGE_INFO
+
 pageLifecycleFunc_t getPageInitFunc(pageId_t pageId)
 {
     bk_printf(TAG "[SCREEN] getPageInitFunc(%d)\n", pageId);
     if(pageId >= 0 && pageId < PAGE_COUNT)
     {
-        bk_printf(TAG "[SCREEN] getPageInitFunc was %d for pageId %d\n", preRenderPageInfo[pageId].init_func != NULL, pageId);
-        return preRenderPageInfo[pageId].init_func;
+        bk_printf(TAG "[SCREEN] getPageInitFunc was %d for pageId %d\n", preRenderPageInfo[pageId].initBase != NULL, pageId);
+        return preRenderPageInfo[pageId].initBase;
+    }
+    return NULL;
+}
+
+pageInitStepFunc_t getPageInitStepFunc(pageId_t pageId)
+{
+    if(pageId >= 0 && pageId < PAGE_COUNT)
+    {
+        return preRenderPageInfo[pageId].initStep;
     }
     return NULL;
 }
@@ -230,8 +250,8 @@ pageLifecycleFunc_t getPageDeinitFunc(pageId_t pageId)
     bk_printf(TAG "[SCREEN] getPageDeinitFunc(%d)\n", pageId);
     if(pageId >= 0 && pageId < PAGE_COUNT)
     {
-        bk_printf(TAG "[SCREEN] getPageDeinitFunc was %d for pageId %d\n", preRenderPageInfo[pageId].deinit_func != NULL, pageId);
-        return preRenderPageInfo[pageId].deinit_func;
+        bk_printf(TAG "[SCREEN] getPageDeinitFunc was %d for pageId %d\n", preRenderPageInfo[pageId].destroy != NULL, pageId);
+        return preRenderPageInfo[pageId].destroy;
     }
     return NULL;
 }

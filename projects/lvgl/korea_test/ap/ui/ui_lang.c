@@ -37,7 +37,7 @@ static void _img(lv_obj_t *obj, const char *base, const char *ext,
                      : (lang == 2) ? "_english"
                      :               "";
     snprintf(path, sizeof(path), "%s%s%s%s", base, fsuf, lsuf, ext);
-    _img_set_src_timed(obj, path);
+    ui_page_build_set_image_src(obj, path);
 }
 
 /* Read current language and degree state from settings. */
@@ -102,7 +102,7 @@ void ui_lang_apply_manualmodestart(bk_lv_ui_t *bk_ui)
         snprintf(_tbz, sizeof(_tbz), "/images/tempbox%s_zero%s.png",
                  is_f ? "_f" : "",
                  (lang == 1) ? "_china" : (lang == 2) ? "_english" : "");
-        _img_set_src_timed(bk_ui->manualmodestart_tempbox, _tbz);
+        ui_page_build_set_image_src(bk_ui->manualmodestart_tempbox, _tbz);
     } else
         _LF(bk_ui->manualmodestart_tempbox, "/images/tempbox",      ".png");
     _L(bk_ui->manualmodestart_blackout, "/images/blackout",         ".png");
@@ -214,7 +214,7 @@ void ui_lang_apply_automodestart(bk_lv_ui_t *bk_ui)
         snprintf(_tbz, sizeof(_tbz), "/images/tempbox%s_zero%s.png",
                  is_f ? "_f" : "",
                  (lang == 1) ? "_china" : (lang == 2) ? "_english" : "");
-        _img_set_src_timed(bk_ui->automodestart_auto_tempbox, _tbz);
+        ui_page_build_set_image_src(bk_ui->automodestart_auto_tempbox, _tbz);
     } else
         _LF(bk_ui->automodestart_auto_tempbox, "/images/tempbox",      ".png");
     _L(bk_ui->automodestart_imageview12,    "/images/auto_mode_start_box_time", ".png");
@@ -622,13 +622,13 @@ void ui_lang_apply_detailsettingdamper(bk_lv_ui_t *bk_ui)
         char p[128];
         const char *csuf = (lang == 1) ? "_china" : "";
         snprintf(p, sizeof(p), "/images/detail_damper_1_off%s.png", csuf);
-        _img_set_src_timed(bk_ui->detailsettingdamper_settingim1, p);
+        ui_page_build_set_image_src(bk_ui->detailsettingdamper_settingim1, p);
         snprintf(p, sizeof(p), "/images/detail_damper_2_off%s.png", csuf);
-        _img_set_src_timed(bk_ui->detailsettingdamper_settingim2, p);
+        ui_page_build_set_image_src(bk_ui->detailsettingdamper_settingim2, p);
         snprintf(p, sizeof(p), "/images/detail_damper_3_off%s.png", csuf);
-        _img_set_src_timed(bk_ui->detailsettingdamper_settingim3, p);
+        ui_page_build_set_image_src(bk_ui->detailsettingdamper_settingim3, p);
         snprintf(p, sizeof(p), "/images/detail_damper_4_off%s.png", csuf);
-        _img_set_src_timed(bk_ui->detailsettingdamper_settingim4, p);
+        ui_page_build_set_image_src(bk_ui->detailsettingdamper_settingim4, p);
     }
 }
 
@@ -658,7 +658,7 @@ void ui_lang_apply_timebar(bk_lv_ui_t *bk_ui)
     /* timebar_error_on_english.png 없음 → 영어만 기본(한국어) 이미지로 폴백.
      * 이전엔 이 이유로 중국어까지 통째로 스킵해서 중국어 모드에서도 기본
      * 이미지가 나오는 버그가 있었음 — 중국어는 정상 적용. */
-    _img_set_src_timed(bk_ui->timebar_timebar_error_checkim,
+    ui_page_build_set_image_src(bk_ui->timebar_timebar_error_checkim,
                         (lang == 1) ? "/images/timebar_error_on_china.png"
                                     : "/images/timebar_error_on.png");
 }
@@ -793,11 +793,11 @@ void ui_lang_apply_popuperror(bk_lv_ui_t *bk_ui)
 
     /* box_error: china variant only — English falls back to Korean */
     snprintf(p, sizeof(p), "/images/box_error%s.png", (lang == 1) ? "_china" : "");
-    _img_set_src_timed(bk_ui->popuperror_imageview2, p);
+    ui_page_build_set_image_src(bk_ui->popuperror_imageview2, p);
 
 #define _EL(obj, name) \
     snprintf(p, sizeof(p), "/images/%s%s.png", (name), csuf); \
-    _img_set_src_timed(obj, p)
+    ui_page_build_set_image_src(obj, p)
 
     _EL(bk_ui->popuperror_e1,  "e1_off");
     _EL(bk_ui->popuperror_e2,  "e2_off");
@@ -826,7 +826,7 @@ void ui_lang_apply_picker(lv_obj_t *obj, int num)
      * 이 개별 호출 사이의 갭을 줄이기 위해 decode 직전에도 한 번 더 체크. */
     ui_cache_drop_if_low_mem();
 #endif
-    _img_set_src_timed(obj, path);
+    ui_page_build_set_image_src(obj, path);
 }
 
 /* ── ON/OFF value display (language-aware, text vs 开/关 font) ───── */
@@ -855,7 +855,7 @@ void ui_lang_apply_next_bt(lv_obj_t *obj, int num)
     const char *lsuf = (lang == 1) ? "_china" : (lang == 2) ? "_english" : "";
     char path[128];
     snprintf(path, sizeof(path), "/images/next_bt_%d%s.png", num, lsuf);
-    _img_set_src_timed(obj, path);
+    ui_page_build_set_image_src(obj, path);
 }
 
 /* ── popuppassword ──────────────────────────────────────────────────── */

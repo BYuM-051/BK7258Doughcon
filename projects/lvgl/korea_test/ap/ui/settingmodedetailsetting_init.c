@@ -70,7 +70,7 @@ void init_page_settingmodedetailsetting(bk_lv_ui_t * bk_ui) {
     // ImageView: title
 #if !UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE
     bk_ui->settingmodedetailsetting_title = lv_image_create(bk_ui->settingmodedetailsetting);
-    _img_set_src_timed(bk_ui->settingmodedetailsetting_title, "/images/detail_title.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedetailsetting_title, "/images/detail_title.png");
     lv_obj_set_pos(bk_ui->settingmodedetailsetting_title, 0, 10);
     lv_obj_set_size(bk_ui->settingmodedetailsetting_title, 380, 80);
     lv_image_set_inner_align(bk_ui->settingmodedetailsetting_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -89,7 +89,7 @@ void init_page_settingmodedetailsetting(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview3
 #if !UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE
     bk_ui->settingmodedetailsetting_imageview3 = lv_image_create(bk_ui->settingmodedetailsetting);
-    _img_set_src_timed(bk_ui->settingmodedetailsetting_imageview3, "/images/exit_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedetailsetting_imageview3, "/images/exit_bt.png");
     lv_obj_set_pos(bk_ui->settingmodedetailsetting_imageview3, 825, 13);
     lv_obj_set_size(bk_ui->settingmodedetailsetting_imageview3, 179, 74);
 #endif
@@ -97,7 +97,7 @@ void init_page_settingmodedetailsetting(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview4
 #if !UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE
     bk_ui->settingmodedetailsetting_imageview4 = lv_image_create(bk_ui->settingmodedetailsetting);
-    _img_set_src_timed(bk_ui->settingmodedetailsetting_imageview4, "/images/detail_temp_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedetailsetting_imageview4, "/images/detail_temp_bt.png");
     lv_obj_set_pos(bk_ui->settingmodedetailsetting_imageview4, 16, 175);
     lv_obj_set_size(bk_ui->settingmodedetailsetting_imageview4, 176, 231);
 #endif
@@ -115,7 +115,7 @@ void init_page_settingmodedetailsetting(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview6
 #if !UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE
     bk_ui->settingmodedetailsetting_imageview6 = lv_image_create(bk_ui->settingmodedetailsetting);
-    _img_set_src_timed(bk_ui->settingmodedetailsetting_imageview6, "/images/detail_humidity_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedetailsetting_imageview6, "/images/detail_humidity_bt.png");
     lv_obj_set_pos(bk_ui->settingmodedetailsetting_imageview6, 220, 175);
     lv_obj_set_size(bk_ui->settingmodedetailsetting_imageview6, 176, 231);
 #endif
@@ -133,7 +133,7 @@ void init_page_settingmodedetailsetting(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview8
 #if !UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE
     bk_ui->settingmodedetailsetting_imageview8 = lv_image_create(bk_ui->settingmodedetailsetting);
-    _img_set_src_timed(bk_ui->settingmodedetailsetting_imageview8, "/images/detail_time_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedetailsetting_imageview8, "/images/detail_time_bt.png");
     lv_obj_set_pos(bk_ui->settingmodedetailsetting_imageview8, 424, 175);
     lv_obj_set_size(bk_ui->settingmodedetailsetting_imageview8, 176, 231);
 #endif
@@ -151,7 +151,7 @@ void init_page_settingmodedetailsetting(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview10
 #if !UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE
     bk_ui->settingmodedetailsetting_imageview10 = lv_image_create(bk_ui->settingmodedetailsetting);
-    _img_set_src_timed(bk_ui->settingmodedetailsetting_imageview10, "/images/detail_damper_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedetailsetting_imageview10, "/images/detail_damper_bt.png");
     lv_obj_set_pos(bk_ui->settingmodedetailsetting_imageview10, 628, 175);
     lv_obj_set_size(bk_ui->settingmodedetailsetting_imageview10, 176, 231);
 #endif
@@ -169,7 +169,7 @@ void init_page_settingmodedetailsetting(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview12
 #if !UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE
     bk_ui->settingmodedetailsetting_imageview12 = lv_image_create(bk_ui->settingmodedetailsetting);
-    _img_set_src_timed(bk_ui->settingmodedetailsetting_imageview12, "/images/detail_defrost_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedetailsetting_imageview12, "/images/detail_defrost_bt.png");
     lv_obj_set_pos(bk_ui->settingmodedetailsetting_imageview12, 832, 175);
     lv_obj_set_size(bk_ui->settingmodedetailsetting_imageview12, 176, 231);
 #endif
@@ -187,7 +187,7 @@ void init_page_settingmodedetailsetting(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview14
 #if !UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE
     bk_ui->settingmodedetailsetting_imageview14 = lv_image_create(bk_ui->settingmodedetailsetting);
-    _img_set_src_timed(bk_ui->settingmodedetailsetting_imageview14, "/images/detail_reset_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedetailsetting_imageview14, "/images/detail_reset_bt.png");
     lv_obj_set_pos(bk_ui->settingmodedetailsetting_imageview14, 825, 431);
     lv_obj_set_size(bk_ui->settingmodedetailsetting_imageview14, 179, 74);
 #endif

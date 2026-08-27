@@ -61,7 +61,7 @@ void init_page_settingmodedefrost(bk_lv_ui_t * bk_ui) {
 
     // ImageView: title
     bk_ui->settingmodedefrost_title = lv_image_create(bk_ui->settingmodedefrost);
-    _img_set_src_timed(bk_ui->settingmodedefrost_title, "/images/setting_title.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedefrost_title, "/images/setting_title.png");
     lv_obj_set_pos(bk_ui->settingmodedefrost_title, 0, 10);
     lv_obj_set_size(bk_ui->settingmodedefrost_title, 380, 80);
     lv_image_set_inner_align(bk_ui->settingmodedefrost_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -78,7 +78,7 @@ void init_page_settingmodedefrost(bk_lv_ui_t * bk_ui) {
 
     // ImageView: imageview3
     bk_ui->settingmodedefrost_imageview3 = lv_image_create(bk_ui->settingmodedefrost);
-    _img_set_src_timed(bk_ui->settingmodedefrost_imageview3, "/images/exit_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmodedefrost_imageview3, "/images/exit_bt.png");
     lv_obj_set_pos(bk_ui->settingmodedefrost_imageview3, 13, 445);
     lv_obj_set_size(bk_ui->settingmodedefrost_imageview3, 179, 74);
 

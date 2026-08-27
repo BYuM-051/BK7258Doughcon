@@ -238,6 +238,10 @@
 
 #if !(UI_LFS_PSRAM_CACHE_ENABLE)
 #define UI_PRENDERING_ENABLE 1
+
+/* Incremental page renderer: pointer input polling period while pages are
+ * completed one image per LVGL timer callback. */
+#define UI_PAGE_BUILD_TOUCH_PERIOD_MS 5
 #endif
 
 #define _BUZZER_ENABLED 1

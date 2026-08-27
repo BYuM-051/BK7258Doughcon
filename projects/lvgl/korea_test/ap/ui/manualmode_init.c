@@ -75,7 +75,7 @@ void init_page_manualmode(bk_lv_ui_t * bk_ui)
 
     // ImageView: title
     bk_ui->manualmode_title = lv_image_create(bk_ui->manualmode);
-    _img_set_src_timed(bk_ui->manualmode_title, "/images/manualmode_title.png");
+    ui_page_build_set_image_src(bk_ui->manualmode_title, "/images/manualmode_title.png");
     lv_obj_set_pos(bk_ui->manualmode_title, 0, 10);
     lv_obj_set_size(bk_ui->manualmode_title, 380, 80);
     lv_image_set_inner_align(bk_ui->manualmode_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -92,13 +92,13 @@ void init_page_manualmode(bk_lv_ui_t * bk_ui)
 
     // ImageView: imageview3
     bk_ui->manualmode_imageview3 = lv_image_create(bk_ui->manualmode);
-    _img_set_src_timed(bk_ui->manualmode_imageview3, "/images/exit_bt.png");
+    ui_page_build_set_image_src(bk_ui->manualmode_imageview3, "/images/exit_bt.png");
     lv_obj_set_pos(bk_ui->manualmode_imageview3, 13, 445);
     lv_obj_set_size(bk_ui->manualmode_imageview3, 179, 74);
 
     // ImageView: imageview4
     bk_ui->manualmode_imageview4 = lv_image_create(bk_ui->manualmode);
-    _img_set_src_timed(bk_ui->manualmode_imageview4, "/images/manual_menu.jpg");
+    ui_page_build_set_image_src(bk_ui->manualmode_imageview4, "/images/manual_menu.jpg");
     /* manual_menu.jpg 원본(1024x340, 상하 30px 투명)에서 상하 28px씩 크롭 후
      * 잔여 2px 투명 여백은 화면 배경색(0xD9D9D9)으로 flatten하여 1024x284로 재저장 —
      * 색상 블록 위치 유지 위해 y를 28px 내림 */

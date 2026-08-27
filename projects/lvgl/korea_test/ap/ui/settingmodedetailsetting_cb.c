@@ -274,7 +274,8 @@ void settingmodedetailsetting_loaded_event_cb(lv_event_t *e)
 
     /* Re-cache reset_popup.png on every entry (including returns from sub-screens).
      * 20 ms delay lets the screen render complete before the decode starts. */
-    _rst_prewarm_start();
+    ui_page_build_enqueue_task(_rst_prewarm_start,
+                               "reset popup prewarm start");
 }
 
 void settingmodedetailsetting_unloaded_event_cb(lv_event_t *e)

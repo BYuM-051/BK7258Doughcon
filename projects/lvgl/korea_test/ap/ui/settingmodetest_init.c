@@ -185,7 +185,7 @@ void init_page_settingmodetest(bk_lv_ui_t * bk_ui) {
     // ImageView: title
     bk_ui->settingmodetest_title = lv_image_create(bk_ui->settingmodetest);
 #if !UI_SETTINGMODETEST_DEFERRED_LOAD_ENABLE
-    _img_set_src_timed(bk_ui->settingmodetest_title, "/images/test_title.png");
+    ui_page_build_set_image_src(bk_ui->settingmodetest_title, "/images/test_title.png");
 #endif
     lv_obj_set_pos(bk_ui->settingmodetest_title, 0, 10);
     lv_obj_set_size(bk_ui->settingmodetest_title, 380, 80);
@@ -204,7 +204,7 @@ void init_page_settingmodetest(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview3
     bk_ui->settingmodetest_imageview3 = lv_image_create(bk_ui->settingmodetest);
 #if !UI_SETTINGMODETEST_DEFERRED_LOAD_ENABLE
-    _img_set_src_timed(bk_ui->settingmodetest_imageview3, "/images/exit_bt.png");
+    ui_page_build_set_image_src(bk_ui->settingmodetest_imageview3, "/images/exit_bt.png");
 #endif
     lv_obj_set_pos(bk_ui->settingmodetest_imageview3, 825, 13);
     lv_obj_set_size(bk_ui->settingmodetest_imageview3, 179, 74);
@@ -212,7 +212,7 @@ void init_page_settingmodetest(bk_lv_ui_t * bk_ui) {
     // ImageView: imageview4
     bk_ui->settingmodetest_imageview4 = lv_image_create(bk_ui->settingmodetest);
 #if !UI_SETTINGMODETEST_DEFERRED_LOAD_ENABLE
-    _img_set_src_timed(bk_ui->settingmodetest_imageview4, "/images/testmode_box.jpg");
+    ui_page_build_set_image_src(bk_ui->settingmodetest_imageview4, "/images/testmode_box.jpg");
 #endif
     lv_obj_set_pos(bk_ui->settingmodetest_imageview4, 20, 100);
     lv_obj_set_size(bk_ui->settingmodetest_imageview4, 984, 433);

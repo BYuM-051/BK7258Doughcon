@@ -135,7 +135,7 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
 #endif /* UI_PRENDERING_ENABLE */
     // ImageView: title
     bk_ui->automode_title = lv_image_create(bk_ui->automode);
-    _img_set_src_timed(bk_ui->automode_title, "/images/automode_title.png");
+    ui_page_build_set_image_src(bk_ui->automode_title, "/images/automode_title.png");
     lv_obj_set_pos(bk_ui->automode_title, 0, 10);
     lv_obj_set_size(bk_ui->automode_title, 380, 80);
     lv_image_set_inner_align(bk_ui->automode_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -152,7 +152,7 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
 
     // ImageView: imageview3
     bk_ui->automode_imageview3 = lv_image_create(bk_ui->automode);
-    _img_set_src_timed(bk_ui->automode_imageview3, "/images/exit_bt.png");
+    ui_page_build_set_image_src(bk_ui->automode_imageview3, "/images/exit_bt.png");
     lv_obj_set_pos(bk_ui->automode_imageview3, 13, 445);
     lv_obj_set_size(bk_ui->automode_imageview3, 179, 74);
 
@@ -168,13 +168,13 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
 
     // ImageView: imageview5
     bk_ui->automode_imageview5 = lv_image_create(bk_ui->automode);
-    _img_set_src_timed(bk_ui->automode_imageview5, "/images/start_bt.png");
+    ui_page_build_set_image_src(bk_ui->automode_imageview5, "/images/start_bt.png");
     lv_obj_set_pos(bk_ui->automode_imageview5, 847, 445);
     lv_obj_set_size(bk_ui->automode_imageview5, 164, 74);
 
     // ImageView: imageview6
     bk_ui->automode_imageview6 = lv_image_create(bk_ui->automode);
-    _img_set_src_timed(bk_ui->automode_imageview6, "/images/auto_mode_start_box_time.png");
+    ui_page_build_set_image_src(bk_ui->automode_imageview6, "/images/auto_mode_start_box_time.png");
     lv_obj_set_pos(bk_ui->automode_imageview6, 17, 96);
     lv_obj_set_size(bk_ui->automode_imageview6, 528, 70);
 
@@ -290,7 +290,7 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
 
     // ImageView: imageview23
     bk_ui->automode_imageview23 = lv_image_create(bk_ui->automode);
-    _img_set_src_timed(bk_ui->automode_imageview23, "/images/load_bt.png");
+    ui_page_build_set_image_src(bk_ui->automode_imageview23, "/images/load_bt.png");
     lv_obj_set_pos(bk_ui->automode_imageview23, 637, 94);
     lv_obj_set_size(bk_ui->automode_imageview23, 204, 74);
 
@@ -306,13 +306,13 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
 
     // ImageView: imageview25
     bk_ui->automode_imageview25 = lv_image_create(bk_ui->automode);
-    _img_set_src_timed(bk_ui->automode_imageview25, "/images/save_bt.png");
+    ui_page_build_set_image_src(bk_ui->automode_imageview25, "/images/save_bt.png");
     lv_obj_set_pos(bk_ui->automode_imageview25, 847, 94);
     lv_obj_set_size(bk_ui->automode_imageview25, 164, 74);
 
     // ImageView: imageview26
     bk_ui->automode_imageview26 = lv_image_create(bk_ui->automode);
-    _img_set_src_timed(bk_ui->automode_imageview26, "/images/auto_mode_freeze_board.png");
+    ui_page_build_set_image_src(bk_ui->automode_imageview26, "/images/auto_mode_freeze_board.png");
     lv_obj_set_pos(bk_ui->automode_imageview26, 15, 175);
     lv_obj_set_size(bk_ui->automode_imageview26, 490, 125);
 
@@ -347,7 +347,7 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
 
     // ImageView: imageview31
     bk_ui->automode_imageview31 = lv_image_create(bk_ui->automode);
-    _img_set_src_timed(bk_ui->automode_imageview31, "/images/auto_mode_defrost_board.png");
+    ui_page_build_set_image_src(bk_ui->automode_imageview31, "/images/auto_mode_defrost_board.png");
     lv_obj_set_pos(bk_ui->automode_imageview31, 519, 175);
     lv_obj_set_size(bk_ui->automode_imageview31, 490, 125);
 
@@ -440,7 +440,7 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
 
     // ImageView: imageview44
     bk_ui->automode_imageview44 = lv_image_create(bk_ui->automode);
-    _img_set_src_timed(bk_ui->automode_imageview44, "/images/auto_mode_fermentation1_board.png");
+    ui_page_build_set_image_src(bk_ui->automode_imageview44, "/images/auto_mode_fermentation1_board.png");
     lv_obj_set_pos(bk_ui->automode_imageview44, 15, 307);
     lv_obj_set_size(bk_ui->automode_imageview44, 490, 125);
 
@@ -555,7 +555,7 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
 
     // ImageView: imageview60
     bk_ui->automode_imageview60 = lv_image_create(bk_ui->automode);
-    _img_set_src_timed(bk_ui->automode_imageview60, "/images/auto_mode_fermentation2_board.png");
+    ui_page_build_set_image_src(bk_ui->automode_imageview60, "/images/auto_mode_fermentation2_board.png");
     lv_obj_set_pos(bk_ui->automode_imageview60, 519, 307);
     lv_obj_set_size(bk_ui->automode_imageview60, 490, 125);
 
@@ -694,7 +694,7 @@ void init_keypad_group(bk_lv_ui_t *bk_ui) {
 
         snprintf(path_buf, sizeof(path_buf), "/images/keypad%s.png", keypad_names[i]);
         bk_ui->automode_KeyPadIm[i] = lv_image_create(bk_ui->automode);
-        _img_set_src_timed(bk_ui->automode_KeyPadIm[i], path_buf);
+        ui_page_build_set_image_src(bk_ui->automode_KeyPadIm[i], path_buf);
         lv_obj_set_pos(bk_ui->automode_KeyPadIm[i], x_start + i * x_step, y_start);
         lv_obj_set_size(bk_ui->automode_KeyPadIm[i], 65, 75);
         lv_obj_add_flag(bk_ui->automode_KeyPadIm[i], LV_OBJ_FLAG_HIDDEN);
