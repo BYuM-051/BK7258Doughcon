@@ -9,6 +9,7 @@
 #include "settings.h"
 #include "device_state.h"
 #include "hardware_hal.h"
+#include "preRenderer.h"
 
 #define TAG "[popuppassword_cb.c] "
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
@@ -56,10 +57,14 @@ static void _ct_corner_cb(lv_event_t *e)
         lv_obj_t *old = s_ct_screen;
         s_ct_screen = NULL; s_ct_bg = NULL;
         s_ct_phase = 0;     s_ct_cidx = 0;
+#if UI_PRENDERING_ENABLE
+        ui_page_change(PAGE_MAIN);
+#else
         if (bk_ui->main == NULL || !lv_obj_is_valid(bk_ui->main))
             init_page_main(bk_ui);
         lv_scr_load(bk_ui->main);
         lv_async_call(_ct_async_del, old);
+#endif /* UI_PRENDERING_ENABLE */
     }
 }
 
@@ -194,9 +199,13 @@ static void _pw_validate(bk_lv_ui_t *bk_ui)
     } else if (strcmp(s_pw_buf, neu) == 0) {
         s_pw_buf[0] = '\0';
         destroy_page_popuppassword(bk_ui);
+#if UI_PRENDERING_ENABLE
+        ui_page_change(PAGE_SETTINGMODEDETAILSETTING);
+#else
         if (bk_ui->settingmodedetailsetting == NULL || !lv_obj_is_valid(bk_ui->settingmodedetailsetting))
             init_page_settingmodedetailsetting(bk_ui);
         lv_scr_load(bk_ui->settingmodedetailsetting);
+#endif /* UI_PRENDERING_ENABLE */
     } else {
         _img_ensure_src(bk_ui->popuppassword_pop_cautionim);
         lv_obj_clear_flag(bk_ui->popuppassword_pop_cautionim, LV_OBJ_FLAG_HIDDEN);
