@@ -53,6 +53,7 @@ void init_page_timebar(bk_lv_ui_t * bk_ui) {
    // 2. 디스플레이의 최상위 레이어(Top Layer) 가져오기
 #if TIMEBAR_INDEPENDENT
     lv_obj_t * top_layer = lv_display_get_layer_top(lv_display_get_default()); 
+    // lv_obj_t * top_layer = NULL; // 이렇게 해서 splash 화면에는 가려지게 두고 싶었는데 이번엔 아예 draw가 안되넹. 왜지?
 #else
     lv_obj_t * top_layer = preRenderRoot;
 #endif /* TIMEBAR_INDEPENDENT */

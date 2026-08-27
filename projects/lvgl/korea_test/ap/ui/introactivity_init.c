@@ -29,7 +29,8 @@ void init_page_introactivity(bk_lv_ui_t * bk_ui) {
     }
 
     // IntroActivity is a special case: It does not use pre-rendering
-    bk_ui->introactivity = lv_obj_create(NULL);
+    // NOTE : 우선 introactivity를 top에 붙여서 로딩중 splash처럼 활용중인데, timebar가 top이라 가끔 timebar가 먼저 나오고 main이 나옴. 확인필요. 아마 timebar init을 main보다 뒤에 하면 될것같긴 한뎅.
+    bk_ui->introactivity = lv_obj_create(lv_layer_top()); 
     lv_obj_set_size(bk_ui->introactivity, 1024, 600);
     lv_obj_set_scrollbar_mode(bk_ui->introactivity, LV_SCROLLBAR_MODE_OFF);
     // ImageView: intro

@@ -91,11 +91,14 @@ static beken_thread_t s_flash_thread = NULL;
 static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
 {
 #if 1 // warm-up 구현을 생명주기 관리자가 알아서 할 예정임 여기는 그런거 없다.
+    //FIXME : NULL screen에서 Main으로 진입하는 첫 번째라서 확인을 좀 해봐야 할 듯.
     #define UI_EVENT_BOOT_WARMUP_EVENT UI_EVENT_PAGE_SHOWN
-    init_page_main(bk_ui);
-    lv_obj_send_event(bk_ui->main, UI_EVENT_BOOT_WARMUP_EVENT, NULL);
-    lv_obj_move_to_index(bk_ui->main, -1);
-    ui_page_change(bk_ui->main);
+    // init_page_main(bk_ui);
+    // lv_obj_send_event(bk_ui->main, UI_EVENT_BOOT_WARMUP_EVENT, NULL);
+    // lv_obj_move_to_index(bk_ui->main, -1);
+    bk_printf(TAG "[BOOT] entering main\n");
+    ui_page_change(PAGE_MAIN);
+    bk_printf(TAG "[BOOT] warmup main: %lu ms\n", (unsigned long)lv_tick_elaps(0));
 #else
     uint32_t t0 = lv_tick_get();
     uint32_t ts;
@@ -238,6 +241,7 @@ static void _uart_comm_task(beken_thread_arg_t arg)
 #endif
         bk_printf(TAG "[BOOT] main screen loaded\n");
     } else {
+        // NOTE : blackout recovery screen 확인해야함
         bk_printf(TAG "[BOOT] blackout recovery screen active\n");
     }
     destroy_page_introactivity(&bk_lv_tool_ui);
