@@ -1,6 +1,7 @@
 #include "lvgl.h"
 #include <stdio.h>
 #include "preRenderer.h"
+#include "preRenderInfo.h"
 #include "ui_config.h"
 
 #define TAG "[preRenderer.c] "
@@ -9,6 +10,7 @@
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 lv_obj_t *currentPage = NULL;
+pageId_t currentPageID = PAGE_NONE; // 첫 init을 main으로하면 uiChange에서 return맞고 assert됨
 
 #if !UI_PRENDERING_ENABLE
 lv_event_code_t UI_EVENT_PAGE_SHOW_START = LV_EVENT_SCREEN_LOAD_START;
@@ -20,6 +22,10 @@ lv_event_code_t UI_EVENT_PAGE_SHOW_START;
 lv_event_code_t UI_EVENT_PAGE_SHOWN;
 lv_event_code_t UI_EVENT_PAGE_HIDE_START;
 lv_event_code_t UI_EVENT_PAGE_HIDDEN;
+
+static inline bool isObjInRoot(lv_obj_t *obj);
+static inline void uiPagePreRenderFlush();
+static void uiPagePreRender(lv_obj_t *page);
 
 static inline bool isObjInRoot(lv_obj_t *obj)
 {
@@ -93,7 +99,8 @@ bool ui_screen_event_initialized(void)
 // newScreen은 새로 표시할 화면을 나타내는 매개변수입니다.
 // SHOW_START, SHOWN, HIDE_START, HIDDEN 이벤트 발생으로 기존 functions의 event_cb를 대체합니다.
 // 화면 전환 자체도 ui_screen_change()에서 처리합니다. (lv_scr_load() 호출)
-void ui_page_change(lv_obj_t *newPage)
+
+void ui_page_change(pageId_t newPageID)
 {
     if(!uiScreenEventInitialized)
     {
@@ -102,27 +109,44 @@ void ui_page_change(lv_obj_t *newPage)
     }
 
     uint32_t startTick = lv_tick_get();
-    lv_obj_t *oldPage = currentPage;
+    lv_obj_t *oldPage = NULL;
+    if(currentPageID != PAGE_NONE)
+    {
+        oldPage = *(preRenderPageInfo[currentPageID].page);
+    }
+    lv_obj_t **newPage = preRenderPageInfo[newPageID].page;
 
-    bk_printf(TAG "[SCREEN] ui_page_change(%p -> %p) called\n", oldPage, newPage);
+    bk_printf(TAG "[SCREEN] ui_page_change(%p -> %p) called\n", oldPage, *newPage);
 
-    if(newPage == NULL || !lv_obj_is_valid(newPage))
+    if(newPage == NULL || !lv_obj_is_valid(*newPage))
     {
         bk_printf(TAG "[SCREEN] newPage is NULL or invalid\n");
         void *caller = __builtin_return_address(0);
         bk_printf(TAG "[CALLER] %p\n", caller); // Print returning addr
-        return;
+        pageLifecycleFunc_t initFunc = getPageInitFunc(newPageID);
+        if(initFunc != NULL)
+        {
+            bk_printf(TAG "[SCREEN] newPage has an init function, calling it\n");
+            initFunc(&bk_lv_tool_ui);
+            newPage = preRenderPageInfo[newPageID].page;
+        }
+        else
+        {
+            bk_printf(TAG "[SCREEN] newPage has no init function\n");
+            return;
+        }
     }
-    if(oldPage == newPage)
+    if(oldPage == *newPage)
     {
         bk_printf(TAG "[SCREEN] newPage is the same as currentPage\n");
         return;
     }
+    currentPageID = newPageID;
 
-    bool newPageInRoot = isObjInRoot(newPage);
-    bool newPageIsScreenItself = !newPageInRoot && lv_obj_get_parent(newPage) == NULL;
+    bool newPageInRoot = isObjInRoot(*newPage);
+    bool newPageIsScreenItself = !newPageInRoot && lv_obj_get_parent(*newPage) == NULL;
 
-    if(newPageInRoot && lv_obj_get_parent(newPage) != preRenderRoot)
+    if(newPageInRoot && lv_obj_get_parent(*newPage) != preRenderRoot)
     {
         bk_printf(TAG "[SCREEN] newPage is inside a page, but is not a direct child of preRenderRoot\n");
         return;
@@ -132,7 +156,7 @@ void ui_page_change(lv_obj_t *newPage)
         bk_printf(TAG "[SCREEN] newPage is neither a root page nor a standalone screen\n");
         return;
     }
-    if(newPage == preRenderRoot)
+    if(*newPage == preRenderRoot)
     {
         bk_printf(TAG "[SCREEN] pass a child page instead of preRenderRoot itself\n");
         return;
@@ -143,9 +167,9 @@ void ui_page_change(lv_obj_t *newPage)
         return;
     }
 
-    lv_obj_t *targetScreen = newPageInRoot ? preRenderRoot : newPage;
+    lv_obj_t *targetScreen = newPageInRoot ? preRenderRoot : *newPage;
 
-    if(oldPage == newPage && lv_scr_act() == targetScreen)
+    if(oldPage == *newPage && lv_scr_act() == targetScreen)
     {
         bk_printf(TAG "[SCREEN] newPage is already active\n");
         return;
@@ -155,16 +179,16 @@ void ui_page_change(lv_obj_t *newPage)
     bool oldPageInRoot = oldPageValid && isObjInRoot(oldPage);
 
     /* 전환 시작 이벤트: 기존 page가 아직 유효하고 새 page는 아직 표시되기 전이다. */
-    if(oldPageValid && oldPage != newPage)
+    if(oldPageValid && oldPage != *newPage)
     {
         lv_obj_send_event(oldPage, UI_EVENT_PAGE_HIDE_START, NULL);
         oldPageValid = lv_obj_is_valid(oldPage);
     }
 
-    lv_obj_send_event(newPage, UI_EVENT_PAGE_SHOW_START, NULL);
+    lv_obj_send_event(*newPage, UI_EVENT_PAGE_SHOW_START, NULL);
 
     /* 합성 page만 직접 숨긴다. 독립 screen은 lv_scr_load()가 비활성화한다. */
-    if(oldPageValid && oldPage != newPage && oldPageInRoot)
+    if(oldPageValid && oldPage != *newPage && oldPageInRoot)
     {
         lv_obj_add_flag(oldPage, LV_OBJ_FLAG_HIDDEN);
     }
@@ -172,8 +196,8 @@ void ui_page_change(lv_obj_t *newPage)
     if(newPageInRoot)
     {
         /* root 내부 page 전환: 새 page를 최상단에 놓고 root를 active screen으로 만든다. */
-        lv_obj_move_to_index(newPage, -1);
-        lv_obj_remove_flag(newPage, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_move_to_index(*newPage, -1);
+        lv_obj_remove_flag(*newPage, LV_OBJ_FLAG_HIDDEN);
 
         if(lv_scr_act() != preRenderRoot)
         {
@@ -183,30 +207,33 @@ void ui_page_change(lv_obj_t *newPage)
     else
     {
         /* 독립 screen 전환: screen에는 z-order 조작을 하지 않는다. */
-        lv_obj_remove_flag(newPage, LV_OBJ_FLAG_HIDDEN);
-        if(lv_scr_act() != newPage)
+        lv_obj_remove_flag(*newPage, LV_OBJ_FLAG_HIDDEN);
+        if(lv_scr_act() != *newPage)
         {
-            lv_scr_load(newPage);
+            lv_scr_load(*newPage);
         }
     }
 
     /* refresh 중 실행되는 timer/callback도 새 page를 현재 page로 보게 한다. */
-    currentPage = newPage;
+    currentPage = *newPage;
     lv_refr_now(NULL);
 
     /* 전환 완료 이벤트는 실제 active screen 교체 및 즉시 refresh 뒤에 보낸다. */
-    if(oldPageValid && oldPage != newPage && lv_obj_is_valid(oldPage))
+    if(oldPageValid && oldPage != *newPage && lv_obj_is_valid(oldPage))
     {
         lv_obj_send_event(oldPage, UI_EVENT_PAGE_HIDDEN, NULL);
     }
 
-    if(lv_obj_is_valid(newPage))
+    if(lv_obj_is_valid(*newPage))
     {
-        lv_obj_send_event(newPage, UI_EVENT_PAGE_SHOWN, NULL);
-        if(!lv_obj_is_valid(newPage))
+        lv_obj_send_event(*newPage, UI_EVENT_PAGE_SHOWN, NULL);
+        if(!lv_obj_is_valid(*newPage))
         {
+            bk_printf(TAG "[SCREEN] newPage became invalid after UI_EVENT_PAGE_SHOWN\n");
             currentPage = NULL;
+            LV_ASSERT(0);
         }
+        uiPagePreRender(*newPage);
     }
     else
     {
@@ -214,4 +241,15 @@ void ui_page_change(lv_obj_t *newPage)
     }
 
     bk_printf(TAG "[SCREEN] ui_page_change() completed. [elapsed: %lu]\n", (unsigned long)lv_tick_elaps(startTick));
+}
+
+static inline void uiPagePreRenderFlush()
+{
+
+}
+
+static void uiPagePreRender(lv_obj_t *page)
+{
+
+    return;
 }

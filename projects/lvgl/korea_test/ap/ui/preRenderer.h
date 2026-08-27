@@ -3,6 +3,7 @@
 
 #include "lvgl.h"
 #include "beken_ui.h"
+#include "preRenderInfo.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,7 +18,7 @@ extern lv_event_code_t UI_EVENT_PAGE_HIDDEN;
 
 extern void ui_screen_event_init(void);
 extern bool ui_screen_event_initialized(void);
-extern void ui_page_change(lv_obj_t *newScreen);
+extern void ui_page_change(pageId_t newPageID);
 
 #ifdef __cplusplus
 }
