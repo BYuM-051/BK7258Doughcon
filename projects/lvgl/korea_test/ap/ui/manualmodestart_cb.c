@@ -16,6 +16,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "preRenderer.h"
 
 #define TAG "[manualmodestart_cb.c] "
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
@@ -891,17 +892,25 @@ void manualmodestart_backbt_event_cb(lv_event_t *e)
         state->manual_current_mode    = 0;
         settings_set_str("saveChecking", "0");
         settings_set_str("SaveWriting",  "0");
+#if UI_PRENDERING_ENABLE
+        ui_page_change(PAGE_AUTOMODE);
+#else
         if (!bk_ui->automode || !lv_obj_is_valid(bk_ui->automode))
             init_page_automode(bk_ui);
         lv_scr_load(bk_ui->automode);
+#endif /* UI_PRENDERING_ENABLE */
         destroy_page_manualmodestart(bk_ui);
         bk_printf(TAG "[OVER_FERM] Stop → AutoModeOver 해제, automode 화면\n");
         return;
     }
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_MANUALMODE);
+#else
     if (bk_ui->manualmode == NULL || !lv_obj_is_valid(bk_ui->manualmode))
         init_page_manualmode(bk_ui);
     lv_scr_load(bk_ui->manualmode);
+#endif /* UI_PRENDERING_ENABLE */
     destroy_page_manualmodestart(bk_ui);
     state->operation           = false;
     /* start_run=false로 두면 이후 _write_process()가 아무 TX도 보내지 않게 되어

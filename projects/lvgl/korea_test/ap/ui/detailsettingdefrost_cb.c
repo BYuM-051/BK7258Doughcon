@@ -12,6 +12,7 @@
 #include "device_state.h"
 #include "hardware_hal.h"
 #include "uart_comm.h"
+#include "preRenderer.h"
 
 #define TAG "[detailsettingdefrost_cb.c] "
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
@@ -278,9 +279,13 @@ void detailsettingdefrost_backbt_event_cb(lv_event_t *e)
     hal_buzzer_beep();
 
     settings_save_dirty();
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_SETTINGMODEDETAILSETTING);
+#else
     if (bk_ui->settingmodedetailsetting == NULL || !lv_obj_is_valid(bk_ui->settingmodedetailsetting))
         init_page_settingmodedetailsetting(bk_ui);
     lv_scr_load(bk_ui->settingmodedetailsetting);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 static void _settingbt(int field)

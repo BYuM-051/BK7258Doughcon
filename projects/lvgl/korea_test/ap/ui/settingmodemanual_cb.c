@@ -10,6 +10,7 @@
 #include "ui_lang.h"
 #include "settings.h"
 #include "hardware_hal.h"
+#include "preRenderer.h"
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 
@@ -51,9 +52,13 @@ void settingmodemanual_backbt_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_SETTINGMODE);
+#else
     if (bk_ui->settingmode == NULL || !lv_obj_is_valid(bk_ui->settingmode))
         init_page_settingmode(bk_ui);
     lv_scr_load(bk_ui->settingmode);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmodemanual_setting_manual_autobt_event_cb(lv_event_t *e)

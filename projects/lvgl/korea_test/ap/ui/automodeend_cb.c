@@ -225,7 +225,7 @@ void automodeend_stopbt_event_cb(lv_event_t *e)
     if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
-#ifdef UI_PRENDERING_ENABLE
+#if UI_PRENDERING_ENABLE
     ui_page_change(PAGE_AUTOMODE);
 #else
     if (bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))

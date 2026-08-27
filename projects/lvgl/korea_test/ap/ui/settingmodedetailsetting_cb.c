@@ -10,6 +10,7 @@
 #include "ui_animations.h"
 #include "ui_lang.h"
 #include "hardware_hal.h"
+#include "preRenderer.h"
 
 #define TAG "[settingmodedetailsetting_cb.c] "
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
@@ -67,9 +68,13 @@ void settingmodedetailsetting_backbt_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_SETTINGMODE);
+#else
     if (bk_ui->settingmode == NULL || !lv_obj_is_valid(bk_ui->settingmode))
         init_page_settingmode(bk_ui);
     lv_scr_load(bk_ui->settingmode);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmodedetailsetting_detail_temp_bt_event_cb(lv_event_t *e)
@@ -81,6 +86,10 @@ void settingmodedetailsetting_detail_temp_bt_event_cb(lv_event_t *e)
     hal_buzzer_beep();
 
     PERF_START("detailtemp");
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_DETAILSETTINGTEMP);
+    PERF_MARK("ui_page_change");
+#else
     if (bk_ui->detailsettingtemp == NULL || !lv_obj_is_valid(bk_ui->detailsettingtemp)) {
         init_page_detailsettingtemp(bk_ui);
         PERF_MARK("init_page_detailsettingtemp");
@@ -89,6 +98,7 @@ void settingmodedetailsetting_detail_temp_bt_event_cb(lv_event_t *e)
     }
     lv_scr_load(bk_ui->detailsettingtemp);
     PERF_MARK("lv_scr_load");
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmodedetailsetting_detail_humidity_bt_event_cb(lv_event_t *e)
@@ -100,6 +110,10 @@ void settingmodedetailsetting_detail_humidity_bt_event_cb(lv_event_t *e)
     hal_buzzer_beep();
 
     PERF_START("detailhumidity");
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_DETAILSETTINGHUMIDITY);
+    PERF_MARK("ui_page_change");
+#else
     if (bk_ui->detailsettinghumidity == NULL || !lv_obj_is_valid(bk_ui->detailsettinghumidity)) {
         init_page_detailsettinghumidity(bk_ui);
         PERF_MARK("init_page_detailsettinghumidity");
@@ -108,6 +122,7 @@ void settingmodedetailsetting_detail_humidity_bt_event_cb(lv_event_t *e)
     }
     lv_scr_load(bk_ui->detailsettinghumidity);
     PERF_MARK("lv_scr_load");
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmodedetailsetting_detail_time_bt_event_cb(lv_event_t *e)
@@ -119,6 +134,10 @@ void settingmodedetailsetting_detail_time_bt_event_cb(lv_event_t *e)
     hal_buzzer_beep();
 
     PERF_START("detailtime");
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_DETAILSETTINGTIME);
+    PERF_MARK("ui_page_change");
+#else
     if (bk_ui->detailsettingtime == NULL || !lv_obj_is_valid(bk_ui->detailsettingtime)) {
         init_page_detailsettingtime(bk_ui);
         PERF_MARK("init_page_detailsettingtime");
@@ -127,6 +146,7 @@ void settingmodedetailsetting_detail_time_bt_event_cb(lv_event_t *e)
     }
     lv_scr_load(bk_ui->detailsettingtime);
     PERF_MARK("lv_scr_load");
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmodedetailsetting_detail_damper_bt_event_cb(lv_event_t *e)
@@ -138,6 +158,10 @@ void settingmodedetailsetting_detail_damper_bt_event_cb(lv_event_t *e)
     hal_buzzer_beep();
 
     PERF_START("detaildamper");
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_DETAILSETTINGDAMPER);
+    PERF_MARK("ui_page_change");
+#else
     if (bk_ui->detailsettingdamper == NULL || !lv_obj_is_valid(bk_ui->detailsettingdamper)) {
         init_page_detailsettingdamper(bk_ui);
         PERF_MARK("init_page_detailsettingdamper");
@@ -146,6 +170,7 @@ void settingmodedetailsetting_detail_damper_bt_event_cb(lv_event_t *e)
     }
     lv_scr_load(bk_ui->detailsettingdamper);
     PERF_MARK("lv_scr_load");
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmodedetailsetting_detail_defrost_bt_event_cb(lv_event_t *e)
@@ -157,6 +182,10 @@ void settingmodedetailsetting_detail_defrost_bt_event_cb(lv_event_t *e)
     hal_buzzer_beep();
 
     PERF_START("detaildefrost");
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_DETAILSETTINGDEFROST);
+    PERF_MARK("ui_page_change");
+#else
     if (bk_ui->detailsettingdefrost == NULL || !lv_obj_is_valid(bk_ui->detailsettingdefrost)) {
         init_page_detailsettingdefrost(bk_ui);
         PERF_MARK("init_page_detailsettingdefrost");
@@ -165,6 +194,7 @@ void settingmodedetailsetting_detail_defrost_bt_event_cb(lv_event_t *e)
     }
     lv_scr_load(bk_ui->detailsettingdefrost);
     PERF_MARK("lv_scr_load");
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmodedetailsetting_detail_reset_bt_event_cb(lv_event_t *e)

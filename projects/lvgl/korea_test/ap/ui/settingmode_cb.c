@@ -138,9 +138,13 @@ void settingmode_setting_degreebt_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_SETTINGMODEDEGREE);
+#else
     if (bk_ui->settingmodedegree == NULL || !lv_obj_is_valid(bk_ui->settingmodedegree))
         init_page_settingmodedegree(bk_ui);
     lv_scr_load(bk_ui->settingmodedegree);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmode_setting_recordbt_event_cb(lv_event_t *e)
@@ -151,9 +155,13 @@ void settingmode_setting_recordbt_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_SETTINGMODERECORD);
+#else
     if (bk_ui->settingmoderecord == NULL || !lv_obj_is_valid(bk_ui->settingmoderecord))
         init_page_settingmoderecord(bk_ui);
     lv_scr_load(bk_ui->settingmoderecord);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmode_setting_testbt_event_cb(lv_event_t *e)
@@ -166,6 +174,9 @@ void settingmode_setting_testbt_event_cb(lv_event_t *e)
     hal_buzzer_beep();
 
     state->test_mode = true;
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_SETTINGMODETEST);
+#else
     {
         uint32_t _pt = lv_tick_get();
         bk_printf(TAG "[SCREEN] ── settingmode→settingmodetest(고장진단) ──\n");
@@ -182,6 +193,7 @@ void settingmode_setting_testbt_event_cb(lv_event_t *e)
         lv_refr_now(NULL);
         bk_printf(TAG "[SCREEN] lv_refr_now(render)     : %lu ms\n", (unsigned long)lv_tick_elaps(_pt));
     }
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmode_setting_timebt_event_cb(lv_event_t *e)
@@ -192,9 +204,13 @@ void settingmode_setting_timebt_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_SETTINGMODETIME);
+#else
     if (bk_ui->settingmodetime == NULL || !lv_obj_is_valid(bk_ui->settingmodetime))
         init_page_settingmodetime(bk_ui);
     lv_scr_load(bk_ui->settingmodetime);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmode_setting_languagebt_event_cb(lv_event_t *e)
@@ -205,9 +221,13 @@ void settingmode_setting_languagebt_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_SETTINGMODELANGUAGE);
+#else
     if (bk_ui->settingmodelanguage == NULL || !lv_obj_is_valid(bk_ui->settingmodelanguage))
         init_page_settingmodelanguage(bk_ui);
     lv_scr_load(bk_ui->settingmodelanguage);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmode_backbt_event_cb(lv_event_t *e)

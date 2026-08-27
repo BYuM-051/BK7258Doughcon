@@ -477,9 +477,13 @@ void memorymode_okbt_event_cb(lv_event_t *e)
         settings_save_dirty();
         bk_printf(TAG "[MEM] load complete, navigate to automode\n");
         /* memory_mode_check는 automode_load_event_cb 진입 후 클리어 — 메모리 불러오기 판별용 */
+#if UI_PRENDERING_ENABLE
+        ui_page_change(PAGE_AUTOMODE);
+#else
         if (bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))
             init_page_automode(bk_ui);
         lv_scr_load(bk_ui->automode);
+#endif /* UI_PRENDERING_ENABLE */
     } else {
         /* Accessed from main page (MEMORY_MODE_NONE): load selected slot → automode */
         if (!_slot_is_used(slot)) {
@@ -491,9 +495,13 @@ void memorymode_okbt_event_cb(lv_event_t *e)
         settings_save_dirty();
         bk_printf(TAG "[MEM] NONE mode load complete (slot %d), navigate to automode\n", slot);
         state->memory_mode_check = MEMORY_MODE_LOAD;  /* automode_load_event_cb에서 클리어 */
+#if UI_PRENDERING_ENABLE
+        ui_page_change(PAGE_AUTOMODE);
+#else
         if (bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))
             init_page_automode(bk_ui);
         lv_scr_load(bk_ui->automode);
+#endif /* UI_PRENDERING_ENABLE */
     }
 }
 
