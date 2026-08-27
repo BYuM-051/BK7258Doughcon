@@ -11,6 +11,7 @@
 #include "settings.h"
 #include "hardware_hal.h"
 #include "rtc_sync.h"
+#include "preRenderer.h"
 
 #define TAG "[settingmodetime_cb.c] "
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
@@ -463,9 +464,13 @@ void settingmodetime_backbt_event_cb(lv_event_t *e)
         _keypad_off_smt(bk_ui);
         s_tci_smt = 0; s_edit_buf_smt[0] = '\0';
     }
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_SETTINGMODE);
+#else
     if (bk_ui->settingmode == NULL || !lv_obj_is_valid(bk_ui->settingmode))
         init_page_settingmode(bk_ui);
     lv_scr_load(bk_ui->settingmode);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 /* 입력 필드 직접 탭 → 해당 필드로 포커스 이동 */

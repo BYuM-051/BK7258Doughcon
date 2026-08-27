@@ -57,8 +57,12 @@ void manualmode_manual_freezebt_event_cb(lv_event_t *e)
 
     state->manual_current_mode = 1;
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_MANUALMODESTART);
+#else
     init_page_manualmodestart(bk_ui);
     lv_scr_load(bk_ui->manualmodestart);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void manualmode_manual_defrostbt_event_cb(lv_event_t *e)
@@ -72,8 +76,12 @@ void manualmode_manual_defrostbt_event_cb(lv_event_t *e)
 
     state->manual_current_mode = 2;
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_MANUALMODESTART);
+#else
     init_page_manualmodestart(bk_ui);
     lv_scr_load(bk_ui->manualmodestart);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void manualmode_manual_fermentationbt_event_cb(lv_event_t *e)
@@ -87,8 +95,12 @@ void manualmode_manual_fermentationbt_event_cb(lv_event_t *e)
 
     state->manual_current_mode = 3;
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_MANUALMODESTART);
+#else
     init_page_manualmodestart(bk_ui);
     lv_scr_load(bk_ui->manualmodestart);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void manualmode_loaded_event_cb(lv_event_t *e)

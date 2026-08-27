@@ -1122,10 +1122,13 @@ void automode_startbt_event_cb(lv_event_t *e)
     settings_set_str("SaveWriting", "0");
 
     /* Navigate — all settings ready before screen load event fires */
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_AUTOMODESTART);
+#else
     init_page_automodestart(bk_ui);
     lv_scr_load(bk_ui->automodestart);
     destroy_page_automode(bk_ui);
-
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void automode_AutoModeCompleteYearBt_event_cb(lv_event_t *e)

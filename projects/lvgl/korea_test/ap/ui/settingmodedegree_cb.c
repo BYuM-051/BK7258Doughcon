@@ -14,6 +14,7 @@
 #include "settings.h"
 #include "device_state.h"
 #include "hardware_hal.h"
+#include "preRenderer.h"
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern double degree_basic_change(double ch);
@@ -98,10 +99,14 @@ void settingmodedegree_backbt_event_cb(lv_event_t *e)
 
     if (state->lock) return;
     hal_buzzer_beep();
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_SETTINGMODE);
+#else
     if (bk_ui->settingmode == NULL || !lv_obj_is_valid(bk_ui->settingmode))
         init_page_settingmode(bk_ui);
     lv_scr_load(bk_ui->settingmode);
     destroy_page_settingmodedegree(bk_ui);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmodedegree_degree_c_bt_event_cb(lv_event_t *e)
