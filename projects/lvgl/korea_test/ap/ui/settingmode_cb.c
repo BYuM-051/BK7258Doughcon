@@ -14,6 +14,7 @@
 #include "device_state.h"
 #include "hardware_hal.h"
 
+#include "preRenderer.h"
 #define TAG "[settingmode_cb.c] "
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
@@ -217,8 +218,12 @@ void settingmode_backbt_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
 
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_MAIN);
+#else
     init_page_main(bk_ui);
     lv_scr_load(bk_ui->main);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmode_load_start_event_cb(lv_event_t *e)

@@ -13,6 +13,7 @@
 #include "settings.h"
 #include "hardware_hal.h"
 
+#include "preRenderer.h"
 #define TAG "[memorymode_cb.c] "
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
@@ -306,13 +307,24 @@ void memorymode_backbt_event_cb(lv_event_t *e)
     int mode = state->memory_mode_check;
     bk_printf(TAG "[MEM] BACK btn: mode=%d -> automode\n", mode);
     state->memory_mode_check = MEMORY_MODE_NONE;
-    if (mode == MEMORY_MODE_SAVE || mode == MEMORY_MODE_LOAD) {
+    if (mode == MEMORY_MODE_SAVE || mode == MEMORY_MODE_LOAD) 
+    {
+#if UI_PRENDERING_ENABLE
+        ui_page_change(PAGE_AUTOMODE);
+#else
         if (bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))
             init_page_automode(bk_ui);
         lv_scr_load(bk_ui->automode);
-    } else {
+#endif /* UI_PRENDERING_ENABLE */
+    } 
+    else 
+    {
+#if UI_PRENDERING_ENABLE
+        ui_page_change(PAGE_MAIN);
+#else
         init_page_main(bk_ui);
         lv_scr_load(bk_ui->main);
+#endif /* UI_PRENDERING_ENABLE */
     }
     /* keep-alive: memorymode screen retained for fast re-entry */
 }

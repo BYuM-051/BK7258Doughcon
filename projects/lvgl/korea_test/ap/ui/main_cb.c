@@ -248,16 +248,7 @@ void main_automode_event_cb(lv_event_t *e)
     bk_printf(TAG "[SCREEN] ── main→automode ──────────────────\n");
 
 #if UI_PRENDERING_ENABLE
-    /* prewarm이 이미 끝났으면 init_page_automode()에서 바로 페이지 전환과
-     * 쓰지 않는 페이지 삭제까지 끝내므로 여기서는 init만 호출 */
-
-    if(bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))
-    {
-        bk_printf(TAG "[SCREEN] automode is NULL or invalid\n");
-        init_page_automode(bk_ui);
-    }
-    ui_page_change(bk_ui->automode);
-
+    ui_page_change(PAGE_AUTOMODE);
 #else
     init_page_automode(bk_ui);
 #endif /* PRENDERING_ENABLE */
@@ -275,12 +266,7 @@ void main_manualmode_event_cb(lv_event_t *e)
     hal_buzzer_beep();
 
 #if UI_PRENDERING_ENABLE
-    if(bk_ui->manualmode == NULL || !lv_obj_is_valid(bk_ui->manualmode))
-    {
-        bk_printf(TAG "[SCREEN] manualmode is NULL or invalid\n");
-        init_page_manualmode(bk_ui);
-    }
-    ui_page_change(bk_ui->manualmode);
+    ui_page_change(PAGE_MANUALMODE);
 #else
     init_page_manualmode(bk_ui);
 #endif /* PRENDERING_ENABLE */
@@ -297,12 +283,7 @@ void main_autodrymode_event_cb(lv_event_t *e)
     hal_buzzer_beep();
 
 #if UI_PRENDERING_ENABLE
-    if(bk_ui->autodrymode == NULL || !lv_obj_is_valid(bk_ui->autodrymode))
-    {
-        bk_printf(TAG "[SCREEN] autodrymode is NULL or invalid\n");
-        init_page_autodrymode(bk_ui);
-    }
-    ui_page_change(bk_ui->autodrymode);
+    ui_page_change(PAGE_AUTODRYMODE);
 #else
     init_page_autodrymode(bk_ui);
 #endif /* PRENDERING_ENABLE */
@@ -323,12 +304,7 @@ void main_memorymode_event_cb(lv_event_t *e)
      * 삭제 버튼 표시 로직(memorymode_load_event_cb)이 잘못 판단하므로 초기화 */
     state->memory_mode_check = MEMORY_MODE_NONE;
 #if UI_PRENDERING_ENABLE
-    if(bk_ui->memorymode == NULL || !lv_obj_is_valid(bk_ui->memorymode))
-    {
-        bk_printf(TAG "[SCREEN] memorymode is NULL or invalid\n");
-        init_page_memorymode(bk_ui);
-    }
-    ui_page_change(bk_ui->memorymode);
+    ui_page_change(PAGE_MEMORYMODE);
 #else
     uint32_t _t0 = lv_tick_get();
     bk_printf(TAG "[SCREEN] ── main→memorymode ────────────────\n");
@@ -358,12 +334,7 @@ void main_settingmode_event_cb(lv_event_t *e)
     hal_buzzer_beep();
 
 #if UI_PRENDERING_ENABLE
-    if(bk_ui->settingmode == NULL || !lv_obj_is_valid(bk_ui->settingmode))
-    {
-        bk_printf(TAG "[SCREEN] settingmode is NULL or invalid\n");
-        init_page_settingmode(bk_ui);
-    }
-    ui_page_change(bk_ui->settingmode);
+    ui_page_change(PAGE_SETTINGMODE);
 #else
     uint32_t _t0 = lv_tick_get();
     bk_printf(TAG "[SCREEN] ── main→settingmode ───────────────\n");

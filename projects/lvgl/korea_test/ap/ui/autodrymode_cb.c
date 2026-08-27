@@ -657,12 +657,7 @@ void autodrymode_backbt_event_cb(lv_event_t *e)
 
     if (s_ui_timer_adm) { lv_timer_delete(s_ui_timer_adm); s_ui_timer_adm = NULL; }
 #if UI_PRENDERING_ENABLE
-    if(bk_ui->main == NULL || !lv_obj_is_valid(bk_ui->main)) {
-        bk_printf(TAG "[SCREEN] main is NULL or invalid\n");
-        init_page_main(bk_ui);
-        return;
-    }
-    ui_page_change(bk_ui->main);
+    ui_page_change(PAGE_MAIN);
 #else
     init_page_main(bk_ui);
     lv_scr_load(bk_ui->main);
