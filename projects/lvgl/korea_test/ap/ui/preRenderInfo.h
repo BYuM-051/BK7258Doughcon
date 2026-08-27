@@ -48,6 +48,8 @@ typedef struct
     pageId_t pageId;
     pageLifecycleFunc_t init_func;
     pageLifecycleFunc_t deinit_func;
+    const pageId_t *preRenderTargets;
+    uint32_t preRenderTargetCount;
 } preRendererPageInfo_t;
 
 extern const preRendererPageInfo_t preRenderPageInfo[PAGE_COUNT];

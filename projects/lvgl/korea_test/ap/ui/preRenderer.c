@@ -5,7 +5,7 @@
 #include "ui_config.h"
 
 #define TAG "[preRenderer.c] "
-// #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+#define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
@@ -24,8 +24,13 @@ lv_event_code_t UI_EVENT_PAGE_HIDE_START;
 lv_event_code_t UI_EVENT_PAGE_HIDDEN;
 
 static inline bool isObjInRoot(lv_obj_t *obj);
-static inline void uiPagePreRenderFlush();
-static void uiPagePreRender(lv_obj_t *page);
+static void uiPagePrepare(pageId_t pageId);
+static void uiPageShow(pageId_t pageId);
+static void uiPageHide(pageId_t pageId);
+static void uiPageDestroy(pageId_t pageId);
+static void uiPagePreRender(pageId_t pageId);
+static void uiPagePreRenderFlush(pageId_t pageId);
+static void uiPagePreRenderRegister(pageId_t pageId);
 
 static inline bool isObjInRoot(lv_obj_t *obj)
 {
@@ -100,6 +105,9 @@ bool ui_screen_event_initialized(void)
 // SHOW_START, SHOWN, HIDE_START, HIDDEN 이벤트 발생으로 기존 functions의 event_cb를 대체합니다.
 // 화면 전환 자체도 ui_screen_change()에서 처리합니다. (lv_scr_load() 호출)
 
+// REFACTOR : 첫 init 분기가 진행되는데, 아예 main으로 전환하는건 이걸 안 타게 하는게 나을지도 모르겠다. 그러면 branch 줄어서 in-order에서 latency가 줄겠지
+#define USE_OLD_PAGE_CHANGE_BEFORE_REFACTOR 1
+#if USE_OLD_PAGE_CHANGE_BEFORE_REFACTOR
 void ui_page_change(pageId_t newPageID)
 {
     if(!uiScreenEventInitialized)
@@ -110,9 +118,11 @@ void ui_page_change(pageId_t newPageID)
 
     uint32_t startTick = lv_tick_get();
     lv_obj_t *oldPage = NULL;
+    pageId_t oldPageID = PAGE_NONE;
     if(currentPageID != PAGE_NONE)
     {
         oldPage = *(preRenderPageInfo[currentPageID].page);
+        oldPageID = currentPageID;
     }
     lv_obj_t **newPage = preRenderPageInfo[newPageID].page;
 
@@ -195,14 +205,14 @@ void ui_page_change(pageId_t newPageID)
 
     if(newPageInRoot)
     {
+        bk_printf(TAG "[SCREEN] -정상적인 루트를 밟았다 이 말임.-Switching to new page in preRenderRoot\n");
         /* root 내부 page 전환: 새 page를 최상단에 놓고 root를 active screen으로 만든다. */
         lv_obj_move_to_index(*newPage, -1);
         lv_obj_remove_flag(*newPage, LV_OBJ_FLAG_HIDDEN);
 
-        if(lv_scr_act() != preRenderRoot)
-        {
-            lv_scr_load(preRenderRoot);
-        }
+        lv_scr_load(preRenderRoot);
+        lv_refr_now(NULL);
+        bk_printf(TAG "[SCREEN] -정상적인 루트를 밟았다 이 말임.-Switching to new page in preRenderRoot completed [TICK : %d]\n", (unsigned long)lv_tick_get());
     }
     else
     {
@@ -233,7 +243,11 @@ void ui_page_change(pageId_t newPageID)
             currentPage = NULL;
             LV_ASSERT(0);
         }
-        uiPagePreRender(*newPage);
+        if(oldPageID != PAGE_NONE)
+        {
+            uiPagePreRenderFlush(oldPageID);
+        }
+        uiPagePreRenderRegister(newPageID);
     }
     else
     {
@@ -242,15 +256,96 @@ void ui_page_change(pageId_t newPageID)
 
     bk_printf(TAG "[SCREEN] ui_page_change() completed. [elapsed: %lu]\n", (unsigned long)lv_tick_elaps(startTick));
 }
-
-static inline void uiPagePreRenderFlush()
+#else
+void ui_page_change(pageId_t newPageID)
 {
 
 }
 
-static void uiPagePreRender(lv_obj_t *page)
+static void uiPagePrepare(pageId_t pageId)
 {
 
+}
+
+static void uiPageShow(pageId_t pageId)
+{
+
+}
+
+static void uiPageHide(pageId_t pageId)
+{
+
+}
+
+static void uiPageDestroy(pageId_t pageId)
+{
+
+}
+
+static void uiPagePreRender(pageId_t pageId)
+{
+
+}
+#endif /* USE_OLD_PAGE_CHANGE_BEFORE_REFACTOR */
+static void uiPagePreRenderFlush(pageId_t oldPageID)
+{
+    bk_printf(TAG "[SCREEN] Flushing pre-rendered pages\n");
+    lv_image_cache_drop(NULL);
+
+    for(uint32_t i = 0; i < preRenderPageInfo[oldPageID].preRenderTargetCount; i++)
+    {
+        if(preRenderPageInfo[oldPageID].preRenderTargets[i] == currentPageID)
+        {
+            bk_printf(TAG "[SCREEN] Skipping flush for current pageId: %d\n", currentPageID);
+            continue;
+        }
+        pageId_t targetPageID = preRenderPageInfo[oldPageID].preRenderTargets[i];
+        if(targetPageID >= PAGE_COUNT)
+        {
+            bk_printf(TAG "[SCREEN] Invalid preRender target pageId: %d\n", targetPageID);
+            continue;
+        }
+        pageLifecycleFunc_t destroyFunc = preRenderPageInfo[targetPageID].deinit_func;
+        if(destroyFunc != NULL)
+        {
+            bk_printf(TAG "[SCREEN] Destroying pre-rendered pageId: %d\n", targetPageID);
+            destroyFunc(&bk_lv_tool_ui);
+        }
+    }
+}
+
+// TODO : preRender가 쌓이면 touch이벤트가 밀리는 문제를 해결해야하는데, 일단은 구현먼저 합시다.
+static void uiPagePreRenderRegister(pageId_t newPageID)
+{
+    lv_obj_t **newPage = preRenderPageInfo[newPageID].page;
+    bk_printf(TAG "[SCREEN] uiPagePreRenderis [%d]\n", newPageID != PAGE_NONE ? true : false);
+    for(uint32_t i = 0; i < preRenderPageInfo[newPageID].preRenderTargetCount; i++)
+    {
+        pageId_t targetPageID = preRenderPageInfo[newPageID].preRenderTargets[i];
+        lv_obj_t **targetPage = preRenderPageInfo[targetPageID].page;
+        if(targetPageID >= PAGE_COUNT)
+        {
+            bk_printf(TAG "[SCREEN] Invalid preRender target pageId: %d\n", targetPageID);
+            continue;
+        }
+        pageLifecycleFunc_t initFunc = getPageInitFunc(targetPageID);
+        if(initFunc != NULL)
+        {
+            bk_printf(TAG "[SCREEN] Pre-rendering pageId: %d\n", targetPageID);
+            initFunc(&bk_lv_tool_ui);
+        }
+    }
+    lv_obj_move_to_index(*newPage, -1);
+    lv_obj_remove_flag(*newPage, LV_OBJ_FLAG_HIDDEN);// REFACTOR : 일단은 위로 계속 쌓으면서 보이게 하는데, init 그 자체를 한번 더 체크합시다.
+    lv_refr_now(NULL);
+    for (size_t i = 0; i < preRenderPageInfo[newPageID].preRenderTargetCount; i++) // REFACTOR : 혹시 이거 먹으면 refresh에서 히든넣고 올리기로 다시 셋팅하자
+    {
+        pageId_t targetPageID = preRenderPageInfo[newPageID].preRenderTargets[i];
+        lv_obj_t **targetPage = preRenderPageInfo[targetPageID].page;
+        lv_obj_add_flag(*targetPage, LV_OBJ_FLAG_HIDDEN);
+    }
+    lv_refr_now(NULL);
+    
     return;
 }
 
