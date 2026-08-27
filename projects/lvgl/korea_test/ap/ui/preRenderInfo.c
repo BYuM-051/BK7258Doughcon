@@ -2,9 +2,9 @@
 #include "preRenderInfo.h"
 
 #define TAG "[preRenderInfo.c] "
-#define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(...) do {} while(0) // disable printf
 
-//extern Rendering Page Init / Deinit functions
+// extern Rendering Page Init / Deinit functions
 extern void init_page_main(bk_lv_ui_t *bk_ui);
 extern void destroy_page_main(bk_lv_ui_t *bk_ui);
 extern void init_page_automode(bk_lv_ui_t *bk_ui);
@@ -51,207 +51,304 @@ extern void init_page_detailsettingdefrost(bk_lv_ui_t *bk_ui);
 extern void destroy_page_detailsettingdefrost(bk_lv_ui_t *bk_ui);
 extern void init_page_neurosys(bk_lv_ui_t *bk_ui);
 extern void destroy_page_neurosys(bk_lv_ui_t *bk_ui);
-//=============================================
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 
-#define PAGE_INFO(id, member, initFunc, destroyFunc) \
-    [id] = { \
-        .page = &bk_lv_tool_ui.member, \
-        .pageId = id, \
-        .initBase = initFunc, \
-        .initStep = ui_page_build_step, \
-        .destroy = destroyFunc \
+
+/*
+ * preRender target이 있는 일반 page.
+ *
+ * __VA_ARGS__에 target page ID를 넣으면
+ * preRenderTargetCount는 자동 계산한다.
+ */
+#define PAGE_INFO(id, member, initFunc, destroyFunc, ...)                     \
+    [id] =                                                                   \
+    {                                                                        \
+        .page = &bk_lv_tool_ui.member,                                       \
+        .pageId = id,                                                        \
+        .initBase = initFunc,                                                \
+        .initStep = ui_page_build_step,                                      \
+        .destroy = destroyFunc,                                              \
+        .preRenderTargets = (const pageId_t[]){ __VA_ARGS__ },               \
+        .preRenderTargetCount =                                              \
+            (uint32_t)(sizeof((const pageId_t[]){ __VA_ARGS__ }) /           \
+                       sizeof(pageId_t))                                     \
     }
+
+
+/*
+ * preRender target이 없는 page.
+ */
+#define PAGE_INFO_NO_TARGETS(id, member, initFunc, destroyFunc)               \
+    [id] =                                                                   \
+    {                                                                        \
+        .page = &bk_lv_tool_ui.member,                                       \
+        .pageId = id,                                                        \
+        .initBase = initFunc,                                                \
+        .initStep = ui_page_build_step,                                      \
+        .destroy = destroyFunc,                                              \
+        .preRenderTargets = NULL,                                            \
+        .preRenderTargetCount = 0                                            \
+    }
+
 
 const preRendererPageInfo_t preRenderPageInfo[PAGE_COUNT] =
 {
-    [PAGE_MAIN] = 
-    {
-        &bk_lv_tool_ui.main, PAGE_MAIN, init_page_main, destroy_page_main, 
-        .preRenderTargets = (const pageId_t[]){PAGE_AUTOMODE, PAGE_MANUALMODE, PAGE_AUTODRYMODE, PAGE_MEMORYMODE, PAGE_SETTINGMODE}, 
-        .preRenderTargetCount = 5
-    },
+    PAGE_INFO(
+        PAGE_MAIN,
+        main,
+        init_page_main,
+        destroy_page_main,
+        PAGE_AUTOMODE,
+        PAGE_MANUALMODE,
+        PAGE_AUTODRYMODE,
+        PAGE_MEMORYMODE,
+        PAGE_SETTINGMODE
+    ),
 
-    [PAGE_AUTOMODE] = 
-    {
-        &bk_lv_tool_ui.automode, PAGE_AUTOMODE, init_page_automode, destroy_page_automode, 
-        .preRenderTargets = (const pageId_t[]){PAGE_MAIN, PAGE_AUTOMODESTART, PAGE_MEMORYMODE}, 
-        .preRenderTargetCount = 3
-    },
+    PAGE_INFO(
+        PAGE_AUTOMODE,
+        automode,
+        init_page_automode,
+        destroy_page_automode,
+        PAGE_MAIN,
+        PAGE_AUTOMODESTART,
+        PAGE_MEMORYMODE
+    ),
 
-    [PAGE_AUTOMODESTART] = 
-    {
-        &bk_lv_tool_ui.automodestart, PAGE_AUTOMODESTART, init_page_automodestart, destroy_page_automodestart, 
-        .preRenderTargets = (const pageId_t[]){PAGE_AUTOMODEEND, PAGE_AUTOMODE}, 
-        .preRenderTargetCount = 2
-    },
+    PAGE_INFO(
+        PAGE_AUTOMODESTART,
+        automodestart,
+        init_page_automodestart,
+        destroy_page_automodestart,
+        PAGE_AUTOMODEEND,
+        PAGE_AUTOMODE
+    ),
 
-    [PAGE_AUTOMODEEND] = 
-    {
-        &bk_lv_tool_ui.automodeend, PAGE_AUTOMODEEND, init_page_automodeend, destroy_page_automodeend, 
-        .preRenderTargets = (const pageId_t[]){PAGE_MANUALMODESTART, PAGE_AUTOMODE}, 
-        .preRenderTargetCount = 2
-    },
+    PAGE_INFO(
+        PAGE_AUTOMODEEND,
+        automodeend,
+        init_page_automodeend,
+        destroy_page_automodeend,
+        PAGE_MANUALMODESTART,
+        PAGE_AUTOMODE
+    ),
 
-    [PAGE_MANUALMODE] = 
-    {
-        &bk_lv_tool_ui.manualmode, PAGE_MANUALMODE, init_page_manualmode, destroy_page_manualmode, 
-        .preRenderTargets = (const pageId_t[]){PAGE_MAIN, PAGE_MANUALMODESTART}, 
-        .preRenderTargetCount = 2
-    },
+    PAGE_INFO(
+        PAGE_MANUALMODE,
+        manualmode,
+        init_page_manualmode,
+        destroy_page_manualmode,
+        PAGE_MAIN,
+        PAGE_MANUALMODESTART
+    ),
 
-    [PAGE_MANUALMODESTART] = 
-    {
-        &bk_lv_tool_ui.manualmodestart, PAGE_MANUALMODESTART, init_page_manualmodestart, destroy_page_manualmodestart, 
-        .preRenderTargets = (const pageId_t[]){PAGE_AUTOMODE, PAGE_MANUALMODE}, 
-        .preRenderTargetCount = 2
-    },
+    PAGE_INFO(
+        PAGE_MANUALMODESTART,
+        manualmodestart,
+        init_page_manualmodestart,
+        destroy_page_manualmodestart,
+        PAGE_AUTOMODE,
+        PAGE_MANUALMODE
+    ),
 
-    [PAGE_AUTODRYMODE] = 
-    {
-        &bk_lv_tool_ui.autodrymode, PAGE_AUTODRYMODE, init_page_autodrymode, destroy_page_autodrymode, 
-        .preRenderTargets = (const pageId_t[]){PAGE_MAIN}, 
-        .preRenderTargetCount = 1
-    },
+    PAGE_INFO(
+        PAGE_AUTODRYMODE,
+        autodrymode,
+        init_page_autodrymode,
+        destroy_page_autodrymode,
+        PAGE_MAIN
+    ),
 
-    [PAGE_MEMORYMODE] = 
-    {
-        &bk_lv_tool_ui.memorymode, PAGE_MEMORYMODE, init_page_memorymode, destroy_page_memorymode, 
-        .preRenderTargets = (const pageId_t[]){PAGE_AUTOMODE, PAGE_MAIN}, 
-        .preRenderTargetCount = 2
-    },
+    PAGE_INFO(
+        PAGE_MEMORYMODE,
+        memorymode,
+        init_page_memorymode,
+        destroy_page_memorymode,
+        PAGE_AUTOMODE,
+        PAGE_MAIN
+    ),
 
-    [PAGE_SETTINGMODE] = 
-    {
-        &bk_lv_tool_ui.settingmode, PAGE_SETTINGMODE, init_page_settingmode, destroy_page_settingmode, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODEDETAILSETTING, PAGE_SETTINGMODEDEGREE, PAGE_SETTINGMODERECORD, PAGE_SETTINGMODETEST, PAGE_SETTINGMODETIME, PAGE_SETTINGMODELANGUAGE, PAGE_MAIN}, 
-        .preRenderTargetCount = 7
-    },
+    PAGE_INFO(
+        PAGE_SETTINGMODE,
+        settingmode,
+        init_page_settingmode,
+        destroy_page_settingmode,
+        PAGE_SETTINGMODEDETAILSETTING,
+        PAGE_SETTINGMODEDEGREE,
+        PAGE_SETTINGMODERECORD,
+        PAGE_SETTINGMODETEST,
+        PAGE_SETTINGMODETIME,
+        PAGE_SETTINGMODELANGUAGE,
+        PAGE_MAIN
+    ),
 
-    [PAGE_SETTINGMODEDETAILSETTING] = 
-    {
-        &bk_lv_tool_ui.settingmodedetailsetting, PAGE_SETTINGMODEDETAILSETTING, init_page_settingmodedetailsetting, destroy_page_settingmodedetailsetting, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODE, PAGE_DETAILSETTINGTEMP, PAGE_DETAILSETTINGHUMIDITY, PAGE_DETAILSETTINGTIME, PAGE_DETAILSETTINGDAMPER, PAGE_DETAILSETTINGDEFROST}, 
-        .preRenderTargetCount = 6
-    },
+    PAGE_INFO(
+        PAGE_SETTINGMODEDETAILSETTING,
+        settingmodedetailsetting,
+        init_page_settingmodedetailsetting,
+        destroy_page_settingmodedetailsetting,
+        PAGE_SETTINGMODE,
+        PAGE_DETAILSETTINGTEMP,
+        PAGE_DETAILSETTINGHUMIDITY,
+        PAGE_DETAILSETTINGTIME,
+        PAGE_DETAILSETTINGDAMPER,
+        PAGE_DETAILSETTINGDEFROST
+    ),
 
-    [PAGE_SETTINGMODEDEGREE] = 
-    {
-        &bk_lv_tool_ui.settingmodedegree, PAGE_SETTINGMODEDEGREE, init_page_settingmodedegree, destroy_page_settingmodedegree, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODE}, 
-        .preRenderTargetCount = 1
-    },
+    PAGE_INFO(
+        PAGE_SETTINGMODEDEGREE,
+        settingmodedegree,
+        init_page_settingmodedegree,
+        destroy_page_settingmodedegree,
+        PAGE_SETTINGMODE
+    ),
 
-    [PAGE_SETTINGMODERECORD] = 
-    {
-        &bk_lv_tool_ui.settingmoderecord, PAGE_SETTINGMODERECORD, init_page_settingmoderecord, destroy_page_settingmoderecord, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODE}, 
-        .preRenderTargetCount = 1
-    },
+    PAGE_INFO(
+        PAGE_SETTINGMODERECORD,
+        settingmoderecord,
+        init_page_settingmoderecord,
+        destroy_page_settingmoderecord,
+        PAGE_SETTINGMODE
+    ),
 
-    [PAGE_SETTINGMODETEST] = 
-    {
-        &bk_lv_tool_ui.settingmodetest, PAGE_SETTINGMODETEST, init_page_settingmodetest, destroy_page_settingmodetest, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODE}, 
-        .preRenderTargetCount = 1
-    },
+    PAGE_INFO(
+        PAGE_SETTINGMODETEST,
+        settingmodetest,
+        init_page_settingmodetest,
+        destroy_page_settingmodetest,
+        PAGE_SETTINGMODE
+    ),
 
-    [PAGE_SETTINGMODETIME] = 
-    {
-        &bk_lv_tool_ui.settingmodetime, PAGE_SETTINGMODETIME, init_page_settingmodetime, destroy_page_settingmodetime, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODE}, 
-        .preRenderTargetCount = 1
-    },
+    PAGE_INFO(
+        PAGE_SETTINGMODETIME,
+        settingmodetime,
+        init_page_settingmodetime,
+        destroy_page_settingmodetime,
+        PAGE_SETTINGMODE
+    ),
 
-    [PAGE_SETTINGMODELANGUAGE] = 
-    {
-        &bk_lv_tool_ui.settingmodelanguage, PAGE_SETTINGMODELANGUAGE, init_page_settingmodelanguage, destroy_page_settingmodelanguage, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODE}, 
-        .preRenderTargetCount = 1
-    },
+    PAGE_INFO(
+        PAGE_SETTINGMODELANGUAGE,
+        settingmodelanguage,
+        init_page_settingmodelanguage,
+        destroy_page_settingmodelanguage,
+        PAGE_SETTINGMODE
+    ),
 
-    [PAGE_SETTINGMODEMANUAL] = 
-    {
-        &bk_lv_tool_ui.settingmodemanual, PAGE_SETTINGMODEMANUAL, init_page_settingmodemanual, destroy_page_settingmodemanual, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODE}, 
-        .preRenderTargetCount = 1
-    },
+    PAGE_INFO(
+        PAGE_SETTINGMODEMANUAL,
+        settingmodemanual,
+        init_page_settingmodemanual,
+        destroy_page_settingmodemanual,
+        PAGE_SETTINGMODE
+    ),
 
-    [PAGE_SETTINGMODEDEFROST] = 
-    {
-        &bk_lv_tool_ui.settingmodedefrost, PAGE_SETTINGMODEDEFROST, init_page_settingmodedefrost, destroy_page_settingmodedefrost, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODE}, 
-        .preRenderTargetCount = 1
-    },
+    PAGE_INFO(
+        PAGE_SETTINGMODEDEFROST,
+        settingmodedefrost,
+        init_page_settingmodedefrost,
+        destroy_page_settingmodedefrost,
+        PAGE_SETTINGMODE
+    ),
 
-    [PAGE_DETAILSETTINGTEMP] = 
-    {
-        &bk_lv_tool_ui.detailsettingtemp, PAGE_DETAILSETTINGTEMP, init_page_detailsettingtemp, destroy_page_detailsettingtemp, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODEDETAILSETTING}, 
-        .preRenderTargetCount = 1
-    },
+    PAGE_INFO(
+        PAGE_DETAILSETTINGTEMP,
+        detailsettingtemp,
+        init_page_detailsettingtemp,
+        destroy_page_detailsettingtemp,
+        PAGE_SETTINGMODEDETAILSETTING
+    ),
 
-    [PAGE_DETAILSETTINGHUMIDITY] = 
-    {
-        &bk_lv_tool_ui.detailsettinghumidity, PAGE_DETAILSETTINGHUMIDITY, init_page_detailsettinghumidity, destroy_page_detailsettinghumidity, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODEDETAILSETTING}, 
-        .preRenderTargetCount = 1
-    },
+    PAGE_INFO(
+        PAGE_DETAILSETTINGHUMIDITY,
+        detailsettinghumidity,
+        init_page_detailsettinghumidity,
+        destroy_page_detailsettinghumidity,
+        PAGE_SETTINGMODEDETAILSETTING
+    ),
 
-    [PAGE_DETAILSETTINGTIME] = 
-    {
-        &bk_lv_tool_ui.detailsettingtime, PAGE_DETAILSETTINGTIME, init_page_detailsettingtime, destroy_page_detailsettingtime, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODEDETAILSETTING}, 
-        .preRenderTargetCount = 1
-    },
+    PAGE_INFO(
+        PAGE_DETAILSETTINGTIME,
+        detailsettingtime,
+        init_page_detailsettingtime,
+        destroy_page_detailsettingtime,
+        PAGE_SETTINGMODEDETAILSETTING
+    ),
 
-    [PAGE_DETAILSETTINGDAMPER] = 
-    {
-        &bk_lv_tool_ui.detailsettingdamper, PAGE_DETAILSETTINGDAMPER, init_page_detailsettingdamper, destroy_page_detailsettingdamper, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODEDETAILSETTING}, 
-        .preRenderTargetCount = 1
-    },
+    PAGE_INFO(
+        PAGE_DETAILSETTINGDAMPER,
+        detailsettingdamper,
+        init_page_detailsettingdamper,
+        destroy_page_detailsettingdamper,
+        PAGE_SETTINGMODEDETAILSETTING
+    ),
 
-    [PAGE_DETAILSETTINGDEFROST] = 
-    {
-        &bk_lv_tool_ui.detailsettingdefrost, PAGE_DETAILSETTINGDEFROST, init_page_detailsettingdefrost, destroy_page_detailsettingdefrost, 
-        .preRenderTargets = (const pageId_t[]){PAGE_SETTINGMODEDETAILSETTING}, 
-        .preRenderTargetCount = 1
-    },
+    PAGE_INFO(
+        PAGE_DETAILSETTINGDEFROST,
+        detailsettingdefrost,
+        init_page_detailsettingdefrost,
+        destroy_page_detailsettingdefrost,
+        PAGE_SETTINGMODEDETAILSETTING
+    ),
 
-    [PAGE_NEUROSYS] = {&bk_lv_tool_ui.neurosys, PAGE_NEUROSYS, init_page_neurosys, destroy_page_neurosys, NULL, 0}
+    PAGE_INFO_NO_TARGETS(
+        PAGE_NEUROSYS,
+        neurosys,
+        init_page_neurosys,
+        destroy_page_neurosys
+    )
 };
 
+
 #undef PAGE_INFO
+#undef PAGE_INFO_NO_TARGETS
+
 
 pageLifecycleFunc_t getPageInitFunc(pageId_t pageId)
 {
     bk_printf(TAG "[SCREEN] getPageInitFunc(%d)\n", pageId);
-    if(pageId >= 0 && pageId < PAGE_COUNT)
+
+    if (pageId >= 0 && pageId < PAGE_COUNT)
     {
-        bk_printf(TAG "[SCREEN] getPageInitFunc was %d for pageId %d\n", preRenderPageInfo[pageId].initBase != NULL, pageId);
+        bk_printf(
+            TAG "[SCREEN] getPageInitFunc was %d for pageId %d\n",
+            preRenderPageInfo[pageId].initBase != NULL,
+            pageId
+        );
+
         return preRenderPageInfo[pageId].initBase;
     }
+
     return NULL;
 }
 
+
 pageInitStepFunc_t getPageInitStepFunc(pageId_t pageId)
 {
-    if(pageId >= 0 && pageId < PAGE_COUNT)
+    if (pageId >= 0 && pageId < PAGE_COUNT)
     {
         return preRenderPageInfo[pageId].initStep;
     }
+
     return NULL;
 }
+
 
 pageLifecycleFunc_t getPageDeinitFunc(pageId_t pageId)
 {
     bk_printf(TAG "[SCREEN] getPageDeinitFunc(%d)\n", pageId);
-    if(pageId >= 0 && pageId < PAGE_COUNT)
+
+    if (pageId >= 0 && pageId < PAGE_COUNT)
     {
-        bk_printf(TAG "[SCREEN] getPageDeinitFunc was %d for pageId %d\n", preRenderPageInfo[pageId].destroy != NULL, pageId);
+        bk_printf(
+            TAG "[SCREEN] getPageDeinitFunc was %d for pageId %d\n",
+            preRenderPageInfo[pageId].destroy != NULL,
+            pageId
+        );
+
         return preRenderPageInfo[pageId].destroy;
     }
+
     return NULL;
 }

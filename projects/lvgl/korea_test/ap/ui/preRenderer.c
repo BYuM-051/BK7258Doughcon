@@ -7,7 +7,7 @@
 #include "ui_config.h"
 
 #define TAG "[preRenderer.c] "
-#define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
@@ -649,6 +649,7 @@ void ui_page_change(pageId_t newPageID)
 
     uint32_t startTick = lv_tick_get();
     lv_obj_t *oldPage = NULL;
+    uint32_t oldPageID = PAGE_NONE;
     if(currentPageID >= 0 && currentPageID < PAGE_COUNT &&
        preRenderPageInfo[currentPageID].page != NULL)
     {
@@ -888,7 +889,7 @@ static void uiPagePreRenderFlush(pageId_t oldPageID)
             bk_printf(TAG "[SCREEN] Invalid preRender target pageId: %d\n", targetPageID);
             continue;
         }
-        pageLifecycleFunc_t destroyFunc = preRenderPageInfo[targetPageID].deinit_func;
+        pageLifecycleFunc_t destroyFunc = preRenderPageInfo[targetPageID].destroy;
         if(destroyFunc != NULL)
         {
             bk_printf(TAG "[SCREEN] Destroying pre-rendered pageId: %d\n", targetPageID);
