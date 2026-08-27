@@ -8,6 +8,7 @@
 #include "beken_ui.h"
 #include "settings.h"
 #include "hardware_hal.h"
+#include "preRenderer.h"
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 
@@ -28,9 +29,13 @@ void popupreset_yesbt_event_cb(lv_event_t *e)
     settings_factory_reset();
 
     /* 초기화 완료 → settingmode 화면으로 복귀 */
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_SETTINGMODE);
+#else
     if (bk_ui->settingmode == NULL || !lv_obj_is_valid(bk_ui->settingmode))
         init_page_settingmode(bk_ui);
     lv_scr_load(bk_ui->settingmode);
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 void popupreset_nobt_event_cb(lv_event_t *e)
