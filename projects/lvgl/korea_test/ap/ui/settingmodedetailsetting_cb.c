@@ -241,3 +241,42 @@ void settingmodedetailsetting_load_event_cb(lv_event_t *e)
         return;
     }
 }
+
+void settingmodedetailsetting_unload_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+
+    _rst_prewarm_cancel();
+
+    /* popupreset_imageview1->src가 canvas->draw_buf를 참조 중일 수 있으므로,
+     * canvas_free() 전에 팝업이 열려있다면 먼저 닫아 dangling pointer 방지
+     * (popuppassword/settingmode_cb.c와 동일한 방어 패턴). */
+    if (bk_ui->popupreset && lv_obj_is_valid(bk_ui->popupreset))
+    {
+        destroy_page_popupreset(bk_ui);
+    }
+
+    popupreset_canvas_free();
+}
+
+void settingmodedetailsetting_load_start_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+
+    ui_lang_apply_settingmodedetailsetting(bk_ui);
+}
+
+void settingmodedetailsetting_loaded_event_cb(lv_event_t *e)
+{
+    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+
+    ui_title_anim(bk_ui->settingmodedetailsetting_title);
+
+    /* Re-cache reset_popup.png on every entry (including returns from sub-screens).
+     * 20 ms delay lets the screen render complete before the decode starts. */
+    _rst_prewarm_start();
+}
+
+void settingmodedetailsetting_unloaded_event_cb(lv_event_t *e)
+{
+}
