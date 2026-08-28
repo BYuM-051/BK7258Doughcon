@@ -49,7 +49,6 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui) {
     lv_obj_set_pos(bk_ui->settingmode, 0, 0);
     lv_obj_set_style_radius(bk_ui->settingmode, 0, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(bk_ui->settingmode, LV_SCROLLBAR_MODE_OFF);
-    // FIXME : 안나눠놨네. 나눠야죠. initcallback인데.
     lv_obj_add_event_cb(bk_ui->settingmode, settingmode_load_start_event_cb, UI_EVENT_PAGE_SHOW_START,   NULL);
     lv_obj_add_event_cb(bk_ui->settingmode, settingmode_loaded_event_cb,     UI_EVENT_PAGE_SHOWN,       NULL);
     lv_obj_add_event_cb(bk_ui->settingmode, settingmode_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);

@@ -105,34 +105,52 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
     extern preRendererPageState_t preRenderPageState[PAGE_COUNT];
     preRenderPageState[PAGE_MAIN].isRendered = true;
     bk_printf(TAG "[BOOT] init_page_main: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+    lv_scr_load(preRenderRoot);
+
+    // init warmup automode
     ts = lv_tick_get();
     init_page_automode(bk_ui);
     lv_obj_move_to_index(bk_ui->automode, -1);
     lv_refr_now(NULL);
-    // lv_obj_add_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN);
-    // lv_refr_now(NULL);
     preRenderPageState[PAGE_AUTOMODE].isRendered = true;
     bk_printf(TAG "[BOOT] warmup automode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+
+    // init warmup manualmode
     ts = lv_tick_get();
     init_page_manualmode(bk_ui);
     lv_obj_move_to_index(bk_ui->manualmode, -1);
-    // lv_refr_now(NULL);
-    // lv_obj_add_flag(bk_ui->manualmode, LV_OBJ_FLAG_HIDDEN);
     lv_refr_now(NULL);
     preRenderPageState[PAGE_MANUALMODE].isRendered = true;
     bk_printf(TAG "[BOOT] warmup manualmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+
+    // init warmup autodrymode
     ts = lv_tick_get();
     init_page_autodrymode(bk_ui);
     lv_obj_move_to_index(bk_ui->autodrymode, -1);
-    // lv_refr_now(NULL);
-    // lv_obj_add_flag(bk_ui->autodrymode, LV_OBJ_FLAG_HIDDEN);
     lv_refr_now(NULL);
     preRenderPageState[PAGE_AUTODRYMODE].isRendered = true;
     bk_printf(TAG "[BOOT] warmup autodrymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+    
+    // init warmup memorymode
+    ts = lv_tick_get();
+    init_page_memorymode(bk_ui);
+    lv_obj_move_to_index(bk_ui->memorymode, -1);
+    lv_refr_now(NULL);
+    preRenderPageState[PAGE_MEMORYMODE].isRendered = true;
+    bk_printf(TAG "[BOOT] warmup memorymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+    
+    // init warmup settingmode
+    ts = lv_tick_get();
+    init_page_settingmode(bk_ui);
+    lv_obj_move_to_index(bk_ui->settingmode, -1);
+    lv_refr_now(NULL);
+    preRenderPageState[PAGE_SETTINGMODE].isRendered = true;
+    bk_printf(TAG "[BOOT] warmup settingmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+
     lv_obj_move_to_index(bk_ui->main, -1);
-    lv_scr_load(preRenderRoot);
     currentScreen = preRenderRoot;
     lv_refr_now(NULL);
+    lv_obj_send_event(bk_ui->main, UI_EVENT_PAGE_SHOWN, NULL); // NOTE : 이거 켜면 prewarm이 enable되어서 드디어 진짜로 빨라질 것 같음
     bk_printf(TAG "[BOOT] warmup main: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 #else
     uint32_t t0 = lv_tick_get();

@@ -6,7 +6,7 @@
 #include <string.h>
 
 #define TAG "[custom_func.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 /* _img_set_src_timed / _img_set_src_deferred / _img_ensure_src 는
  * ui/custom/custom_func.c 에 정의됨 — 여기서 재정의하면 링커 중복 오류 발생.

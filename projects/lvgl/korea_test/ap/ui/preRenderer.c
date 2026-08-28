@@ -341,21 +341,24 @@ void ui_page_change(pageId_t newPageID)
         lv_obj_send_event(oldPage, UI_EVENT_PAGE_HIDE_START, NULL);
         if(oldPageID != PAGE_NONE && oldPageID != newPageID)
         {
-            bk_printf(TAG "[SCREEN] Hiding oldPageID %d\n", oldPageID);
             for(int i = 0 ; i < PAGE_COUNT ; i++)
             {
                 lv_obj_t *page = *(preRenderPageState[i].page);
-                if(page == NULL)
+                if(page == NULL || !lv_obj_is_valid(page) || i == newPageID)
                 {
-                    bk_printf(TAG "[SCREEN] page %d is NULL, skipping\n", i);
-                    continue;
-                }
-                if(!lv_obj_is_valid(page))
-                {
-                    bk_printf(TAG "[SCREEN] page %d is invalid, skipping\n", i);
+                    // bk_printf(TAG "[SCREEN] Skipping hide for pageId: %d\n", i);
                     continue;
                 }
                 lv_obj_add_flag(page, LV_OBJ_FLAG_HIDDEN);
+                bk_printf
+                (
+                    TAG "[PTR] main=%p auto=%p manual=%p autodry=%p root=%p\n",
+                    bk_lv_tool_ui.main,
+                    bk_lv_tool_ui.automode,
+                    bk_lv_tool_ui.manualmode,
+                    bk_lv_tool_ui.autodrymode,
+                    preRenderRoot
+                );
             }
         }
         else

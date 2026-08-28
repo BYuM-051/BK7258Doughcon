@@ -100,7 +100,7 @@ void init_page_main(bk_lv_ui_t * bk_ui)
     // Button: automode
     bk_ui->main_automode = lv_button_create(bk_ui->main);
     lv_obj_add_flag(bk_ui->main_automode, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->main_automode, main_automode_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->main_automode, main_automode_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->main_automode, 0, 0);
     lv_obj_set_style_border_width(bk_ui->main_automode, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->main_automode, 0, 0);
@@ -117,7 +117,7 @@ void init_page_main(bk_lv_ui_t * bk_ui)
     // Button: manualmode
     bk_ui->main_manualmode = lv_button_create(bk_ui->main);
     lv_obj_add_flag(bk_ui->main_manualmode, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->main_manualmode, main_manualmode_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->main_manualmode, main_manualmode_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->main_manualmode, 0, 0);
     lv_obj_set_style_border_width(bk_ui->main_manualmode, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->main_manualmode, 0, 0);
@@ -134,7 +134,7 @@ void init_page_main(bk_lv_ui_t * bk_ui)
     // Button: autodrymode
     bk_ui->main_autodrymode = lv_button_create(bk_ui->main);
     lv_obj_add_flag(bk_ui->main_autodrymode, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->main_autodrymode, main_autodrymode_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->main_autodrymode, main_autodrymode_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->main_autodrymode, 0, 0);
     lv_obj_set_style_border_width(bk_ui->main_autodrymode, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->main_autodrymode, 0, 0);
@@ -151,7 +151,7 @@ void init_page_main(bk_lv_ui_t * bk_ui)
     // Button: memorymode
     bk_ui->main_memorymode = lv_button_create(bk_ui->main);
     lv_obj_add_flag(bk_ui->main_memorymode, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->main_memorymode, main_memorymode_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->main_memorymode, main_memorymode_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->main_memorymode, 0, 0);
     lv_obj_set_style_border_width(bk_ui->main_memorymode, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->main_memorymode, 0, 0);
@@ -168,7 +168,7 @@ void init_page_main(bk_lv_ui_t * bk_ui)
     // Button: settingmode
     bk_ui->main_settingmode = lv_button_create(bk_ui->main);
     lv_obj_add_flag(bk_ui->main_settingmode, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->main_settingmode, main_settingmode_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->main_settingmode, main_settingmode_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->main_settingmode, 0, 0);
     lv_obj_set_style_border_width(bk_ui->main_settingmode, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->main_settingmode, 0, 0);
@@ -210,8 +210,4 @@ void init_page_main(bk_lv_ui_t * bk_ui)
     // lv_obj_set_style_text_opa(bk_ui->main_dclock_1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     // lv_obj_set_style_text_font(bk_ui->main_dclock_1, &lv_font_scdream_regular_22, LV_PART_MAIN | LV_STATE_DEFAULT);
     // lv_obj_set_style_text_align(bk_ui->main_dclock_1, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    // TODO : 나중에 여기에다가 lvgl callback 연결하는 코드 넣어서 warmup 시키면 되지 않을까 싶음.
-    // destroy callback도 넣어야겠지. 그래서 warmup했던거 active화면만 남기고 다시 지우게해야지.
-    // 아니면 그냥 warmup update하는거로 두 알고리즘을 통합시키거나.
 }
