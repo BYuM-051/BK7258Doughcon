@@ -82,7 +82,7 @@ void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
     lv_obj_add_event_cb(bk_ui->autodrymode, autodrymode_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN, NULL);
 
     lv_obj_set_style_bg_color(bk_ui->autodrymode, lv_color_hex(0x49b206), 0);
-    lv_obj_set_style_bg_opa(bk_ui->autodrymode, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(bk_ui->autodrymode, LV_OPA_COVER, LV_PART_MAIN);
 #else
     bk_ui->autodrymode = lv_obj_create(NULL);
     lv_obj_set_size(bk_ui->autodrymode, 1024, 600);

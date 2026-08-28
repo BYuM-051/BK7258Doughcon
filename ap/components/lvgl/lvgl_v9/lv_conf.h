@@ -337,7 +337,7 @@
  *  If size is not set to 0, the decoder will fail to decode when the cache is full.
  *  If size is 0, the cache function is not enabled and the decoded memory will be
  *  released immediately after use. */
-#define LV_CACHE_DEF_SIZE       (4* 1024 * 1024)  /* 1.5MB: password_popup(1.27MB) 수용 최솟값 + 여유 */
+#define LV_CACHE_DEF_SIZE       (4 * 1024 * 1024)  /* 1.5MB: password_popup(1.27MB) 수용 최솟값 + 여유 */
 // #define LV_CACHE_DEF_SIZE       (3 * 1024 * 1024 / 2)  /* 1.5MB: password_popup(1.27MB) 수용 최솟값 + 여유 */
 
 /** Default number of image header cache entries. The cache is used to store the headers of images

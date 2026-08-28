@@ -342,7 +342,21 @@ void ui_page_change(pageId_t newPageID)
         if(oldPageID != PAGE_NONE && oldPageID != newPageID)
         {
             bk_printf(TAG "[SCREEN] Hiding oldPageID %d\n", oldPageID);
-            lv_obj_add_flag(oldPage, LV_OBJ_FLAG_HIDDEN);
+            for(int i = 0 ; i < PAGE_COUNT ; i++)
+            {
+                lv_obj_t *page = *(preRenderPageState[i].page);
+                if(page == NULL)
+                {
+                    bk_printf(TAG "[SCREEN] page %d is NULL, skipping\n", i);
+                    continue;
+                }
+                if(!lv_obj_is_valid(page))
+                {
+                    bk_printf(TAG "[SCREEN] page %d is invalid, skipping\n", i);
+                    continue;
+                }
+                lv_obj_add_flag(page, LV_OBJ_FLAG_HIDDEN);
+            }
         }
         else
         {
