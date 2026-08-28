@@ -942,7 +942,8 @@ extern void automodestart_lang_invalidate(bk_lv_ui_t *bk_ui);
 void ui_lang_invalidate_cached_screens(bk_lv_ui_t *bk_ui)
 {
 #if UI_PRENDERING_ENABLE
-    lv_obj_t *active = ui_get_current_page();
+    lv_obj_t *current_page = ui_get_current_page();
+    lv_obj_t *active = current_page;
 #else
     lv_obj_t *active = lv_scr_act();
 #endif /* UI_PRENDERING_ENABLE */

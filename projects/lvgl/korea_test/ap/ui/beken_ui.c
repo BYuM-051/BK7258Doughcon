@@ -93,12 +93,42 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
 #if 1 // warm-up 구현을 생명주기 관리자가 알아서 할 예정임 여기는 그런거 없다.
     //FIXME : NULL screen에서 Main으로 진입하는 첫 번째라서 확인을 좀 해봐야 할 듯.
     #define UI_EVENT_BOOT_WARMUP_EVENT UI_EVENT_PAGE_SHOWN
-    // init_page_main(bk_ui);
-    // lv_obj_send_event(bk_ui->main, UI_EVENT_BOOT_WARMUP_EVENT, NULL);
-    // lv_obj_move_to_index(bk_ui->main, -1);
+    uint32_t ts;
+    extern pageId_t currentPageID;
+    extern lv_obj_t *currentScreen;
     bk_printf(TAG "[BOOT] entering main\n");
-    ui_page_change(PAGE_MAIN);
-    bk_printf(TAG "[BOOT] warmup main: %lu ms\n", (unsigned long)lv_tick_elaps(0));
+    // ui_page_change(PAGE_MAIN); // ui_page_change를 바꿔서 첫 화면 init은 수동으로 해야함.
+    ts = lv_tick_get();
+    init_page_main(&bk_lv_tool_ui);
+    currentPageID = PAGE_MAIN;
+
+    bk_printf(TAG "[BOOT] init_page_main: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+    ts = lv_tick_get();
+    init_page_automode(bk_ui);
+    lv_obj_move_to_index(bk_ui->automode, -1);
+    lv_refr_now(NULL);
+    lv_obj_add_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN);
+    lv_refr_now(NULL);
+    bk_printf(TAG "[BOOT] warmup automode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+    ts = lv_tick_get();
+    init_page_manualmode(bk_ui);
+    lv_obj_move_to_index(bk_ui->manualmode, -1);
+    lv_refr_now(NULL);
+    lv_obj_add_flag(bk_ui->manualmode, LV_OBJ_FLAG_HIDDEN);
+    lv_refr_now(NULL);
+    bk_printf(TAG "[BOOT] warmup manualmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+    ts = lv_tick_get();
+    init_page_autodrymode(bk_ui);
+    lv_obj_move_to_index(bk_ui->autodrymode, -1);
+    lv_refr_now(NULL);
+    lv_obj_add_flag(bk_ui->autodrymode, LV_OBJ_FLAG_HIDDEN);
+    lv_refr_now(NULL);
+    bk_printf(TAG "[BOOT] warmup autodrymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
+    lv_obj_move_to_index(bk_ui->main, -1);
+    lv_scr_load(preRenderRoot);
+    currentScreen = preRenderRoot;
+    lv_refr_now(NULL);
+    bk_printf(TAG "[BOOT] warmup main: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 #else
     uint32_t t0 = lv_tick_get();
     uint32_t ts;
@@ -225,10 +255,6 @@ static void _uart_comm_task(beken_thread_arg_t arg)
     init_page_timebar(&bk_lv_tool_ui);
     ui_lang_apply_timebar(&bk_lv_tool_ui);
     bk_printf(TAG "[BOOT] init_page_timebar: %lu ms\n", lv_tick_elaps(_boot_t));
-
-    _boot_t = lv_tick_get();
-    init_page_main(&bk_lv_tool_ui);
-    bk_printf(TAG "[BOOT] init_page_main: %lu ms\n", lv_tick_elaps(_boot_t));
 
     if (!g_device_state.black_out_checking) {
 #if UI_BOOT_WARMUP_ENABLE
