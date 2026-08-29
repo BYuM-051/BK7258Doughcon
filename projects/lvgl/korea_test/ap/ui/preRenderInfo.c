@@ -8,48 +8,70 @@
 extern bk_lv_ui_t bk_lv_tool_ui;
 
 extern void init_page_main(bk_lv_ui_t *bk_ui);
+extern void init_page_main_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_main(bk_lv_ui_t *bk_ui);
 extern void init_page_automode(bk_lv_ui_t *bk_ui);
+extern void init_page_automode_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_automode(bk_lv_ui_t *bk_ui);
 extern void init_page_automodestart(bk_lv_ui_t *bk_ui);
+extern void init_page_automodestart_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_automodestart(bk_lv_ui_t *bk_ui);
 extern void init_page_automodeend(bk_lv_ui_t *bk_ui);
+extern void init_page_automodeend_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_automodeend(bk_lv_ui_t *bk_ui);
 extern void init_page_manualmode(bk_lv_ui_t *bk_ui);
+extern void init_page_manualmode_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_manualmode(bk_lv_ui_t *bk_ui);
 extern void init_page_manualmodestart(bk_lv_ui_t *bk_ui);
+extern void init_page_manualmodestart_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_manualmodestart(bk_lv_ui_t *bk_ui);
 extern void init_page_autodrymode(bk_lv_ui_t *bk_ui);
+extern void init_page_autodrymode_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_autodrymode(bk_lv_ui_t *bk_ui);
 extern void init_page_memorymode(bk_lv_ui_t *bk_ui);
+extern void init_page_memorymode_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_memorymode(bk_lv_ui_t *bk_ui);
 extern void init_page_settingmode(bk_lv_ui_t *bk_ui);
+extern void init_page_settingmode_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_settingmode(bk_lv_ui_t *bk_ui);
 extern void init_page_settingmodedetailsetting(bk_lv_ui_t *bk_ui);
+extern void init_page_settingmodedetailsetting_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_settingmodedetailsetting(bk_lv_ui_t *bk_ui);
 extern void init_page_settingmodedegree(bk_lv_ui_t *bk_ui);
+extern void init_page_settingmodedegree_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_settingmodedegree(bk_lv_ui_t *bk_ui);
 extern void init_page_settingmoderecord(bk_lv_ui_t *bk_ui);
+extern void init_page_settingmoderecord_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_settingmoderecord(bk_lv_ui_t *bk_ui);
 extern void init_page_settingmodetest(bk_lv_ui_t *bk_ui);
+extern void init_page_settingmodetest_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_settingmodetest(bk_lv_ui_t *bk_ui);
 extern void init_page_settingmodetime(bk_lv_ui_t *bk_ui);
+extern void init_page_settingmodetime_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_settingmodetime(bk_lv_ui_t *bk_ui);
 extern void init_page_settingmodelanguage(bk_lv_ui_t *bk_ui);
+extern void init_page_settingmodelanguage_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_settingmodelanguage(bk_lv_ui_t *bk_ui);
 extern void init_page_settingmodemanual(bk_lv_ui_t *bk_ui);
+extern void init_page_settingmodemanual_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_settingmodemanual(bk_lv_ui_t *bk_ui);
 extern void init_page_settingmodedefrost(bk_lv_ui_t *bk_ui);
+extern void init_page_settingmodedefrost_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_settingmodedefrost(bk_lv_ui_t *bk_ui);
 extern void init_page_detailsettingtemp(bk_lv_ui_t *bk_ui);
+extern void init_page_detailsettingtemp_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_detailsettingtemp(bk_lv_ui_t *bk_ui);
 extern void init_page_detailsettinghumidity(bk_lv_ui_t *bk_ui);
+extern void init_page_detailsettinghumidity_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_detailsettinghumidity(bk_lv_ui_t *bk_ui);
 extern void init_page_detailsettingtime(bk_lv_ui_t *bk_ui);
+extern void init_page_detailsettingtime_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_detailsettingtime(bk_lv_ui_t *bk_ui);
 extern void init_page_detailsettingdamper(bk_lv_ui_t *bk_ui);
+extern void init_page_detailsettingdamper_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_detailsettingdamper(bk_lv_ui_t *bk_ui);
 extern void init_page_detailsettingdefrost(bk_lv_ui_t *bk_ui);
+extern void init_page_detailsettingdefrost_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_detailsettingdefrost(bk_lv_ui_t *bk_ui);
 extern void init_page_neurosys(bk_lv_ui_t *bk_ui);
 extern void destroy_page_neurosys(bk_lv_ui_t *bk_ui);
@@ -61,9 +83,9 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
     {
         .pageId = PAGE_MAIN,
         .init_func = init_page_main,
-        .init_func_with_stage = NULL,
+        .init_func_with_step = init_page_main_with_step,
         .deinit_func = destroy_page_main,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_AUTOMODE,
             PAGE_MANUALMODE,
@@ -71,107 +93,114 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
             PAGE_MEMORYMODE,
             PAGE_SETTINGMODE
         },
-        .preRenderTargetCount = 5
+        .preRenderTargetPageCount = 5
     },
 
     [PAGE_AUTOMODE] =
     {
         .pageId = PAGE_AUTOMODE,
         .init_func = init_page_automode,
-        .init_func_with_stage = NULL,
+        .init_func_with_step = init_page_automode_with_step,
         .deinit_func = destroy_page_automode,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_MAIN,
             PAGE_AUTOMODESTART,
             PAGE_MEMORYMODE
         },
-        .preRenderTargetCount = 3
+        .preRenderTargetPageCount = 3
     },
 
     [PAGE_AUTOMODESTART] =
     {
         .pageId = PAGE_AUTOMODESTART,
         .init_func = init_page_automodestart,
+        .init_func_with_step = init_page_automodestart_with_step,
         .deinit_func = destroy_page_automodestart,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_AUTOMODEEND,
             PAGE_AUTOMODE
         },
-        .preRenderTargetCount = 2
+        .preRenderTargetPageCount = 2
     },
 
     [PAGE_AUTOMODEEND] =
     {
         .pageId = PAGE_AUTOMODEEND,
         .init_func = init_page_automodeend,
+        .init_func_with_step = init_page_automodeend_with_step,
         .deinit_func = destroy_page_automodeend,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_MANUALMODESTART,
             PAGE_AUTOMODE
         },
-        .preRenderTargetCount = 2
+        .preRenderTargetPageCount = 2
     },
 
     [PAGE_MANUALMODE] =
     {
         .pageId = PAGE_MANUALMODE,
         .init_func = init_page_manualmode,
+        .init_func_with_step = init_page_manualmode_with_step,
         .deinit_func = destroy_page_manualmode,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_MAIN,
             PAGE_MANUALMODESTART
         },
-        .preRenderTargetCount = 2
+        .preRenderTargetPageCount = 2
     },
 
     [PAGE_MANUALMODESTART] =
     {
         .pageId = PAGE_MANUALMODESTART,
         .init_func = init_page_manualmodestart,
+        .init_func_with_step = init_page_manualmodestart_with_step,
         .deinit_func = destroy_page_manualmodestart,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_AUTOMODE,
             PAGE_MANUALMODE
         },
-        .preRenderTargetCount = 2
+        .preRenderTargetPageCount = 2
     },
 
     [PAGE_AUTODRYMODE] =
     {
         .pageId = PAGE_AUTODRYMODE,
         .init_func = init_page_autodrymode,
+        .init_func_with_step = init_page_autodrymode_with_step,
         .deinit_func = destroy_page_autodrymode,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_MAIN
         },
-        .preRenderTargetCount = 1
+        .preRenderTargetPageCount = 1
     },
 
     [PAGE_MEMORYMODE] =
     {
         .pageId = PAGE_MEMORYMODE,
         .init_func = init_page_memorymode,
+        .init_func_with_step = init_page_memorymode_with_step,
         .deinit_func = destroy_page_memorymode,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_AUTOMODE,
             PAGE_MAIN
         },
-        .preRenderTargetCount = 2
+        .preRenderTargetPageCount = 2
     },
 
     [PAGE_SETTINGMODE] =
     {
         .pageId = PAGE_SETTINGMODE,
         .init_func = init_page_settingmode,
+        .init_func_with_step = init_page_settingmode_with_step,
         .deinit_func = destroy_page_settingmode,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODEDETAILSETTING,
             PAGE_SETTINGMODEDEGREE,
@@ -181,15 +210,16 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
             PAGE_SETTINGMODELANGUAGE,
             PAGE_MAIN
         },
-        .preRenderTargetCount = 7
+        .preRenderTargetPageCount = 7
     },
 
     [PAGE_SETTINGMODEDETAILSETTING] =
     {
         .pageId = PAGE_SETTINGMODEDETAILSETTING,
         .init_func = init_page_settingmodedetailsetting,
+        .init_func_with_step = init_page_settingmodedetailsetting_with_step,
         .deinit_func = destroy_page_settingmodedetailsetting,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODE,
             PAGE_DETAILSETTINGTEMP,
@@ -198,160 +228,173 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
             PAGE_DETAILSETTINGDAMPER,
             PAGE_DETAILSETTINGDEFROST
         },
-        .preRenderTargetCount = 6
+        .preRenderTargetPageCount = 6
     },
 
     [PAGE_SETTINGMODEDEGREE] =
     {
         .pageId = PAGE_SETTINGMODEDEGREE,
         .init_func = init_page_settingmodedegree,
+        .init_func_with_step = init_page_settingmodedegree_with_step,
         .deinit_func = destroy_page_settingmodedegree,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODE
         },
-        .preRenderTargetCount = 1
+        .preRenderTargetPageCount = 1
     },
 
     [PAGE_SETTINGMODERECORD] =
     {
         .pageId = PAGE_SETTINGMODERECORD,
         .init_func = init_page_settingmoderecord,
+        .init_func_with_step = init_page_settingmoderecord_with_step,
         .deinit_func = destroy_page_settingmoderecord,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODE
         },
-        .preRenderTargetCount = 1
+        .preRenderTargetPageCount = 1
     },
 
     [PAGE_SETTINGMODETEST] =
     {
         .pageId = PAGE_SETTINGMODETEST,
         .init_func = init_page_settingmodetest,
+        .init_func_with_step = init_page_settingmodetest_with_step,
         .deinit_func = destroy_page_settingmodetest,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODE
         },
-        .preRenderTargetCount = 1
+        .preRenderTargetPageCount = 1
     },
 
     [PAGE_SETTINGMODETIME] =
     {
         .pageId = PAGE_SETTINGMODETIME,
         .init_func = init_page_settingmodetime,
+        .init_func_with_step = init_page_settingmodetime_with_step,
         .deinit_func = destroy_page_settingmodetime,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODE
         },
-        .preRenderTargetCount = 1
+        .preRenderTargetPageCount = 1
     },
 
     [PAGE_SETTINGMODELANGUAGE] =
     {
         .pageId = PAGE_SETTINGMODELANGUAGE,
         .init_func = init_page_settingmodelanguage,
+        .init_func_with_step = init_page_settingmodelanguage_with_step,
         .deinit_func = destroy_page_settingmodelanguage,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODE
         },
-        .preRenderTargetCount = 1
+        .preRenderTargetPageCount = 1
     },
 
     [PAGE_SETTINGMODEMANUAL] =
     {
         .pageId = PAGE_SETTINGMODEMANUAL,
         .init_func = init_page_settingmodemanual,
+        .init_func_with_step = init_page_settingmodemanual_with_step,
         .deinit_func = destroy_page_settingmodemanual,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODE
         },
-        .preRenderTargetCount = 1
+        .preRenderTargetPageCount = 1
     },
 
     [PAGE_SETTINGMODEDEFROST] =
     {
         .pageId = PAGE_SETTINGMODEDEFROST,
         .init_func = init_page_settingmodedefrost,
+        .init_func_with_step = init_page_settingmodedefrost_with_step,
         .deinit_func = destroy_page_settingmodedefrost,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODE
         },
-        .preRenderTargetCount = 1
+        .preRenderTargetPageCount = 1
     },
 
     [PAGE_DETAILSETTINGTEMP] =
     {
         .pageId = PAGE_DETAILSETTINGTEMP,
         .init_func = init_page_detailsettingtemp,
+        .init_func_with_step = init_page_detailsettingtemp_with_step,
         .deinit_func = destroy_page_detailsettingtemp,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODEDETAILSETTING
         },
-        .preRenderTargetCount = 1
+        .preRenderTargetPageCount = 1
     },
 
     [PAGE_DETAILSETTINGHUMIDITY] =
     {
         .pageId = PAGE_DETAILSETTINGHUMIDITY,
         .init_func = init_page_detailsettinghumidity,
+        .init_func_with_step = init_page_detailsettinghumidity_with_step,
         .deinit_func = destroy_page_detailsettinghumidity,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODEDETAILSETTING
         },
-        .preRenderTargetCount = 1
+        .preRenderTargetPageCount = 1
     },
 
     [PAGE_DETAILSETTINGTIME] =
     {
         .pageId = PAGE_DETAILSETTINGTIME,
         .init_func = init_page_detailsettingtime,
+        .init_func_with_step = init_page_detailsettingtime_with_step,
         .deinit_func = destroy_page_detailsettingtime,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODEDETAILSETTING
         },
-        .preRenderTargetCount = 1
+        .preRenderTargetPageCount = 1
     },
 
     [PAGE_DETAILSETTINGDAMPER] =
     {
         .pageId = PAGE_DETAILSETTINGDAMPER,
         .init_func = init_page_detailsettingdamper,
+        .init_func_with_step = init_page_detailsettingdamper_with_step,
         .deinit_func = destroy_page_detailsettingdamper,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODEDETAILSETTING
         },
-        .preRenderTargetCount = 1
+        .preRenderTargetPageCount = 1
     },
 
     [PAGE_DETAILSETTINGDEFROST] =
     {
         .pageId = PAGE_DETAILSETTINGDEFROST,
         .init_func = init_page_detailsettingdefrost,
+        .init_func_with_step = init_page_detailsettingdefrost_with_step,
         .deinit_func = destroy_page_detailsettingdefrost,
-        .preRenderTargets = (const pageId_t[])
+        .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_SETTINGMODEDETAILSETTING
         },
-        .preRenderTargetCount = 1
+        .preRenderTargetPageCount = 1
     },
 
     [PAGE_NEUROSYS] =
     {
         .pageId = PAGE_NEUROSYS,
         .init_func = init_page_neurosys,
+        .init_func_with_step = NULL,
         .deinit_func = destroy_page_neurosys,
-        .preRenderTargets = NULL,
-        .preRenderTargetCount = 0
+        .preRenderTargetPages = NULL,
+        .preRenderTargetPageCount = 0
     }
 };
 

@@ -41,17 +41,28 @@ typedef enum
     PAGE_COUNT,
     PAGE_NONE = PAGE_COUNT
 } pageId_t;
+typedef enum
+{
+    RENDER_STEP_CREATE_PAGE = 0,
+    RENDER_STEP_CREATE_CHILD,
+    RENDER_STEP_CACHE_IMAGE,
+    RENDER_STEP_ATTACH_EVENT,
+    RENDER_STEP_COUNT,
+    RENDER_STEP_LAST = RENDER_STEP_COUNT - 1
+} renderStep_t;
 
 typedef void (*pageLifecycleFunc_t)(bk_lv_ui_t *ui);
-typedef void (*pageLifecycleFuncWithStage_t)(bk_lv_ui_t *ui);
+typedef void (*pageLifecycleFuncWithStep_t)(bk_lv_ui_t *ui);
 typedef struct
 {
     pageId_t pageId;
     pageLifecycleFunc_t init_func;
-    pageLifecycleFuncWithStage_t init_func_with_stage;
+    pageLifecycleFuncWithStep_t init_func_with_step;
     pageLifecycleFunc_t deinit_func;
-    const pageId_t *preRenderTargets;
-    const uint32_t preRenderTargetCount;
+    const pageId_t *preRenderTargetPages;
+    const uint32_t preRenderTargetPageCount;
+    const uint32_t preRenderImageCount;
+    const char **preRenderImagePaths;
 } preRendererPageConfig_t;
 typedef struct
 {
@@ -59,6 +70,7 @@ typedef struct
     _Atomic bool isRendered;
     _Atomic uint32_t renderStep;
     const preRendererPageConfig_t *config;
+    
 } preRendererPageState_t;
 
 extern const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT];

@@ -391,10 +391,10 @@ void ui_page_change(pageId_t newPageID)
 
     // TODO : enqueing preRender targets for newPageID ======================================================
     bk_printf(TAG "[SCREEN] Start enqueuing preRender targets Tick : %d\n", (unsigned long)lv_tick_get());
-    for(uint32_t i = 0 ; i < preRenderPageConfig[newPageID].preRenderTargetCount ; i++)
+    for(uint32_t i = 0 ; i < preRenderPageConfig[newPageID].preRenderTargetPageCount ; i++)
     {
         //TODO : enqueue preRender target pageId
-        pageId_t targetPageID = preRenderPageConfig[newPageID].preRenderTargets[i];
+        pageId_t targetPageID = preRenderPageConfig[newPageID].preRenderTargetPages[i];
     }
     // page change logic end =======================================================================
 
