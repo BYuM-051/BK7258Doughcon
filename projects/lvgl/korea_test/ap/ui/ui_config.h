@@ -240,12 +240,14 @@
 #define UI_PRENDERING_ENABLE 1
 #endif
 
-#define _BUZZER_ENABLED 1
+#define _BUZZER_ENABLED 0
 
 /* 
 * 0 : timebar도 preRenderRoot의 child로 만들기
 * 1 : timebar는 원래대로 (티온에서 구현한 대로)
 */
 #define TIMEBAR_INDEPENDENT 1
+
+#define UI_LODEPNG_565A8 1
 
 #endif /* UI_CONFIG_H */
