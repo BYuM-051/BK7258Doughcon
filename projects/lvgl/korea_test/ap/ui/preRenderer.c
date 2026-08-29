@@ -371,10 +371,12 @@ void ui_page_change(pageId_t newPageID)
         if(newPageID != PAGE_NONE)
         {
             bk_printf(TAG "[SCREEN] Showing newPageID %d\n", newPageID);
+            lv_image_cache_dump();
             lv_obj_remove_flag(*newPage, LV_OBJ_FLAG_HIDDEN);
             lv_obj_move_to_index(*newPage, -1);
             lv_refr_now(NULL);
             bk_printf(TAG "[SCREEN] after show Tick : %d\n", (unsigned long)lv_tick_get());
+            lv_image_cache_dump();
         }
         else
         {
