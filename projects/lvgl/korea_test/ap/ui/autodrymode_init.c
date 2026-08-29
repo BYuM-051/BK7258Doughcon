@@ -307,3 +307,8 @@ void init_page_autodrymode(bk_lv_ui_t * bk_ui) {
     // init_keypad_group
     bk_printf(TAG "[IMGTIME] ===== autodrymode init total: %lu ms =====\n", lv_tick_elaps(_t_start));
 }
+
+void init_page_autodrymode_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

@@ -49,3 +49,8 @@ void init_page_popupconnectionerror(bk_lv_ui_t *bk_ui)
 
     ui_lang_apply_popupconnectionerror(bk_ui);
 }
+
+void init_page_popupconnectionerror_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

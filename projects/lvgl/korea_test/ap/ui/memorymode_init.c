@@ -915,3 +915,8 @@ void init_page_memorymode(bk_lv_ui_t * bk_ui) {
     lv_obj_set_size(bk_ui->memorymode_deletebt, 179, 74);
 
 }
+
+void init_page_memorymode_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

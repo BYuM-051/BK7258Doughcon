@@ -204,3 +204,8 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui) {
 #endif
 
 }
+
+void init_page_settingmode_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

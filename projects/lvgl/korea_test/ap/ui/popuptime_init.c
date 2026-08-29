@@ -19,3 +19,8 @@ void init_page_popuptime(bk_lv_ui_t *bk_ui)
 {
     (void)bk_ui;
 }
+
+void init_page_popuptime_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

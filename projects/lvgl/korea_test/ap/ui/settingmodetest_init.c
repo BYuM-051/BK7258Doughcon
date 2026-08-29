@@ -522,3 +522,8 @@ void init_page_settingmodetest(bk_lv_ui_t * bk_ui) {
 #endif
 #endif
 }
+
+void init_page_settingmodetest_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

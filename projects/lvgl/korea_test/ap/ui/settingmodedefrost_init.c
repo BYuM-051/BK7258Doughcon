@@ -83,3 +83,8 @@ void init_page_settingmodedefrost(bk_lv_ui_t * bk_ui) {
     lv_obj_set_size(bk_ui->settingmodedefrost_imageview3, 179, 74);
 
 }
+
+void init_page_settingmodedefrost_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

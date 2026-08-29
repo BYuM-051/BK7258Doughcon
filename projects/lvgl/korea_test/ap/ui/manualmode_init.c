@@ -136,3 +136,8 @@ void init_page_manualmode(bk_lv_ui_t * bk_ui)
     lv_obj_set_size(bk_ui->manualmode_manual_fermentationbt, 334, 290);
 
 }
+
+void init_page_manualmode_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

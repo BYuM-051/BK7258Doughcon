@@ -36,3 +36,8 @@ void init_page_popupcalendar(bk_lv_ui_t * bk_ui) {
     lv_obj_set_size(bk_ui->popupcalendar_calendarpopup_bg, 541, 501);
 
 }
+
+void init_page_popupcalendar_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

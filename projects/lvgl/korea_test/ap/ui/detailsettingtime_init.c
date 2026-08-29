@@ -345,3 +345,8 @@ void init_page_detailsettingtime(bk_lv_ui_t * bk_ui) {
 
     ui_lang_apply_detailsettingtime(bk_ui);
 }
+
+void init_page_detailsettingtime_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

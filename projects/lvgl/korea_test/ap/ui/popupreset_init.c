@@ -173,3 +173,8 @@ void init_page_popupreset(bk_lv_ui_t * bk_ui) {
     if (s_rp_canvas && lv_obj_is_valid(s_rp_canvas))
         lv_image_set_src(bk_ui->popupreset_imageview1, lv_canvas_get_image(s_rp_canvas));
 }
+
+void init_page_popupreset_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

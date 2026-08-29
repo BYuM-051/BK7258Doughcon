@@ -211,3 +211,8 @@ void init_page_main(bk_lv_ui_t * bk_ui)
     // lv_obj_set_style_text_font(bk_ui->main_dclock_1, &lv_font_scdream_regular_22, LV_PART_MAIN | LV_STATE_DEFAULT);
     // lv_obj_set_style_text_align(bk_ui->main_dclock_1, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
+
+void init_page_main_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

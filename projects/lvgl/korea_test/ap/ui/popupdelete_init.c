@@ -76,3 +76,8 @@ void init_page_popupdelete(bk_lv_ui_t *bk_ui)
     ui_lang_apply_popupdelete(bk_ui);
     lv_obj_set_size(bk_ui->popupdelete_imageview1, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 }
+
+void init_page_popupdelete_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

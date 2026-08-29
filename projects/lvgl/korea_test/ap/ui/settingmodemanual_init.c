@@ -195,3 +195,8 @@ void init_page_settingmodemanual(bk_lv_ui_t * bk_ui) {
     lv_obj_set_size(bk_ui->settingmodemanual_setting_manual_value, 430, 280);
 
 }
+
+void init_page_settingmodemanual_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

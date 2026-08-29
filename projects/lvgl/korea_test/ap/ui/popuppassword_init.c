@@ -546,3 +546,8 @@ void init_page_popuppassword(bk_lv_ui_t * bk_ui) {
 //     }
         
 // }
+
+void init_page_popuppassword_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

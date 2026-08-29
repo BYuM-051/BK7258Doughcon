@@ -1284,3 +1284,8 @@ void init_page_settingmoderecord(bk_lv_ui_t * bk_ui) {
     lv_obj_set_style_text_align(bk_ui->settingmoderecord_RecordEndMin4, LV_TEXT_ALIGN_CENTER, 0);
 
 }
+
+void init_page_settingmoderecord_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

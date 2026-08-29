@@ -120,3 +120,8 @@ void init_page_settingmodedegree(bk_lv_ui_t * bk_ui) {
     lv_obj_set_size(bk_ui->settingmodedegree_degree_f_im, 296, 156);
 
 }
+
+void init_page_settingmodedegree_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

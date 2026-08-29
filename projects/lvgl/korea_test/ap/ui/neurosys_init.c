@@ -102,3 +102,8 @@ void init_page_neurosys(bk_lv_ui_t * bk_ui) {
     lv_obj_set_size(bk_ui->neurosys_fourbt, 100, 100);
 
 }
+
+void init_page_neurosys_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

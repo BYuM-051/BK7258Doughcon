@@ -161,3 +161,8 @@ void init_page_automodeend(bk_lv_ui_t * bk_ui) {
     // lv_obj_set_size(bk_ui->automodeend_blackout, 0, 0);
 
 }
+
+void init_page_automodeend_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

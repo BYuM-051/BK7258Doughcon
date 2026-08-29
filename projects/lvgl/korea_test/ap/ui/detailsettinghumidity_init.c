@@ -207,3 +207,8 @@ void init_page_detailsettinghumidity(bk_lv_ui_t * bk_ui) {
 
     ui_lang_apply_detailsettinghumidity(bk_ui);
 }
+
+void init_page_detailsettinghumidity_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

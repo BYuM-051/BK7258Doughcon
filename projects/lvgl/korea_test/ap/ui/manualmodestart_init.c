@@ -332,3 +332,8 @@ void init_page_manualmodestart(bk_lv_ui_t * bk_ui) {
     lv_obj_set_size(bk_ui->manualmodestart_blackout, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 
 }
+
+void init_page_manualmodestart_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

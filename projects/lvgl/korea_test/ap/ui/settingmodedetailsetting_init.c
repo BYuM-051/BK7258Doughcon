@@ -203,3 +203,8 @@ void init_page_settingmodedetailsetting(bk_lv_ui_t * bk_ui) {
     lv_obj_set_size(bk_ui->settingmodedetailsetting_detail_reset_bt, 179, 74);
 
 }
+
+void init_page_settingmodedetailsetting_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

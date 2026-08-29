@@ -99,3 +99,8 @@ void init_page_popuperror(bk_lv_ui_t *bk_ui)
 
     ui_lang_apply_popuperror(bk_ui);
 }
+
+void init_page_popuperror_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

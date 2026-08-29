@@ -308,3 +308,8 @@ void init_page_settingmodetime(bk_lv_ui_t *bk_ui)
         bk_ui->settingmodetime_KeyPadIm[i] = NULL;
     }
 }
+
+void init_page_settingmodetime_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}

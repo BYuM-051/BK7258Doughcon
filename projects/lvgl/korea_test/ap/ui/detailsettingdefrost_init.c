@@ -200,3 +200,8 @@ void init_page_detailsettingdefrost(bk_lv_ui_t * bk_ui) {
 
     ui_lang_apply_detailsettingdefrost(bk_ui);
 }
+
+void init_page_detailsettingdefrost_with_step(bk_lv_ui_t *bk_ui)
+{
+    return;
+}
