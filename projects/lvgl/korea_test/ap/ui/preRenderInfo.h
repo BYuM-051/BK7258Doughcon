@@ -47,12 +47,18 @@ typedef enum
     RENDER_STEP_CREATE_CHILD,
     RENDER_STEP_CACHE_IMAGE,
     RENDER_STEP_ATTACH_EVENT,
-    RENDER_STEP_COUNT,
-    RENDER_STEP_LAST = RENDER_STEP_COUNT - 1
+    RENDER_STEP_DONE,
+    RENDER_STEP_COUNT
 } renderStep_t;
+typedef enum
+{
+    RENDERER_FUNC_NOT_DONE = 0,
+    RENDERER_FUNC_DONE,
+    RENDERER_FUNC_FAILED
+} rendererFuncStatus_t;
 
 typedef void (*pageLifecycleFunc_t)(bk_lv_ui_t *ui);
-typedef void (*pageLifecycleFuncWithStep_t)(bk_lv_ui_t *ui);
+typedef rendererFuncStatus_t (*pageLifecycleFuncWithStep_t)(bk_lv_ui_t *ui);
 typedef struct
 {
     pageId_t pageId;

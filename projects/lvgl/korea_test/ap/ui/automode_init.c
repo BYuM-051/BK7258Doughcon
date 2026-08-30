@@ -673,7 +673,6 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
 void init_page_automode_with_step(bk_lv_ui_t *bk_ui) 
 {
     static uint32_t currentStep = 0;
-    static uint32_t currentImageStep = 0;
 
     switch (currentStep)
     {
@@ -684,11 +683,11 @@ void init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_size(bk_ui->automode, 1024, 600);
             lv_obj_set_style_radius(bk_ui->automode, 0, LV_PART_MAIN);
             lv_obj_set_pos(bk_ui->automode, 0, 0);
-            lv_obj_set_scrollbar_mode(bk_ui->automode, LV_SCROLLBAR_MODE_OFF);            
-            lv_obj_set_style_bg_color(bk_ui->automode, lv_color_hex(0xD9D9D9), 0);
-            lv_obj_set_style_bg_opa(bk_ui->automode, LV_OPA_COVER, 0);
+            lv_obj_set_scrollbar_mode(bk_ui->automode, LV_SCROLLBAR_MODE_OFF0);
+            lv_obj_set_style_bg_opa(bk_ui->automode, LV_OPA_COVER, 0););            
+            lv_obj_set_style_bg_color(bk_ui->automode, lv_color_hex(0xD9D9D9), 
             currentStep++;
-            return;
+            return RENDERER_FUNC_NOT_DONE;
         }
 case RENDER_STEP_CREATE_CHILD :
         {
@@ -1183,23 +1182,26 @@ case RENDER_STEP_CREATE_CHILD :
             // auto_f1~f4: lazy-created in automode_load_event_cb only when °F mode active
 
             currentStep++;
-            return;
+            return RENDERER_FUNC_NOT_DONE;
         }
         case RENDER_STEP_CACHE_IMAGE :
         {
+            static uint32_t currentImageStep = 0;
             const uint32_t ImageCount = preRenderPageConfig[PAGE_AUTOMODE].preRenderImageCount;
             if(currentImageStep != ImageCount)
             {
-                // TODO : decode and cache the background image
-                // TODO : decode and cache the pngimage prop for currentImageStep
+                char *imagePath = preRenderPageConfig[PAGE_AUTOMODE].preRenderImagePaths[currentImageStep];
+                lv_image_decoder_dsc_t dsc;
+                lv_image_decoder_args_t args = {0};
+                
                 currentImageStep++;
-                return;
+                return RENDERER_FUNC_NOT_DONE;
             }
             else
             {
                 currentImageStep = 0;
                 currentStep++;
-                return;
+                return RENDERER_FUNC_DONE;
             }
         }
         case RENDER_STEP_ATTACH_EVENT :
@@ -1232,7 +1234,14 @@ case RENDER_STEP_CREATE_CHILD :
             lv_obj_add_event_cb(bk_ui->automode_AutoFermentation2TimeHourBt, automode_AutoFermentation2TimeHourBt_event_cb, LV_EVENT_PRESSED, NULL);
             lv_obj_add_event_cb(bk_ui->automode_AutoFermentation2TimeMinBt, automode_AutoFermentation2TimeMinBt_event_cb, LV_EVENT_PRESSED, NULL);
             currentStep++;
-            return;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+        case RENDER_STEP_DONE :
+        {
+            currentStep = 0;
+            currentImageStep = 0;
+            preRenderPageState[PAGE_AUTOMODE].isRendered = true;
+            return RENDERER_FUNC_DONE;
         }
     }
 }
