@@ -670,9 +670,10 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
     bk_printf(TAG "[IMGTIME] ===== automode init total: %lu ms =====\n", lv_tick_elaps(_t_start));
 }
 
-void init_page_automode_with_step(bk_lv_ui_t *bk_ui) 
+rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui) 
 {
     static uint32_t currentStep = 0;
+    static uint32_t currentImageStep = 0;
 
     switch (currentStep)
     {
@@ -683,9 +684,9 @@ void init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_size(bk_ui->automode, 1024, 600);
             lv_obj_set_style_radius(bk_ui->automode, 0, LV_PART_MAIN);
             lv_obj_set_pos(bk_ui->automode, 0, 0);
-            lv_obj_set_scrollbar_mode(bk_ui->automode, LV_SCROLLBAR_MODE_OFF0);
-            lv_obj_set_style_bg_opa(bk_ui->automode, LV_OPA_COVER, 0););            
-            lv_obj_set_style_bg_color(bk_ui->automode, lv_color_hex(0xD9D9D9), 
+            lv_obj_set_scrollbar_mode(bk_ui->automode, LV_SCROLLBAR_MODE_OFF);
+            lv_obj_set_style_bg_opa(bk_ui->automode, LV_OPA_COVER, 0);
+            lv_obj_set_style_bg_color(bk_ui->automode, lv_color_hex(0xD9D9D9), LV_PART_MAIN);
             currentStep++;
             return RENDERER_FUNC_NOT_DONE;
         }
@@ -1184,16 +1185,36 @@ case RENDER_STEP_CREATE_CHILD :
             currentStep++;
             return RENDERER_FUNC_NOT_DONE;
         }
+        case RENDER_STEP_CACHE_BACKGROUND :
+        {
+            if(preRenderPageConfig[PAGE_AUTOMODE].preRenderBackgroundImagePath != NULL)
+            {
+                bk_printf(TAG "[PREWARM] background image: %s\n", preRenderPageConfig[PAGE_AUTOMODE].preRenderBackgroundImagePath);
+                // TODO : implement jpeg prewarm
+            }
+            currentStep++;
+            return RENDERER_FUNC_NOT_DONE;
+        }
         case RENDER_STEP_CACHE_IMAGE :
         {
-            static uint32_t currentImageStep = 0;
+
             const uint32_t ImageCount = preRenderPageConfig[PAGE_AUTOMODE].preRenderImageCount;
             if(currentImageStep != ImageCount)
             {
-                char *imagePath = preRenderPageConfig[PAGE_AUTOMODE].preRenderImagePaths[currentImageStep];
-                lv_image_decoder_dsc_t dsc;
-                lv_image_decoder_args_t args = {0};
-                
+                const char *imagePath =preRenderPageConfig[PAGE_AUTOMODE].preRenderImagePaths[currentImageStep];
+                lv_image_decoder_dsc_t *dsc;
+                lv_result_t res = lv_image_decoder_open(&dsc, imagePath, NULL);
+
+                if(res == LV_RESULT_OK)
+                {
+                    lv_image_decoder_close(&dsc);
+                    bk_printf(TAG "[PREWARM] OK: %s\n", imagePath);
+                }
+                else
+                {
+                    bk_printf(TAG "[PREWARM] FAILED: %s\n", imagePath);
+                    return RENDERER_FUNC_FAILED;
+                }
                 currentImageStep++;
                 return RENDERER_FUNC_NOT_DONE;
             }
@@ -1243,11 +1264,15 @@ case RENDER_STEP_CREATE_CHILD :
             preRenderPageState[PAGE_AUTOMODE].isRendered = true;
             return RENDERER_FUNC_DONE;
         }
+        default :
+        {
+            return RENDERER_FUNC_FAILED;
+        }
     }
 }
 
 void init_keypad_group(bk_lv_ui_t *bk_ui) {
-    /*FIXME: 다음줄부터
+    /*IMPORTANT FIXME: 다음줄부터
     * lv_style_init은 여러번 호출되면 안 됨
     * 왜 이렇게 만들었는지 모르겠는데 나중에 beken_ui.c에서 만들어서 extern으로 데리고 오면 될듯
     * 지금은 일단 손댈게 많으니까 이쪽은 나중에 손대는데 중요노트라 길게 씀 */
