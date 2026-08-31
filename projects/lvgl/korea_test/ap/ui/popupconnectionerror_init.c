@@ -7,6 +7,10 @@
 
 #include "ui_lang.h"
 
+#include "preRenderer.h"
+#include "preRenderInfo.h"
+#define TAG "[popupconnectionerror_init.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 extern bk_lv_ui_t bk_lv_tool_ui;
 
 void destroy_page_popupconnectionerror(bk_lv_ui_t *bk_ui)
@@ -50,7 +54,7 @@ void init_page_popupconnectionerror(bk_lv_ui_t *bk_ui)
     ui_lang_apply_popupconnectionerror(bk_ui);
 }
 
-void init_page_popupconnectionerror_with_step(bk_lv_ui_t *bk_ui)
+rendererFuncStatus_t init_page_popupconnectionerror_with_step(bk_lv_ui_t *bk_ui)
 {
-    return;
+    return RENDERER_FUNC_FAILED;
 }

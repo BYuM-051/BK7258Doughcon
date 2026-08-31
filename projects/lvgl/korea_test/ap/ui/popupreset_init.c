@@ -8,6 +8,8 @@
 #include "ui_lang.h"
 #include "settings.h"
 
+#include "preRenderer.h"
+#include "preRenderInfo.h"
 #define TAG "[popupreset_init.c] "
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
@@ -174,7 +176,7 @@ void init_page_popupreset(bk_lv_ui_t * bk_ui) {
         lv_image_set_src(bk_ui->popupreset_imageview1, lv_canvas_get_image(s_rp_canvas));
 }
 
-void init_page_popupreset_with_step(bk_lv_ui_t *bk_ui)
+rendererFuncStatus_t init_page_popupreset_with_step(bk_lv_ui_t *bk_ui)
 {
-    return;
+    return RENDERER_FUNC_FAILED;
 }

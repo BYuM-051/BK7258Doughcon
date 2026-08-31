@@ -916,7 +916,8 @@ void init_page_memorymode(bk_lv_ui_t * bk_ui) {
 
 }
 
-void init_page_memorymode_with_step(bk_lv_ui_t *bk_ui)
+rendererFuncStatus_t init_page_memorymode_with_step(bk_lv_ui_t *bk_ui)
 {
-    return;
+    return RENDERER_FUNC_DONE; // test stub
+    // return RENDERER_FUNC_FAILED;
 }

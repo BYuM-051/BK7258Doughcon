@@ -309,7 +309,7 @@ void init_page_settingmodetime(bk_lv_ui_t *bk_ui)
     }
 }
 
-void init_page_settingmodetime_with_step(bk_lv_ui_t *bk_ui)
+rendererFuncStatus_t init_page_settingmodetime_with_step(bk_lv_ui_t *bk_ui)
 {
-    return;
+    return RENDERER_FUNC_FAILED;
 }

@@ -5,6 +5,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "preRenderer.h"
+#include "preRenderInfo.h"
+#define TAG "[popupcalendar_init.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void popupcalendar_load_event_cb(lv_event_t *e);
 
@@ -37,7 +42,7 @@ void init_page_popupcalendar(bk_lv_ui_t * bk_ui) {
 
 }
 
-void init_page_popupcalendar_with_step(bk_lv_ui_t *bk_ui)
+rendererFuncStatus_t init_page_popupcalendar_with_step(bk_lv_ui_t *bk_ui)
 {
-    return;
+    return RENDERER_FUNC_FAILED;
 }
