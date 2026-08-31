@@ -415,3 +415,18 @@ static lv_result_t try_cache(lv_image_decoder_dsc_t * dsc)
 
     return LV_RESULT_INVALID;
 }
+
+lv_result_t lv_image_decoder_prewarm(const void *src)
+{
+    lv_image_decoder_dsc_t dsc;
+
+    lv_result_t res = lv_image_decoder_open(&dsc, src, NULL);
+    if(res != LV_RESULT_OK)
+    {
+        return res;
+    }
+
+    lv_image_decoder_close(&dsc);
+
+    return LV_RESULT_OK;
+}
