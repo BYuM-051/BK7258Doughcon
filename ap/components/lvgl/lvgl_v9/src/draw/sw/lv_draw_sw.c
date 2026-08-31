@@ -68,7 +68,7 @@ static int32_t lv_draw_sw_delete(lv_draw_unit_t * draw_unit);
  *      MACROS
  **********************/
 #define TAG "[lv_draw_sw.c] "
-// #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+#define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 /**********************
  *   GLOBAL FUNCTIONS

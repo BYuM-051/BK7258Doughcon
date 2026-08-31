@@ -33,7 +33,7 @@
 #define disp_refr LV_GLOBAL_DEFAULT()->disp_refresh
 
 #define TAG "[lv_refr.c] "
-// #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+#define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 #define PERF_TEST 0
 /**********************
  *      TYPEDEFS

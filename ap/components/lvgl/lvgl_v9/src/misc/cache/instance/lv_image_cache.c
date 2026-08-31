@@ -23,7 +23,7 @@
 #define img_cache_p (LV_GLOBAL_DEFAULT()->img_cache)
 #define image_cache_draw_buf_handlers &(LV_GLOBAL_DEFAULT()->image_cache_draw_buf_handlers)
 
-#define PERF_LOG_BEKEN 1
+#define PERF_LOG_BEKEN 0 // set 1 to enable bk_printf() for performance logging in this file
 #if PERF_LOG_BEKEN
 #undef LV_LOG_USER
 #define LV_LOG_USER(...) bk_printf("[lv_image_cache.c]" __VA_ARGS__)
