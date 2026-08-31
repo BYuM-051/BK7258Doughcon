@@ -3,6 +3,7 @@
  *
  */
 #include "../../../../../../../projects/lvgl/korea_test/ap/ui/ui_config.h"
+
 #if UI_LODEPNG_565A8
 /**
  * @file lv_lodepng.c
@@ -21,6 +22,8 @@
 #include "lodepng.h"
 #include <stdlib.h>
 #include <stdio.h>
+#define TAG "[lv_lodepng.c] "
+#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 /*********************
  *      DEFINES
@@ -442,13 +445,14 @@ static lv_draw_buf_t * decode_png_data(const void * png_data, size_t png_data_si
     uint32_t stage565Ms = lv_tick_elaps(stage565Start);
     uint32_t totalMs = lv_tick_elaps(totalStart);
 
-    printf("[PNG_PERF] mode=RGB565A8 size=%ux%u decode32=%lu ms convert_loop=%lu ms 565A8_stage=%lu ms total=%lu ms\\n",
-           png_width,
-           png_height,
-           (unsigned long)decodeMs,
-           (unsigned long)convertMs,
-           (unsigned long)stage565Ms,
-           (unsigned long)totalMs);
+
+    bk_printf(TAG "[PNG_PERF] mode=RGB565A8 size=%ux%u decode32=%lu ms convert_loop=%lu ms 565A8_stage=%lu ms total=%lu ms\\n",
+        png_width,
+        png_height,
+        (unsigned long)decodeMs,
+        (unsigned long)convertMs,
+        (unsigned long)stage565Ms,
+        (unsigned long)totalMs);
 
     return decoded;
 }
@@ -717,12 +721,12 @@ static lv_draw_buf_t * decode_png_data(const void * png_data, size_t png_data_si
     uint32_t convertMs = lv_tick_elaps(convertStart);
     uint32_t totalMs = lv_tick_elaps(totalStart);
 
-    printf("[PNG_PERF] mode=ARGB8888 size=%ux%u decode32=%lu ms rb_swap=%lu ms total=%lu ms\\n",
-           png_width,
-           png_height,
-           (unsigned long)decodeMs,
-           (unsigned long)convertMs,
-           (unsigned long)totalMs);
+    bk_printf(TAG "[PNG_PERF] mode=ARGB8888 size=%ux%u decode32=%lu ms rb_swap=%lu ms total=%lu ms\\n",
+        png_width,
+        png_height,
+        (unsigned long)decodeMs,
+        (unsigned long)convertMs,
+        (unsigned long)totalMs);
 
     return decoded;
 }
