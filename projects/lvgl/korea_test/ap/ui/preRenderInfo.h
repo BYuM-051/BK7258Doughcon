@@ -176,7 +176,7 @@ extern void init_page_neurosys(bk_lv_ui_t *bk_ui);
 extern void destroy_page_neurosys(bk_lv_ui_t *bk_ui);
 //=============================================
 
-pageLifecycleFunc_t getPageInitFunc(pageId_t pageId);
+pageLifecycleFuncWithStep_t getPageInitFunc(pageId_t pageId);
 pageLifecycleFunc_t getPageDeinitFunc(pageId_t pageId);
 
 extern rendererFuncStatus_t init_shared_image_asset();

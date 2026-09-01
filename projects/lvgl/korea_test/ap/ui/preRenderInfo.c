@@ -550,13 +550,13 @@ preRendererPageState_t preRenderPageState[PAGE_COUNT] =
     },
 };
 
-pageLifecycleFunc_t getPageInitFunc(pageId_t pageId)
+pageLifecycleFuncWithStep_t getPageInitFunc(pageId_t pageId)
 {
     bk_printf(TAG "[SCREEN] getPageInitFunc(%d)\n", pageId);
     if(pageId >= 0 && pageId < PAGE_COUNT)
     {
         bk_printf(TAG "[SCREEN] getPageInitFunc was %d for pageId %d\n", preRenderPageConfig[pageId].init_func != NULL, pageId);
-        return preRenderPageConfig[pageId].init_func;
+        return preRenderPageConfig[pageId].init_func_with_step;
     }
     return NULL;
 }

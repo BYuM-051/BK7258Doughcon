@@ -3,6 +3,8 @@
 #include "preRenderer.h"
 #include "preRenderInfo.h"
 #include "ui_config.h"
+#include "queue.h"
+#include "FreeRTOS.h"
 
 #define TAG "[preRenderer.c] "
 // #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
@@ -12,8 +14,6 @@ extern lv_obj_t *preRenderRoot;
 lv_obj_t *currentPage = NULL;
 lv_obj_t *currentScreen = NULL;
 pageId_t currentPageID = PAGE_NONE; // 첫 init을 main으로하면 uiChange에서 return맞고 assert됨
-
-//TODO : preRenderer Queue구현 여기말고
 
 #if !UI_PRENDERING_ENABLE
 lv_event_code_t UI_EVENT_PAGE_SHOW_START = LV_EVENT_SCREEN_LOAD_START;
@@ -26,8 +26,15 @@ lv_event_code_t UI_EVENT_PAGE_SHOWN;
 lv_event_code_t UI_EVENT_PAGE_HIDE_START;
 lv_event_code_t UI_EVENT_PAGE_HIDDEN;
 
-static void uiPagePreRenderFlush(pageId_t pageId);
+#include "lv_conf.h"
+static void uiPagePreRenderPop(pageId_t pageId);
 static void uiPagePreRenderRegister(pageId_t pageId);
+static void uiPagePreRenderTask(lv_timer_t *timer);
+
+static pageId_t currentPreRenderPage = PAGE_NONE;
+
+static QueueHandle_t preRendererQueue = NULL;
+static lv_timer_t* preRendererTimer = NULL;
 
 #endif
 
@@ -62,11 +69,61 @@ void ui_screen_event_init(void)
         lv_delay_ms(2000);
         LV_ASSERT(0);
     }
+
+    if(preRendererQueue == NULL)
+    {
+        preRendererQueue = xQueueCreate(16, sizeof(pageId_t));
+        if(preRendererQueue == NULL)
+        {
+            bk_printf(TAG "[SCREEN] Failed to create preRendererQueue\n");
+            lv_delay_ms(2000);
+            LV_ASSERT(0);
+        }
+    }
+
+    if(preRendererTimer == NULL)
+    {
+        preRendererTimer = lv_timer_create(uiPagePreRenderTask, LV_INDEV_REFR_PERIOD, NULL);
+        if(preRendererTimer == NULL)
+        {
+            bk_printf(TAG "[SCREEN] Failed to create preRendererTimer\n");
+            lv_delay_ms(2000);
+            LV_ASSERT(0);
+        }
+    }
 }
 
 bool ui_screen_event_initialized(void)
 {
     return uiScreenEventInitialized;
+}
+
+void uiPagePreRenderTask(lv_timer_t *timer)
+{
+    pageId_t pageId;
+    if(preRendererQueue == NULL)
+    {
+        goto fatal;
+    }
+    if(xQueueReceive(preRendererQueue, &pageId, 0) == pdPASS)
+    {
+        if(preRenderPageState[pageId].config->init_func_with_step(&bk_lv_tool_ui) != RENDERER_FUNC_DONE)
+        {
+            currentPreRenderPage = pageId;
+            xQueueSendToBack(preRendererQueue, &pageId, 0);
+            bk_printf(TAG "[SCREEN] Pre-rendering page %d is not finished yet, re-queueing\n", pageId);
+        }
+    }
+
+    lv_timer_reset(timer); // yeild처럼 쓰려면 이러면 됨. period만큼 무조건 쉰다.
+    
+    return;
+
+fatal:
+    bk_printf(TAG "[SCREEN] Fatal error in uiPagePreRenderTask\n");
+    lv_delay_ms(2000);
+    LV_ASSERT(0);
+    return;
 }
 
 // screen 변경에 따른 생명주기 관리 함수
@@ -253,19 +310,17 @@ inline bool isPageIdValid(pageId_t pageId)
 void ui_page_change(pageId_t newPageID)
 {
     bk_printf(TAG "[SCREEN] ui_page_change called Tick : %d\n", (unsigned long)lv_tick_get());
-    // check if ui_screen_event_init() has been called before
+
     if(!uiScreenEventInitialized)
     {
         bk_printf(TAG "[SCREEN] ui_page_change() called before ui_screen_event_init()\n");
         return;
     }
-    // check if newPageID is valid
     if(!isPageIdValid(newPageID))
     {
         bk_printf(TAG "[SCREEN] Invalid newPageID: %d\n", newPageID);
         goto fatal;
     }
-    // check if oldPageID is valid [PAGE_NONE으로 처음 초기화하면 안됨.]
     if(!isPageIdValid(currentPageID))
     {
         bk_printf(TAG "[SCREEN] Invalid currentPageID: %d\n", currentPageID);
@@ -279,8 +334,9 @@ void ui_page_change(pageId_t newPageID)
     // page change logic start =======================================================================
     bk_printf(TAG "[SCREEN] page change logic start Tick : %d\n", (unsigned long)lv_tick_get());
 
-    // TODO : halt + empty preRendering queue + deinit page except newPageID and its preRenderTargets
-    // 큐만 비우면 될 것 같기도 하고?
+    // 걍 다 비워.
+    pageId_t queueIndex;
+    xQueueReset(preRendererQueue);
 
     // check if newPageID is already rendered and if not, call its init function
     if(preRenderPageState[newPageID].isRendered)
@@ -290,17 +346,24 @@ void ui_page_change(pageId_t newPageID)
     else
     {
         bk_printf(TAG "[SCREEN] newPageID %d is not rendered, calling init function Tick = %d\n", newPageID, (unsigned long)lv_tick_get());
-        pageLifecycleFunc_t initFunc = getPageInitFunc(newPageID);
+        pageLifecycleFuncWithStep_t initFunc = getPageInitFunc(newPageID);
         if(initFunc != NULL)
         {
             bk_printf(TAG "[SCREEN] Initializing newPageID %d\n", newPageID);
-            initFunc(&bk_lv_tool_ui);
-            if(newPage == NULL || !lv_obj_is_valid(*newPage))
+            while(true)
             {
-                bk_printf(TAG "[SCREEN] newPage is invalid after init function\n");
-                goto fatal;
+                rendererFuncStatus_t result = initFunc(&bk_lv_tool_ui);
+                if(result == RENDERER_FUNC_DONE)
+                {
+                    break;
+                }
+                else if(result == RENDERER_FUNC_FAILED)
+                {
+                    bk_printf(TAG "[BOOT] initFunc failed\n");
+                    lv_delay_ms(2000);
+                    LV_ASSERT(0);
+                }
             }
-            preRenderPageState[newPageID].isRendered = true;
         }
         else
         {
@@ -372,14 +435,44 @@ void ui_page_change(pageId_t newPageID)
         lv_obj_send_event(*newPage, UI_EVENT_PAGE_SHOWN, NULL);
         bk_printf(TAG "[SCREEN] every event processed Tick : %d\n", (unsigned long)lv_tick_get());
     }
-    // TODO : delete page except newPageID and its preRenderTargets and remove dangling pointer < if needed? <not now>
+    // pageState 순회하면서 newPageID와 그 preRenderTargets를 제외한 나머지 페이지들 deinit
+    for(int i = PAGE_MAIN ; i < PAGE_COUNT ; i++)
+    {
+        bool isPreRenderTarget = false;
+        if(i == newPageID)
+        {
+            continue;
+        }
+        for(int j = 0 ; j < preRenderPageConfig[newPageID].preRenderTargetPageCount ; j++)
+        {
 
-    // TODO : enqueing preRender targets for newPageID ======================================================
+            if(preRenderPageConfig[newPageID].preRenderTargetPages[j] == i)
+            {
+                isPreRenderTarget = true;
+            }
+        }
+        if(isPreRenderTarget)
+        {
+            continue;
+        }
+
+        if(preRenderPageState[i].isRendered)
+        {
+            pageLifecycleFunc_t deinitFunc = preRenderPageConfig[i].deinit_func;
+            if(deinitFunc != NULL)
+            {
+                bk_printf(TAG "[SCREEN] Deinitializing pageId: %d\n", i);
+                deinitFunc(&bk_lv_tool_ui);
+            }
+        }
+    }
+
+    // enqueing preRender targets for newPageID ======================================================
     bk_printf(TAG "[SCREEN] Start enqueuing preRender targets Tick : %d\n", (unsigned long)lv_tick_get());
     for(uint32_t i = 0 ; i < preRenderPageConfig[newPageID].preRenderTargetPageCount ; i++)
     {
-        //TODO : enqueue preRender target pageId
         pageId_t targetPageID = preRenderPageConfig[newPageID].preRenderTargetPages[i];
+        xQueueSendToBack(preRendererQueue, &targetPageID, 0);
     }
     // page change logic end =======================================================================
 
@@ -401,7 +494,7 @@ void ui_screen_change(lv_obj_t *newScreen)
 
 #endif /* USE_OLD_PAGE_CHANGE_BEFORE_REFACTOR */
 #if USE_OLD_PAGE_CHANGE_BEFORE_REFACTOR
-static void uiPagePreRenderFlush(pageId_t oldPageID)
+static void uiPagePreRenderPop(pageId_t oldPageID)
 {
     bk_printf(TAG "[SCREEN] Flushing pre-rendered pages\n");
     lv_image_cache_drop(NULL);
