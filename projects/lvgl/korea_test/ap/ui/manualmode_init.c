@@ -13,6 +13,9 @@
 #define TAG "[manualmode_init.c] "
 // #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
+static uint32_t currentStep = 0;
+static uint32_t currentImageStep = 0;
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 extern void manualmode_backbt_event_cb(lv_event_t *e);
@@ -33,8 +36,13 @@ void destroy_page_manualmode(bk_lv_ui_t *bk_ui)
         lv_obj_del(bk_ui->manualmode);
         bk_ui->manualmode = NULL;
     }
+
+    currentStep = 0;
+    currentImageStep = 0;
+    preRenderPageState[PAGE_MANUALMODE].isRendered = false;
 }
 
+// NOTE : discontinued initialize method. check _with_step()
 void init_page_manualmode(bk_lv_ui_t * bk_ui) 
 {
     uint32_t _t_start = lv_tick_get();
@@ -140,8 +148,6 @@ void init_page_manualmode(bk_lv_ui_t * bk_ui)
 
 rendererFuncStatus_t init_page_manualmode_with_step(bk_lv_ui_t *bk_ui)
 {
-    static uint32_t currentStep = 0;
-    static uint32_t currentImageStep = 0;
     static uint32_t renderStartTick = 0;
 
     if(preRenderPageState[PAGE_MANUALMODE].isRendered)
