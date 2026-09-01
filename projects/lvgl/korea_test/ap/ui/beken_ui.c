@@ -210,6 +210,7 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
     bk_printf(TAG "[BOOT] entering main\n");
     currentPageID = PAGE_MAIN;
     lv_obj_move_to_index(bk_ui->main, -1);
+    lv_obj_remove_flag(bk_ui->main, LV_OBJ_FLAG_HIDDEN);
     currentScreen = preRenderRoot;
     lv_obj_send_event(bk_ui->main, UI_EVENT_PAGE_SHOWN, NULL); // NOTE : 이거 켜면 prewarm이 enable되어서 드디어 진짜로 빨라질 것 같음
     bk_printf(TAG "[BOOT] warmup main: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
