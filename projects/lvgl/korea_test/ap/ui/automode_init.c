@@ -8,10 +8,11 @@
 
 #include "ui_config.h"
 #include "preRenderer.h"
+#include "settings.h"
 
 #define TAG "[automode_init.c] "
 #include "preRenderer.h"
-// #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+#define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 
@@ -91,7 +92,7 @@ void destroy_page_automode(bk_lv_ui_t *bk_ui)
 #endif /* UI_PRENDERING_ENABLE */
 }
 
-
+// NOTE : discontinued initialize method. check _with_step()
 void init_page_automode(bk_lv_ui_t * bk_ui) 
 {
     uint32_t _t_start = lv_tick_get();
@@ -674,11 +675,22 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
 {
     static uint32_t currentStep = 0;
     static uint32_t currentImageStep = 0;
+    static uint32_t renderStartTick = 0;
+
+    if(preRenderPageState[PAGE_AUTOMODE].isRendered)
+    {
+        return RENDERER_FUNC_DONE;
+    }
 
     switch (currentStep)
     {
         case RENDER_STEP_CREATE_PAGE :
         {
+            uint32_t stepStartTick = lv_tick_get();
+            renderStartTick = stepStartTick;
+
+            bk_printf(TAG "[RENDER][AUTOMODE] start tick=%lu\n", (unsigned long)renderStartTick);
+
             bk_ui->automode = lv_obj_create(preRenderRoot);
             lv_obj_remove_style_all(bk_ui->automode);
             lv_obj_set_size(bk_ui->automode, 1024, 600);
@@ -687,11 +699,18 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_scrollbar_mode(bk_ui->automode, LV_SCROLLBAR_MODE_OFF);
             lv_obj_set_style_bg_opa(bk_ui->automode, LV_OPA_COVER, 0);
             lv_obj_set_style_bg_color(bk_ui->automode, lv_color_hex(0xD9D9D9), LV_PART_MAIN);
-            currentStep++;
+
+            bk_printf(TAG "[RENDER][AUTOMODE] CREATE_PAGE done elapsed=%lu ms\n", (unsigned long)lv_tick_elaps(stepStartTick));
+
+            currentStep = RENDER_STEP_CREATE_CHILD;
             return RENDERER_FUNC_NOT_DONE;
         }
-case RENDER_STEP_CREATE_CHILD :
+        case RENDER_STEP_CREATE_CHILD :
         {
+            uint32_t stepStartTick = lv_tick_get();
+
+            bk_printf(TAG "[RENDER][AUTOMODE] CREATE_CHILD start\n");
+
             // ImageView: title
             bk_ui->automode_title = lv_image_create(bk_ui->automode);
             _img_set_src_timed(bk_ui->automode_title, "/images/automode_title.png");
@@ -1182,51 +1201,87 @@ case RENDER_STEP_CREATE_CHILD :
             // keypadbaseim + KeyPad: lazy-created in _keypad_on_automode on first use
             // auto_f1~f4: lazy-created in automode_load_event_cb only when °F mode active
 
-            currentStep++;
+            bk_printf(TAG "[RENDER][AUTOMODE] CREATE_CHILD done elapsed=%lu ms total=%lu ms\n",
+                      (unsigned long)lv_tick_elaps(stepStartTick),
+                      (unsigned long)lv_tick_elaps(renderStartTick));
+
+            currentStep = RENDER_STEP_CACHE_BACKGROUND;
             return RENDERER_FUNC_NOT_DONE;
         }
         case RENDER_STEP_CACHE_BACKGROUND :
         {
-            if(preRenderPageConfig[PAGE_AUTOMODE].preRenderBackgroundImagePath != NULL)
+            if(preRenderPageConfig[PAGE_AUTOMODE].backgroundImageAssetId != SHARED_IMAGE_NONE)
             {
-                bk_printf(TAG "[PREWARM] background image: %s\n", preRenderPageConfig[PAGE_AUTOMODE].preRenderBackgroundImagePath);
-                // TODO : implement jpeg prewarm
+                const sharedImageAssetId_t bgImageId = preRenderPageConfig[PAGE_AUTOMODE].backgroundImageAssetId;
+                set_shared_image_asset(NULL, bgImageId);
             }
-            currentStep++;
+            currentStep = RENDER_STEP_CACHE_IMAGE;
             return RENDERER_FUNC_NOT_DONE;
         }
         case RENDER_STEP_CACHE_IMAGE :
         {
+            bk_printf(TAG "[PREWARM][AUTOMODE] CACHE_IMAGE start (%lu images)\n", (unsigned long)preRenderPageConfig[PAGE_AUTOMODE].preRenderImageCount);
 
             const uint32_t ImageCount = preRenderPageConfig[PAGE_AUTOMODE].preRenderImageCount;
-            if(currentImageStep != ImageCount)
+            if(currentImageStep < ImageCount)
             {
-                const char *imagePath =preRenderPageConfig[PAGE_AUTOMODE].preRenderImagePaths[currentImageStep];
-                lv_image_decoder_dsc_t *dsc;
-                lv_result_t res = lv_image_decoder_open(&dsc, imagePath, NULL);
-
-                if(res == LV_RESULT_OK)
+                const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_AUTOMODE].preRenderImageInfo[currentImageStep];
+                char imagePath[128] = {0};
+                const bool hasVariant = imageInfo->hasLanguageVariant;
+                uint32_t imageStartTick = lv_tick_get();
+                if(hasVariant)
                 {
-                    lv_image_decoder_close(&dsc);
-                    bk_printf(TAG "[PREWARM] OK: %s\n", imagePath);
+                    const char* lang = settings_get_int("LANGUAGE") == 1 ? "_china.png" : settings_get_int("LANGUAGE") == 2 ? "_english.png" : ".png"; 
+                    snprintf(imagePath, sizeof(imagePath), "%s%s", imageInfo->imagePath, lang);
                 }
                 else
                 {
-                    bk_printf(TAG "[PREWARM] FAILED: %s\n", imagePath);
+                    snprintf(imagePath, sizeof(imagePath), "%s.png", imageInfo->imagePath);
+                }
+
+                bk_printf(TAG "[PREWARM][AUTOMODE] image %lu/%lu start: %s\n",
+                          (unsigned long)(currentImageStep + 1),
+                          (unsigned long)ImageCount,
+                          imagePath);
+
+                lv_result_t res = lv_image_decoder_prewarm(imagePath);
+                uint32_t imageElapsed = lv_tick_elaps(imageStartTick);
+
+                if(res != LV_RESULT_OK)
+                {
+                    bk_printf(TAG "[PREWARM][AUTOMODE] image %lu/%lu FAILED res=%d elapsed=%lu ms path=%s\n",
+                              (unsigned long)(currentImageStep + 1),
+                              (unsigned long)ImageCount,
+                              (int)res,
+                              (unsigned long)imageElapsed,
+                              imagePath);
                     return RENDERER_FUNC_FAILED;
                 }
+
+                bk_printf(TAG "[PREWARM][AUTOMODE] image %lu/%lu OK elapsed=%lu ms path=%s\n",
+                          (unsigned long)(currentImageStep + 1),
+                          (unsigned long)ImageCount,
+                          (unsigned long)imageElapsed,
+                          imagePath);
+
                 currentImageStep++;
                 return RENDERER_FUNC_NOT_DONE;
             }
             else
             {
+                bk_printf(TAG "[PREWARM][AUTOMODE] all images done count=%lu total=%lu ms\n", (unsigned long)ImageCount, (unsigned long)lv_tick_elaps(renderStartTick));
+
                 currentImageStep = 0;
-                currentStep++;
-                return RENDERER_FUNC_DONE;
+                currentStep = RENDER_STEP_ATTACH_EVENT;
+                return RENDERER_FUNC_NOT_DONE;
             }
         }
         case RENDER_STEP_ATTACH_EVENT :
         {
+            uint32_t stepStartTick = lv_tick_get();
+
+            bk_printf(TAG "[RENDER][AUTOMODE] ATTACH_EVENT start\n");
+
             lv_obj_add_event_cb(bk_ui->automode, automode_load_start_event_cb, UI_EVENT_PAGE_SHOW_START,   NULL);
             lv_obj_add_event_cb(bk_ui->automode, automode_loaded_event_cb, UI_EVENT_PAGE_SHOWN,       NULL);
             lv_obj_add_event_cb(bk_ui->automode, automode_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN, NULL);
@@ -1254,18 +1309,27 @@ case RENDER_STEP_CREATE_CHILD :
             lv_obj_add_event_cb(bk_ui->automode_AutoFermentation2HumidityBt, automode_AutoFermentation2HumidityBt_event_cb, LV_EVENT_PRESSED, NULL);
             lv_obj_add_event_cb(bk_ui->automode_AutoFermentation2TimeHourBt, automode_AutoFermentation2TimeHourBt_event_cb, LV_EVENT_PRESSED, NULL);
             lv_obj_add_event_cb(bk_ui->automode_AutoFermentation2TimeMinBt, automode_AutoFermentation2TimeMinBt_event_cb, LV_EVENT_PRESSED, NULL);
-            currentStep++;
+
+            bk_printf(TAG "[RENDER][AUTOMODE] ATTACH_EVENT done elapsed=%lu ms\n", (unsigned long)lv_tick_elaps(stepStartTick));
+
+            currentStep = RENDER_STEP_DONE;
             return RENDERER_FUNC_NOT_DONE;
         }
         case RENDER_STEP_DONE :
         {
+            uint32_t totalElapsed = lv_tick_elaps(renderStartTick);
+
+            bk_printf(TAG "[RENDER][AUTOMODE] DONE total=%lu ms\n", (unsigned long)totalElapsed);
+
             currentStep = 0;
             currentImageStep = 0;
+            renderStartTick = 0;
             preRenderPageState[PAGE_AUTOMODE].isRendered = true;
             return RENDERER_FUNC_DONE;
         }
         default :
         {
+            bk_printf(TAG "[RENDER][AUTOMODE] INVALID STEP: %lu\n", (unsigned long)currentStep);
             return RENDERER_FUNC_FAILED;
         }
     }

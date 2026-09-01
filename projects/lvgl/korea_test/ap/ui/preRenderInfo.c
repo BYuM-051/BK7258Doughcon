@@ -47,6 +47,17 @@ static const preRenderImageInfo_t AutomodePreRenderImages[] =
     { "/images/defrost_auto_time_box", true  },
     { "/images/keypad",         true }
 };
+static const preRenderImageInfo_t SettingmodePreRenderImages[] =
+{
+    { "/images/setting_title", true },
+    { "/images/setting_mode_detailsetting",        true },
+    { "/images/setting_mode_degree",        true },
+    { "/images/setting_mode_record",          true },
+    { "/images/setting_mode_test",          true },
+    { "/images/setting_mode_time",      true },
+    { "/images/setting_mode_language",  true },
+    { "/images/exit_bt",      true }
+};
 
 // NOTE : preRenderTarget에 적어둔 순서대로 preRendering이 진행, 자주 쓰이는 페이지를 앞쪽에 배치하는 것이 좋음. (ex: PAGE_MAIN, PAGE_AUTOMODE, PAGE_MANUALMODE 등)
 const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
@@ -188,7 +199,10 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
             PAGE_SETTINGMODELANGUAGE,
             PAGE_MAIN
         },
-        .preRenderTargetPageCount = 7
+        .preRenderTargetPageCount = 7,
+        .backgroundImageAssetId = SHARED_IMAGE_ASSET_BG_DOUGH,
+        .preRenderImageCount = ARRAY_COUNT(AutomodePreRenderImages),
+        .preRenderImageInfo = AutomodePreRenderImages
     },
 
     [PAGE_SETTINGMODEDETAILSETTING] =

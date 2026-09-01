@@ -11,10 +11,12 @@
 #include "settings.h"
 
 #define TAG "[main_init.c] "
-// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+#define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
+static uint32_t currentStep = 0;
+static uint32_t currentImageStep = 0;
 
 extern void lv_digital_clock_register(lv_obj_t *label, int show_second, int use_ampm, int hour, int minute, int second);
 extern void lv_digital_date_register(lv_obj_t *label);
@@ -40,6 +42,7 @@ extern void main_unloaded_event_cb(lv_event_t *e);
 //         bk_ui->main = NULL;
 //     }
 // }
+
 void destroy_page_main(bk_lv_ui_t *bk_ui) {
     bk_printf(TAG "[SCREEN] destroy_page_main() called\n");
     if (bk_ui->main != NULL) {
@@ -49,6 +52,10 @@ void destroy_page_main(bk_lv_ui_t *bk_ui) {
         bk_ui->main = NULL;
     }
     bk_printf(TAG "[SCREEN] destroyed\n");
+    
+    currentStep = 0;
+    currentImageStep = 0;
+    preRenderPageState[PAGE_MAIN].isRendered = false;
 }
 
 void init_page_main(bk_lv_ui_t * bk_ui) 
@@ -215,10 +222,7 @@ void init_page_main(bk_lv_ui_t * bk_ui)
 
 rendererFuncStatus_t init_page_main_with_step(bk_lv_ui_t *bk_ui)
 {
-    static uint32_t currentStep = 0;
-    static uint32_t currentImageStep = 0;
     static uint32_t renderStartTick = 0;
-
     if(preRenderPageState[PAGE_MAIN].isRendered)
     {
         return RENDERER_FUNC_DONE;
@@ -240,10 +244,10 @@ rendererFuncStatus_t init_page_main_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_size(bk_ui->main, 1024, 600);
             lv_obj_set_pos(bk_ui->main, 0, 0);
             lv_obj_set_style_bg_opa(bk_ui->main, LV_OPA_TRANSP, LV_PART_MAIN);
+            lv_obj_set_style_radius(bk_ui->main, 0, LV_PART_MAIN);
             lv_obj_set_scrollbar_mode(bk_ui->main, LV_SCROLLBAR_MODE_OFF);
 
-            bk_printf(TAG "[RENDER][MAIN] CREATE_PAGE done elapsed=%lu ms\n",
-                      (unsigned long)lv_tick_elaps(stepStartTick));
+            bk_printf(TAG "[RENDER][MAIN] CREATE_PAGE done elapsed=%lu ms\n", (unsigned long)lv_tick_elaps(stepStartTick));
 
             currentStep = RENDER_STEP_CREATE_CHILD;
             return RENDERER_FUNC_NOT_DONE;

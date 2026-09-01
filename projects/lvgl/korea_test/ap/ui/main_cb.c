@@ -11,7 +11,7 @@
 #include "ui_lang.h"
 
 #define TAG "[main_cb.c] "
-#
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 #include "preRenderer.h"
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
@@ -35,7 +35,6 @@ static uint32_t last_click_time = 0;
 static uint32_t s_last_cache_drop_tick = 0;
 static bool     s_cache_drop_done_once = false;
 
-#if !(UI_PRENDERING_ENABLE)
 static void _periodic_cache_drop_if_due(void)
 {
     if (!s_cache_drop_done_once || lv_tick_elaps(s_last_cache_drop_tick) >= _CACHE_DROP_INTERVAL_MS) {
@@ -45,7 +44,6 @@ static void _periodic_cache_drop_if_due(void)
         bk_printf(TAG "[MEM] shared image cache dropped (periodic defrag)\n");
     }
 }
-#endif /* NOT UI_PRENDERING_ENABLE */
 
 /* Settingmode image prewarm — loads image(s) one per tick while user is on main screen.
  * UI_SETTINGMODE_COMBINED_BG_ENABLE=1: settingmode is now a single combined
@@ -179,44 +177,6 @@ void main_loaded_event_cb(lv_event_t *e);
 void main_unload_start_event_cb(lv_event_t *e);
 void main_unloaded_event_cb(lv_event_t *e);
 
-
-#if 0 // 0 : beep음 앞으로 땡겨오기 1 : beep음을 auto init과 함께
-void main_automode_event_cb(lv_event_t *e)
-{
-    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
-    if (state->lock || state->hard_lock) return;
-    if (lv_tick_elaps(last_click_time) < 250) return;
-    last_click_time = lv_tick_get();
-    hal_buzzer_beep();
-
-    uint32_t _t0 = lv_tick_get();
-    bk_printf(TAG "[SCREEN] ── main→automode ──────────────────\n");
-    if (bk_ui->automode == NULL || !lv_obj_is_valid(bk_ui->automode))
-    {
-        init_page_automode(bk_ui);
-        bk_printf(TAG "[SCREEN] init_page_automode: %lu ms\n", lv_tick_elaps(_t0));
-    }
-    else
-    {
-        bk_printf(TAG "[SCREEN] automode already exists, skipping init\n");
-    }
-    _t0 = lv_tick_get();
-    // lv_scr_load(bk_ui->automode); //여기를 어떻게 잘 조지면 모든게 완벽하게 될것같은데 말이야.
-    lv_obj_move_to_index(bk_ui->automode, -1);
-    // lv_obj_invalidate(preRenderRoot);
-    bk_printf(TAG "[SCREEN] lv_scr_load       : %lu ms\n", lv_tick_elaps(_t0));
-    /* lv_scr_load는 화면 포인터만 바꾸고 실제 렌더링/플러시는 다음 lv_timer_handler
-     * 틱에서 일어남 — 여기서 강제로 즉시 그려서 "실제 화면이 보이는 시점"을 측정. */
-    _t0 = lv_tick_get();
-    lv_refr_now(NULL);
-    bk_printf(TAG "[SCREEN] lv_refr_now(render): %lu ms\n", lv_tick_elaps(_t0));
-    _t0 = lv_tick_get();
-    destroy_page_main(bk_ui);
-    bk_printf(TAG "[SCREEN] destroy_page_main : %lu ms\n", lv_tick_elaps(_t0));
-}
-#else
 void main_automode_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
@@ -240,7 +200,6 @@ void main_automode_event_cb(lv_event_t *e)
     init_page_automode(bk_ui);
 #endif /* PRENDERING_ENABLE */
 }
-#endif /* 0 */ // beep음 땡겨오기
 
 void main_manualmode_event_cb(lv_event_t *e)
 {
@@ -354,15 +313,15 @@ void main_loaded_event_cb(lv_event_t *e)
 {
 #if !(UI_PRENDERING_ENABLE)
     _periodic_cache_drop_if_due();
-#endif /* NOT UI_PRENDERING_ENABLE */
-
     _sm_prewarm_start();
     automode_mm_prewarm_start();
     _am_prewarm_start();
+#endif /* NOT UI_PRENDERING_ENABLE */
 }
 
 void main_unload_start_event_cb(lv_event_t *e)
 {
+#if !(UI_PRENDERING_ENABLE)
     if (s_sm_prewarm_timer)
     {
         lv_timer_delete(s_sm_prewarm_timer);
@@ -379,6 +338,7 @@ void main_unload_start_event_cb(lv_event_t *e)
 
     automode_mm_prewarm_cancel();
     main_automode_prewarm_reset();
+#endif /* NOT UI_PRENDERING_ENABLE */
 }
 
 void main_unloaded_event_cb(lv_event_t *e)
