@@ -21,6 +21,8 @@
 #define img_header_cache_p (LV_GLOBAL_DEFAULT()->img_header_cache)
 #define image_cache_draw_buf_handlers &(LV_GLOBAL_DEFAULT()->image_cache_draw_buf_handlers)
 
+#define TAG "[lv_image_decoder.c] "
+// #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 /**********************
  *      TYPEDEFS
  **********************/
@@ -418,7 +420,7 @@ static lv_result_t try_cache(lv_image_decoder_dsc_t * dsc)
 
 lv_result_t lv_image_decoder_prewarm(const void *src)
 {
-    lv_image_decoder_dsc_t dsc;
+    lv_image_decoder_dsc_t dsc = {0};
 
     lv_result_t res = lv_image_decoder_open(&dsc, src, NULL);
     if(res != LV_RESULT_OK)
@@ -427,6 +429,247 @@ lv_result_t lv_image_decoder_prewarm(const void *src)
     }
 
     lv_image_decoder_close(&dsc);
+
+    return LV_RESULT_OK;
+}
+
+lv_draw_buf_t* lv_image_decoder_prewarm_to_buffer(const void *src)
+{
+    lv_image_decoder_dsc_t dsc = {0};
+    lv_image_decoder_args_t args = {0};
+    args.no_cache = true;
+
+    bk_printf(TAG "[PREWARM] start src [%s]\n", src);
+
+    lv_result_t res = lv_image_decoder_open(&dsc, src, &args);
+    
+    if(res != LV_RESULT_OK)
+    {
+        bk_printf(TAG "[PREWARM] lv_image_decoder_prewarm_to_buffer: Failed to open decoder for src [%s]\n", src);
+        return NULL;
+    }
+    if(dsc.decoded == NULL) // TJPEGD처럼 incremental decoder로 나오는 경우
+    {
+        bk_printf(TAG "[PREWARM] incremental decoder src=[%s] w=%u h=%u cf=%d\n", src, dsc.header.w, dsc.header.h, dsc.header.cf);
+
+        lv_draw_buf_t* buffer = lv_draw_buf_create_ex(image_cache_draw_buf_handlers, dsc.header.w, dsc.header.h, LV_COLOR_FORMAT_RGB565, LV_STRIDE_AUTO);
+        if(buffer == NULL)
+        {
+            bk_printf(TAG "[PREWARM] lv_image_decoder_prewarm_to_buffer: Failed to create draw buffer for src [%s]\n", src);
+            lv_image_decoder_close(&dsc);
+            return NULL;
+        }
+
+        lv_area_t fullArea = {.x1 = 0, .y1 = 0, .x2 = dsc.header.w - 1, .y2 = dsc.header.h - 1};
+        lv_area_t decodedArea = {.x1 = LV_COORD_MIN, .y1 = LV_COORD_MIN, .x2 = LV_COORD_MIN, .y2 = LV_COORD_MIN};
+
+        while(lv_image_decoder_get_area(&dsc, &fullArea, &decodedArea) == LV_RESULT_OK)
+        {
+            if(dsc.decoded == NULL)
+            {
+                bk_printf(TAG "[PREWARM] get_area returned NULL decoded buffer\n");
+                lv_draw_buf_destroy(buffer);
+                lv_image_decoder_close(&dsc);
+                return NULL;
+            }
+
+            int32_t tileW = lv_area_get_width(&decodedArea);
+            int32_t tileH = lv_area_get_height(&decodedArea);
+
+            for(int32_t y = 0; y < tileH; y++)
+            {
+                const uint8_t *srcRow = (const uint8_t *)dsc.decoded->data + y * dsc.decoded->header.stride;
+                uint16_t *dstRow = (uint16_t *)lv_draw_buf_goto_xy(buffer, decodedArea.x1, decodedArea.y1 + y);
+
+                for(int32_t x = 0; x < tileW; x++)
+                {
+                    const uint8_t b = srcRow[x * 3 + 0];
+                    const uint8_t g = srcRow[x * 3 + 1];
+                    const uint8_t r = srcRow[x * 3 + 2];
+
+                    dstRow[x] =((uint16_t)(r & 0xF8) << 8) | ((uint16_t)(g & 0xFC) << 3) | ((uint16_t)b >> 3);
+                }
+            }
+        }
+
+        lv_image_decoder_close(&dsc);
+        return buffer;
+    }
+    else // dsc.decoded != NULL // PNG등 원래 full buffer로 나오는 경우
+    {
+        lv_draw_buf_t* buffer = lv_draw_buf_dup_ex(image_cache_draw_buf_handlers, dsc.decoded);
+        if(buffer == NULL)
+        {
+            bk_printf(TAG "[PREWARM] lv_image_decoder_prewarm_to_buffer: Failed to duplicate decoded buffer for src [%s]\n", src);
+            lv_image_decoder_close(&dsc);
+            return NULL;
+        }
+        lv_image_decoder_close(&dsc);
+        return buffer;
+    }
+}
+
+lv_result_t lv_image_decoder_prewarm_update(const void *src, lv_draw_buf_t *buffer)
+{
+    if(buffer == NULL)
+    {
+        return LV_RESULT_INVALID;
+    }
+
+    lv_image_decoder_dsc_t dsc = {0};
+    lv_image_decoder_args_t args = {0};
+    args.no_cache = true;
+
+    bk_printf(TAG "[PREWARM] update start src [%s]\n", src);
+
+    lv_result_t res = lv_image_decoder_open(&dsc, src, &args);
+    if(res != LV_RESULT_OK)
+    {
+        bk_printf(TAG "[PREWARM] update: Failed to open decoder for src [%s]\n", src);
+        return LV_RESULT_INVALID;
+    }
+
+    if(buffer->header.w != dsc.header.w ||
+       buffer->header.h != dsc.header.h)
+    {
+        bk_printf(TAG
+                  "[PREWARM] update: Size mismatch src=[%s] "
+                  "buffer=%ux%u src=%ux%u\n",
+                  src,
+                  buffer->header.w,
+                  buffer->header.h,
+                  dsc.header.w,
+                  dsc.header.h);
+
+        lv_image_decoder_close(&dsc);
+        return LV_RESULT_INVALID;
+    }
+
+    if(dsc.decoded == NULL) /* TJPGD 같은 incremental decoder */
+    {
+        bk_printf(TAG
+                  "[PREWARM] update incremental src=[%s] "
+                  "w=%u h=%u cf=%d\n",
+                  src,
+                  dsc.header.w,
+                  dsc.header.h,
+                  dsc.header.cf);
+
+        /*
+         * prewarm_to_buffer()에서 incremental JPEG는
+         * RGB565 buffer로 만들었으므로 같은 형식이어야 함.
+         */
+        if(buffer->header.cf != LV_COLOR_FORMAT_RGB565)
+        {
+            bk_printf(TAG
+                      "[PREWARM] update: Incremental destination "
+                      "is not RGB565 src=[%s] cf=%d\n",
+                      src,
+                      buffer->header.cf);
+
+            lv_image_decoder_close(&dsc);
+            return LV_RESULT_INVALID;
+        }
+
+        lv_area_t fullArea =
+        {
+            .x1 = 0,
+            .y1 = 0,
+            .x2 = dsc.header.w - 1,
+            .y2 = dsc.header.h - 1
+        };
+
+        lv_area_t decodedArea =
+        {
+            .x1 = LV_COORD_MIN,
+            .y1 = LV_COORD_MIN,
+            .x2 = LV_COORD_MIN,
+            .y2 = LV_COORD_MIN
+        };
+
+        while(lv_image_decoder_get_area(&dsc, &fullArea, &decodedArea) == LV_RESULT_OK)
+        {
+            if(dsc.decoded == NULL)
+            {
+                bk_printf(TAG
+                          "[PREWARM] update: get_area returned "
+                          "NULL decoded buffer src=[%s]\n",
+                          src);
+
+                lv_image_decoder_close(&dsc);
+                return LV_RESULT_INVALID;
+            }
+
+            int32_t tileW = lv_area_get_width(&decodedArea);
+            int32_t tileH = lv_area_get_height(&decodedArea);
+
+            for(int32_t y = 0; y < tileH; y++)
+            {
+                const uint8_t *srcRow =
+                    (const uint8_t *)dsc.decoded->data +
+                    y * dsc.decoded->header.stride;
+
+                uint16_t *dstRow =
+                    (uint16_t *)lv_draw_buf_goto_xy(
+                        buffer,
+                        decodedArea.x1,
+                        decodedArea.y1 + y
+                    );
+
+                if(dstRow == NULL)
+                {
+                    bk_printf(TAG
+                              "[PREWARM] update: Invalid destination "
+                              "coordinate src=[%s] x=%ld y=%ld\n",
+                              src,
+                              (long)decodedArea.x1,
+                              (long)(decodedArea.y1 + y));
+
+                    lv_image_decoder_close(&dsc);
+                    return LV_RESULT_INVALID;
+                }
+
+                for(int32_t x = 0; x < tileW; x++)
+                {
+                    const uint8_t b = srcRow[x * 3 + 0];
+                    const uint8_t g = srcRow[x * 3 + 1];
+                    const uint8_t r = srcRow[x * 3 + 2];
+
+                    dstRow[x] =
+                        ((uint16_t)(r & 0xF8) << 8) |
+                        ((uint16_t)(g & 0xFC) << 3) |
+                        ((uint16_t)b >> 3);
+                }
+            }
+        }
+    }
+    else /* PNG 등 full buffer로 나오는 경우 */
+    {
+        if(buffer->header.cf != dsc.decoded->header.cf)
+        {
+            bk_printf(TAG
+                      "[PREWARM] update: Color format mismatch "
+                      "src=[%s] buffer_cf=%d decoded_cf=%d\n",
+                      src,
+                      buffer->header.cf,
+                      dsc.decoded->header.cf);
+
+            lv_image_decoder_close(&dsc);
+            return LV_RESULT_INVALID;
+        }
+
+        lv_draw_buf_copy(buffer, NULL, dsc.decoded, NULL);
+    }
+
+    lv_image_decoder_close(&dsc);
+
+    /*
+     * buffer->data를 직접 수정했으므로
+     * 캐시 flush가 필요한 handler/platform에서도 안전하게 처리.
+     */
+    lv_draw_buf_flush_cache(buffer, NULL);
+
+    bk_printf(TAG "[PREWARM] update success src [%s]\n", src);
 
     return LV_RESULT_OK;
 }

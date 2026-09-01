@@ -30,6 +30,7 @@
 #include "ui_lang.h"
 
 #include "preRenderer.h"
+#include "preRenderInfo.h"
 
 #define TAG "[beken_ui.c] "
 // #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
@@ -96,60 +97,126 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
     uint32_t ts;
     extern pageId_t currentPageID;
     extern lv_obj_t *currentScreen;
-    bk_printf(TAG "[BOOT] entering main\n");
-    // ui_page_change(PAGE_MAIN); // ui_page_change를 바꿔서 첫 화면 init은 수동으로 해야함.
-    ts = lv_tick_get();
-    init_page_main(&bk_lv_tool_ui);
-    currentPageID = PAGE_MAIN;
-
     extern preRendererPageState_t preRenderPageState[PAGE_COUNT];
+
+    // init warmup main
+    ts = lv_tick_get();
+    while(true)
+    {
+        rendererFuncStatus_t result = init_page_main_with_step(bk_ui);
+        if(result == RENDERER_FUNC_DONE)
+        {
+            break;
+        }
+        else if(result == RENDERER_FUNC_FAILED)
+        {
+            bk_printf(TAG "[BOOT] init_page_main_with_step failed\n");
+            lv_delay_ms(2000);
+            LV_ASSERT(0);
+        }
+    }
     preRenderPageState[PAGE_MAIN].isRendered = true;
-    bk_printf(TAG "[BOOT] init_page_main: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
-    lv_scr_load(preRenderRoot);
+    bk_printf(TAG "[BOOT] warmup main: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
     // init warmup automode
     ts = lv_tick_get();
-    init_page_automode(bk_ui);
-    lv_obj_move_to_index(bk_ui->automode, -1);
-    lv_refr_now(NULL);
+    while(true)
+    {
+        rendererFuncStatus_t result = init_page_automode_with_step(bk_ui);
+        if(result == RENDERER_FUNC_DONE)
+        {
+            break;
+        }
+        else if(result == RENDERER_FUNC_FAILED)
+        {
+            bk_printf(TAG "[BOOT] init_page_automode_with_step failed\n");
+            lv_delay_ms(2000);
+            LV_ASSERT(0);
+        }
+    }
     preRenderPageState[PAGE_AUTOMODE].isRendered = true;
     bk_printf(TAG "[BOOT] warmup automode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
     // init warmup manualmode
     ts = lv_tick_get();
-    init_page_manualmode(bk_ui);
-    lv_obj_move_to_index(bk_ui->manualmode, -1);
-    lv_refr_now(NULL);
+    while(true)
+    {
+        rendererFuncStatus_t result = init_page_manualmode_with_step(bk_ui);
+        if(result == RENDERER_FUNC_DONE)
+        {
+            break;
+        }
+        else if(result == RENDERER_FUNC_FAILED)
+        {
+            bk_printf(TAG "[BOOT] init_page_manualmode_with_step failed\n");
+            lv_delay_ms(2000);
+            LV_ASSERT(0);
+        }
+    }
     preRenderPageState[PAGE_MANUALMODE].isRendered = true;
     bk_printf(TAG "[BOOT] warmup manualmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
     // init warmup autodrymode
     ts = lv_tick_get();
-    init_page_autodrymode(bk_ui);
-    lv_obj_move_to_index(bk_ui->autodrymode, -1);
-    lv_refr_now(NULL);
+    while(true)
+    {
+        rendererFuncStatus_t result = init_page_autodrymode_with_step(bk_ui);
+        if(result == RENDERER_FUNC_DONE)
+        {
+            break;
+        }
+        else if(result == RENDERER_FUNC_FAILED)
+        {
+            bk_printf(TAG "[BOOT] init_page_autodrymode_with_step failed\n");
+            lv_delay_ms(2000);
+            LV_ASSERT(0);
+        }
+    }
     preRenderPageState[PAGE_AUTODRYMODE].isRendered = true;
     bk_printf(TAG "[BOOT] warmup autodrymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
     
     // init warmup memorymode
     ts = lv_tick_get();
-    init_page_memorymode(bk_ui);
-    lv_obj_move_to_index(bk_ui->memorymode, -1);
-    lv_refr_now(NULL);
+    while(true)
+    {
+        rendererFuncStatus_t result = init_page_memorymode_with_step(bk_ui);
+        if(result == RENDERER_FUNC_DONE)
+        {
+            break;
+        }
+        else if(result == RENDERER_FUNC_FAILED)
+        {
+            bk_printf(TAG "[BOOT] init_page_memorymode_with_step failed\n");
+            lv_delay_ms(2000);
+            LV_ASSERT(0);
+        }
+    }
     preRenderPageState[PAGE_MEMORYMODE].isRendered = true;
     bk_printf(TAG "[BOOT] warmup memorymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
     
     // init warmup settingmode
     ts = lv_tick_get();
-    init_page_settingmode(bk_ui);
-    lv_obj_move_to_index(bk_ui->settingmode, -1);
-    lv_refr_now(NULL);
+    while(true)
+    {
+        rendererFuncStatus_t result = init_page_settingmode_with_step(bk_ui);
+        if(result == RENDERER_FUNC_DONE)
+        {
+            break;
+        }
+        else if(result == RENDERER_FUNC_FAILED)
+        {
+            bk_printf(TAG "[BOOT] init_page_settingmode_with_step failed\n");
+            lv_delay_ms(2000);
+            LV_ASSERT(0);
+        }
+    }
     preRenderPageState[PAGE_SETTINGMODE].isRendered = true;
     bk_printf(TAG "[BOOT] warmup settingmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
+    bk_printf(TAG "[BOOT] entering main\n");
+    currentPageID = PAGE_MAIN;
     lv_obj_move_to_index(bk_ui->main, -1);
     currentScreen = preRenderRoot;
-    lv_refr_now(NULL);
     lv_obj_send_event(bk_ui->main, UI_EVENT_PAGE_SHOWN, NULL); // NOTE : 이거 켜면 prewarm이 enable되어서 드디어 진짜로 빨라질 것 같음
     bk_printf(TAG "[BOOT] warmup main: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 #else
@@ -285,6 +352,8 @@ static void _uart_comm_task(beken_thread_arg_t arg)
          * automode/memorymode/settingmode를 순회 warmup한 뒤 main으로 전환.
          * _boot_warmup_screens()가 마지막에 lv_scr_load(main)까지 수행한다. */
         _boot_warmup_screens(&bk_lv_tool_ui);
+        lv_scr_load(preRenderRoot);
+        lv_refr_now(NULL);
 #else
         lv_scr_load(bk_lv_tool_ui.main);
 #endif

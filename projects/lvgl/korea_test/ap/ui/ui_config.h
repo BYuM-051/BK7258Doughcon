@@ -35,7 +35,7 @@
  * 0: 기존처럼 bg.jpg + 개별 아이콘 5장 사용.
  * 주의: vfs_file1/images/의 개별 아이콘 원본은 combinednimus/ 로 이동되어
  *       있으므로 0으로 되돌리려면 해당 파일들을 다시 옮겨와야 함. */
-#define UI_MAIN_COMBINED_BG_ENABLE   1
+#define UI_MAIN_COMBINED_BG_ENABLE   0
 
 /* 1: settingmode(기능설정) 화면의 bg.jpg + 타이틀 + 아이콘 6장 + 나가기 버튼을
  *    /images/feature-setting.jpg(+_china/_english) 1장으로 대체.

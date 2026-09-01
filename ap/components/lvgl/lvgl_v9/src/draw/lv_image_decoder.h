@@ -195,6 +195,13 @@ lv_draw_buf_t * lv_image_decoder_post_process(lv_image_decoder_dsc_t * dsc, lv_d
 // TODO : add description
 lv_result_t lv_image_decoder_prewarm(const void *src);
 
+// TODO : add description
+lv_draw_buf_t* lv_image_decoder_prewarm_to_buffer(const void *src);
+
+// TODO : add description
+lv_result_t lv_image_decoder_prewarm_update(const void *src, lv_draw_buf_t* buffer);
+
+
 /**********************
  *      MACROS
  **********************/

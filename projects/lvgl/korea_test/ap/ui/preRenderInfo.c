@@ -1,81 +1,53 @@
 #include "preRenderer.h"
 #include "preRenderInfo.h"
+#include "settings.h"
+#include <stdio.h>
 
 #define TAG "[preRenderInfo.c] "
-#define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
-//extern Rendering Page Init / Deinit functions
-extern bk_lv_ui_t bk_lv_tool_ui;
+#define ARRAY_COUNT(array) (sizeof(array) / sizeof((array)[0]))
 
-extern void init_page_main(bk_lv_ui_t *bk_ui);
-extern void init_page_main_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_main(bk_lv_ui_t *bk_ui);
-extern void init_page_automode(bk_lv_ui_t *bk_ui);
-extern void init_page_automode_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_automode(bk_lv_ui_t *bk_ui);
-extern void init_page_automodestart(bk_lv_ui_t *bk_ui);
-extern void init_page_automodestart_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_automodestart(bk_lv_ui_t *bk_ui);
-extern void init_page_automodeend(bk_lv_ui_t *bk_ui);
-extern void init_page_automodeend_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_automodeend(bk_lv_ui_t *bk_ui);
-extern void init_page_manualmode(bk_lv_ui_t *bk_ui);
-extern void init_page_manualmode_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_manualmode(bk_lv_ui_t *bk_ui);
-extern void init_page_manualmodestart(bk_lv_ui_t *bk_ui);
-extern void init_page_manualmodestart_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_manualmodestart(bk_lv_ui_t *bk_ui);
-extern void init_page_autodrymode(bk_lv_ui_t *bk_ui);
-extern void init_page_autodrymode_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_autodrymode(bk_lv_ui_t *bk_ui);
-extern void init_page_memorymode(bk_lv_ui_t *bk_ui);
-extern void init_page_memorymode_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_memorymode(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmode(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmode_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_settingmode(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodedetailsetting(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodedetailsetting_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_settingmodedetailsetting(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodedegree(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodedegree_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_settingmodedegree(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmoderecord(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmoderecord_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_settingmoderecord(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodetest(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodetest_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_settingmodetest(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodetime(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodetime_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_settingmodetime(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodelanguage(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodelanguage_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_settingmodelanguage(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodemanual(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodemanual_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_settingmodemanual(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodedefrost(bk_lv_ui_t *bk_ui);
-extern void init_page_settingmodedefrost_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_settingmodedefrost(bk_lv_ui_t *bk_ui);
-extern void init_page_detailsettingtemp(bk_lv_ui_t *bk_ui);
-extern void init_page_detailsettingtemp_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_detailsettingtemp(bk_lv_ui_t *bk_ui);
-extern void init_page_detailsettinghumidity(bk_lv_ui_t *bk_ui);
-extern void init_page_detailsettinghumidity_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_detailsettinghumidity(bk_lv_ui_t *bk_ui);
-extern void init_page_detailsettingtime(bk_lv_ui_t *bk_ui);
-extern void init_page_detailsettingtime_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_detailsettingtime(bk_lv_ui_t *bk_ui);
-extern void init_page_detailsettingdamper(bk_lv_ui_t *bk_ui);
-extern void init_page_detailsettingdamper_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_detailsettingdamper(bk_lv_ui_t *bk_ui);
-extern void init_page_detailsettingdefrost(bk_lv_ui_t *bk_ui);
-extern void init_page_detailsettingdefrost_with_step(bk_lv_ui_t *bk_ui);
-extern void destroy_page_detailsettingdefrost(bk_lv_ui_t *bk_ui);
-extern void init_page_neurosys(bk_lv_ui_t *bk_ui);
-extern void destroy_page_neurosys(bk_lv_ui_t *bk_ui);
-//=============================================
+const preRenderImageInfo_t sharedImageAssetInfo[SHARED_IMAGE_COUNT] =
+{
+    [SHARED_IMAGE_ASSET_BG_DOUGH] =
+    {
+        .imagePath = "/images/bg",
+        .hasLanguageVariant = false
+    },
+
+    [SHARED_IMAGE_ASSET_BG_AUTOMODESTART] =
+    {
+        .imagePath = "/images/auto_mode_start_bgi",
+        .hasLanguageVariant = true
+    }
+};
+preRendererImageState_t sharedImageAssetState[SHARED_IMAGE_COUNT] = {0};
+
+static const preRenderImageInfo_t MainPreRenderImages[] =
+{
+    { "/images/automode", true },
+    { "/images/manualmode", true },
+    { "/images/autodrymode", true },
+    { "/images/memorymode", true },
+    { "/images/settingmode", true }
+};
+static const preRenderImageInfo_t AutomodePreRenderImages[] =
+{
+    { "/images/automode_title", true  },
+    { "/images/exit_bt",        true },
+    { "/images/start_bt",       true },
+    { "/images/auto_mode_start_box_time", true  },
+    { "/images/load_bt",        true },
+    { "/images/save_bt",        true },
+    { "/images/auto_mode_freeze_board", true  },
+    { "/images/auto_mode_defrost_board", true  },
+    { "/images/auto_mode_fermentation1_board", true  },
+    { "/images/auto_mode_fermentation2_board", true  },
+    { "/images/defrost_auto_time_box", true  },
+    { "/images/keypad",         true }
+};
+
 // NOTE : preRenderTarget에 적어둔 순서대로 preRendering이 진행, 자주 쓰이는 페이지를 앞쪽에 배치하는 것이 좋음. (ex: PAGE_MAIN, PAGE_AUTOMODE, PAGE_MANUALMODE 등)
 const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
 {
@@ -93,7 +65,10 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
             PAGE_MEMORYMODE,
             PAGE_SETTINGMODE
         },
-        .preRenderTargetPageCount = 5
+        .preRenderTargetPageCount = 5,
+        .backgroundImageAssetId = SHARED_IMAGE_ASSET_BG_DOUGH,
+        .preRenderImageCount = ARRAY_COUNT(MainPreRenderImages),
+        .preRenderImageInfo = MainPreRenderImages
     },
 
     [PAGE_AUTOMODE] =
@@ -108,7 +83,10 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
             PAGE_AUTOMODESTART,
             PAGE_MEMORYMODE
         },
-        .preRenderTargetPageCount = 3
+        .preRenderTargetPageCount = 3,
+        .backgroundImageAssetId = SHARED_IMAGE_NONE,
+        .preRenderImageCount = ARRAY_COUNT(AutomodePreRenderImages),
+        .preRenderImageInfo = AutomodePreRenderImages
     },
 
     [PAGE_AUTOMODESTART] =
@@ -559,4 +537,86 @@ pageLifecycleFunc_t getPageDeinitFunc(pageId_t pageId)
         return preRenderPageConfig[pageId].deinit_func;
     }
     return NULL;
+}
+
+rendererFuncStatus_t init_shared_image_asset()
+{
+    for(int i = 0 ; i < SHARED_IMAGE_COUNT ; i++)
+    {
+        if(i == SHARED_IMAGE_NONE)
+        {
+            continue;
+        }
+        sharedImageAssetState[i].imageInfo = &sharedImageAssetInfo[i];
+        sharedImageAssetState[i].imageBuffer = NULL;
+    }
+    for(int i = 0 ; i < SHARED_IMAGE_COUNT ; i++)
+    {
+        if(i == SHARED_IMAGE_NONE)
+        {
+            continue;
+        }
+        bool hasLanguageVariant = sharedImageAssetInfo[i].hasLanguageVariant;
+        char variantFilePath[128];
+        lv_draw_buf_t *imageBuffer;
+        if(hasLanguageVariant)
+        {
+            const char* lang = settings_get_int("LANGUAGE") == 1 ? "_china.jpg" : settings_get_int("LANGUAGE") == 2 ? "_english.jpg" : ".jpg";
+            snprintf(variantFilePath, sizeof(variantFilePath), "%s%s", sharedImageAssetInfo[i].imagePath, lang);
+            bk_printf(TAG "[SHARED_IMAGE] init_shared_image_asset: Loading image for assetId %d with language variant: [%s]\n", i, variantFilePath);
+        }
+        else
+        {
+            snprintf(variantFilePath, sizeof(variantFilePath), "%s.jpg", sharedImageAssetInfo[i].imagePath);
+            bk_printf(TAG "[SHARED_IMAGE] init_shared_image_asset: Loading image for assetId %d without language variant: [%s]\n", i, variantFilePath);
+        }
+
+        imageBuffer = lv_image_decoder_prewarm_to_buffer(variantFilePath);
+        if(!imageBuffer)
+        {
+            bk_printf(TAG "[SHARED_IMAGE] init_shared_image_asset: Failed to load image for assetId %d from path: %s\n", i, variantFilePath);
+            goto failed;
+        }
+        sharedImageAssetState[i].imageBuffer = imageBuffer;
+        bk_printf(TAG "[SHARED_IMAGE] init_shared_image_asset: Successfully loaded image for assetId %d from path: %s\n", i, variantFilePath);
+    }
+    return RENDERER_FUNC_DONE;
+
+    failed:
+    return RENDERER_FUNC_FAILED;
+}
+
+rendererFuncStatus_t set_shared_image_asset(lv_obj_t *obj, sharedImageAssetId_t assetId)
+{
+    if(assetId < SHARED_IMAGE_NONE || assetId >= SHARED_IMAGE_COUNT)
+    {
+        bk_printf(TAG "[SHARED_IMAGE] set_shared_image_asset: Invalid assetId %d\n", assetId);
+        return RENDERER_FUNC_FAILED;
+    }
+
+    preRendererImageState_t *assetState = &sharedImageAssetState[assetId];
+    if(!assetState->imageBuffer)
+    {
+        bk_printf(TAG "[SHARED_IMAGE] set_shared_image_asset: No image buffer for assetId %d\n", assetId);
+        return RENDERER_FUNC_FAILED;
+    }
+
+    lv_image_set_src(obj, assetState->imageBuffer);
+    bk_printf(TAG "[SHARED_IMAGE] set_shared_image_asset: Set image for assetId %d on object %p\n", assetId, obj);
+
+    return RENDERER_FUNC_DONE;
+}
+
+rendererFuncStatus_t refresh_shared_image_asset()
+{
+    for(int i = 0; i < SHARED_IMAGE_COUNT; i++)
+    {
+        bool hasLanguageVariant = sharedImageAssetState[i].imageInfo->hasLanguageVariant;
+        if(hasLanguageVariant)
+        {
+            // TODO : reload image for the current language variant
+            bk_printf(TAG "[SHARED_IMAGE] refresh_shared_image_asset: Reloaded image for assetId %d with language variant\n", i);
+        }
+    }
+    return RENDERER_FUNC_DONE;
 }

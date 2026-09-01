@@ -26,11 +26,6 @@ lv_event_code_t UI_EVENT_PAGE_SHOWN;
 lv_event_code_t UI_EVENT_PAGE_HIDE_START;
 lv_event_code_t UI_EVENT_PAGE_HIDDEN;
 
-static void uiPagePrepare(pageId_t pageId);
-static void uiPageShow(pageId_t pageId);
-static void uiPageHide(pageId_t pageId);
-static void uiPageDestroy(pageId_t pageId);
-static void uiPagePreRender(pageId_t pageId);
 static void uiPagePreRenderFlush(pageId_t pageId);
 static void uiPagePreRenderRegister(pageId_t pageId);
 
@@ -52,6 +47,21 @@ void ui_screen_event_init(void)
     UI_EVENT_PAGE_HIDE_START = lv_event_register_id();
     UI_EVENT_PAGE_HIDDEN = lv_event_register_id();
 #endif
+
+    if(preRenderRoot == NULL)
+    {
+        preRenderRoot = lv_obj_create(NULL);
+        lv_obj_remove_style_all(preRenderRoot);
+        lv_obj_set_size(preRenderRoot, 1024, 600);
+        lv_obj_set_scrollbar_mode(preRenderRoot, LV_SCROLLBAR_MODE_OFF);
+    }
+
+    if(init_shared_image_asset() != RENDERER_FUNC_DONE)
+    {
+        bk_printf(TAG "[SCREEN] init_shared_image_asset() failed\n");
+        lv_delay_ms(2000);
+        LV_ASSERT(0);
+    }
 }
 
 bool ui_screen_event_initialized(void)
@@ -59,36 +69,11 @@ bool ui_screen_event_initialized(void)
     return uiScreenEventInitialized;
 }
 
-// 여기가 ui_screen_change()의 핵심 로직임. 기존 화면을 숨기고 새 화면을 보여주는 것까지 처리함.
-// if (bk_ui->automode != NULL && lv_obj_is_valid(bk_ui->automode)) 
-// {   
-//     uint32_t elapsed;
-//     bk_printf(TAG "[SCREEN] automode already exists, moving to top\n");
-//     /*
-//     * 여기는 프리힛이 이미 됐다는 소리잖아. 프리힛 된거에 다시 init했다는거는 다른애들 지우고 refresh하면 되는거잖아
-//     */
-//     bk_ui->main != NULL ? lv_obj_add_flag(bk_ui->main, LV_OBJ_FLAG_HIDDEN) : (void)0;
-//     bk_ui->automode != NULL ? lv_obj_add_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN) : (void)0;
-//     bk_ui->manualmode != NULL ? lv_obj_add_flag(bk_ui->manualmode, LV_OBJ_FLAG_HIDDEN) : (void)0;
-//     bk_ui->autodrymode != NULL ? lv_obj_add_flag(bk_ui->autodrymode, LV_OBJ_FLAG_HIDDEN) : (void)0;
-//     elapsed = lv_tick_get() - _t_start;
-//     bk_printf(TAG "[SCREEN] preRenderCleared elapsed: %u\n", elapsed);
-//     lv_obj_move_to_index(bk_ui->automode, -1);
-//     lv_obj_remove_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN);
-//     elapsed = lv_tick_get() - _t_start;
-//     bk_printf(TAG "[SCREEN] automode unhidden elapsed: %u\n", elapsed);
-//     lv_refr_now(NULL);
-//     elapsed = lv_tick_get() - _t_start;
-//     bk_printf(TAG "[SCREEN] automode moved to top elapsed: %u\n", elapsed);
-//     return;
-// }
 // screen 변경에 따른 생명주기 관리 함수
 // currentPage는 현재 화면을 가리키는 전역 변수로, 이전 화면을 추적하는 데 사용됩니다.
 // newScreen은 새로 표시할 화면을 나타내는 매개변수입니다.
 // SHOW_START, SHOWN, HIDE_START, HIDDEN 이벤트 발생으로 기존 functions의 event_cb를 대체합니다.
 // 화면 전환 자체도 ui_screen_change()에서 처리합니다. (lv_scr_load() 호출)
-
-// REFACTOR : 첫 init 분기가 진행되는데, 아예 main으로 전환하는건 이걸 안 타게 하는게 나을지도 모르겠다. 그러면 branch 줄어서 in-order에서 latency가 줄겠지
 #define USE_OLD_PAGE_CHANGE_BEFORE_REFACTOR 0
 #if USE_OLD_PAGE_CHANGE_BEFORE_REFACTOR
 static inline bool isObjInRoot(lv_obj_t *obj)
