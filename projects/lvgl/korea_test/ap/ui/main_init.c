@@ -241,6 +241,7 @@ rendererFuncStatus_t init_page_main_with_step(bk_lv_ui_t *bk_ui)
 
             bk_ui->main = lv_obj_create(preRenderRoot);
             lv_obj_remove_style_all(bk_ui->main);
+            lv_obj_add_flag(bk_ui->main, LV_OBJ_FLAG_HIDDEN);
             lv_obj_set_size(bk_ui->main, 1024, 600);
             lv_obj_set_pos(bk_ui->main, 0, 0);
             lv_obj_set_style_bg_opa(bk_ui->main, LV_OPA_TRANSP, LV_PART_MAIN);

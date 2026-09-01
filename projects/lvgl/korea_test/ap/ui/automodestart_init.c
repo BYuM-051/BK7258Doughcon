@@ -45,6 +45,7 @@ void init_page_automodestart(bk_lv_ui_t * bk_ui) {
 
 #if UI_PRENDERING_ENABLE
     bk_ui->automodestart = lv_obj_create(preRenderRoot);
+    lv_obj_add_flag(bk_ui->automodestart, LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_style_all(bk_ui->automodestart);
     lv_obj_set_size(bk_ui->automodestart, 1024, 600);
     lv_obj_set_pos(bk_ui->automodestart, 0, 0);
@@ -425,5 +426,5 @@ void init_page_automodestart(bk_lv_ui_t * bk_ui) {
 
 rendererFuncStatus_t init_page_automodestart_with_step(bk_lv_ui_t *bk_ui)
 {
-    return RENDERER_FUNC_FAILED;
+    return RENDERER_FUNC_DONE;
 }

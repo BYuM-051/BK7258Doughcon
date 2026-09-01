@@ -167,6 +167,7 @@ rendererFuncStatus_t init_page_manualmode_with_step(bk_lv_ui_t *bk_ui)
             ui_lang_reset_manualmode_cache();
 
             bk_ui->manualmode = lv_obj_create(preRenderRoot);
+            lv_obj_add_flag(bk_ui->manualmode, LV_OBJ_FLAG_HIDDEN);
             lv_obj_remove_style_all(bk_ui->manualmode);
             lv_obj_set_size(bk_ui->manualmode, 1024, 600);
             lv_obj_set_scrollbar_mode(bk_ui->manualmode, LV_SCROLLBAR_MODE_OFF);

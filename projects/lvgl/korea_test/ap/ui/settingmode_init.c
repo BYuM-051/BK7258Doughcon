@@ -239,6 +239,7 @@ rendererFuncStatus_t init_page_settingmode_with_step(bk_lv_ui_t *bk_ui)
             ui_lang_reset_settingmode_cache();
 
             bk_ui->settingmode = lv_obj_create(preRenderRoot);
+            lv_obj_add_flag(bk_ui->settingmode, LV_OBJ_FLAG_HIDDEN);
             lv_obj_remove_style_all(bk_ui->settingmode);
             lv_obj_set_size(bk_ui->settingmode, 1024, 600);
             lv_obj_set_pos(bk_ui->settingmode, 0, 0);

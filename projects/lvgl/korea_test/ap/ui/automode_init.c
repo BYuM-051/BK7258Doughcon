@@ -697,6 +697,7 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             bk_printf(TAG "[RENDER][AUTOMODE] start tick=%lu\n", (unsigned long)renderStartTick);
 
             bk_ui->automode = lv_obj_create(preRenderRoot);
+            lv_obj_add_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN);  
             lv_obj_remove_style_all(bk_ui->automode);
             lv_obj_set_size(bk_ui->automode, 1024, 600);
             lv_obj_set_style_radius(bk_ui->automode, 0, LV_PART_MAIN);
