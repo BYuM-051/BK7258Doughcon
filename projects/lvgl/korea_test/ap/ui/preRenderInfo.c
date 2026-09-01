@@ -64,6 +64,17 @@ static const preRenderImageInfo_t ManualmodePreRenderImages[] =
     { "/images/exit_bt", true },
     { "/images/manual_menu", true }
 };
+static const preRenderImageInfo_t MemorymodePreRenderImages[] =
+{
+    { "/images/memorymode_title", true },
+    { "/images/exit_bt", true },
+    { "/images/memory_title_line", true },
+    { "/images/memory_box", true },
+    { "/images/memory_left", false },
+    { "/images/memory_right", false },
+    { "/images/ok", true },
+    { "/images/delete", true }
+};
 
 // NOTE : preRenderTarget에 적어둔 순서대로 preRendering이 진행, 자주 쓰이는 페이지를 앞쪽에 배치하는 것이 좋음. (ex: PAGE_MAIN, PAGE_AUTOMODE, PAGE_MANUALMODE 등)
 const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
@@ -186,7 +197,9 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
             PAGE_AUTOMODE,
             PAGE_MAIN
         },
-        .preRenderTargetPageCount = 2
+        .preRenderTargetPageCount = 2,
+        .preRenderImageCount = ARRAY_COUNT(MemorymodePreRenderImages),
+        .preRenderImageInfo = MemorymodePreRenderImages
     },
 
     [PAGE_SETTINGMODE] =

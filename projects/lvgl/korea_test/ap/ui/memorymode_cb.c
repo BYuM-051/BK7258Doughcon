@@ -15,7 +15,7 @@
 
 #include "preRenderer.h"
 #define TAG "[memorymode_cb.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern double degree_basic_change(double ch);
@@ -299,7 +299,7 @@ void memorymode_backbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -332,7 +332,7 @@ void memorymode_backbt_event_cb(lv_event_t *e)
 void memorymode_memory_check1bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_check_t[0]) < 150) return;
     s_check_t[0] = lv_tick_get();
     hal_buzzer_beep();
@@ -344,7 +344,7 @@ void memorymode_memory_check1bt_event_cb(lv_event_t *e)
 void memorymode_memory_check2bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_check_t[1]) < 150) return;
     s_check_t[1] = lv_tick_get();
     hal_buzzer_beep();
@@ -356,7 +356,7 @@ void memorymode_memory_check2bt_event_cb(lv_event_t *e)
 void memorymode_memory_check3bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_check_t[2]) < 150) return;
     s_check_t[2] = lv_tick_get();
     hal_buzzer_beep();
@@ -368,7 +368,7 @@ void memorymode_memory_check3bt_event_cb(lv_event_t *e)
 void memorymode_memory_check4bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_check_t[3]) < 150) return;
     s_check_t[3] = lv_tick_get();
     hal_buzzer_beep();
@@ -380,7 +380,7 @@ void memorymode_memory_check4bt_event_cb(lv_event_t *e)
 void memorymode_memoryleftbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -393,7 +393,7 @@ void memorymode_memoryleftbt_event_cb(lv_event_t *e)
 void memorymode_memory1bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -405,7 +405,7 @@ void memorymode_memory1bt_event_cb(lv_event_t *e)
 void memorymode_memory2bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -417,7 +417,7 @@ void memorymode_memory2bt_event_cb(lv_event_t *e)
 void memorymode_memory3bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -429,7 +429,7 @@ void memorymode_memory3bt_event_cb(lv_event_t *e)
 void memorymode_memoryrightbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -443,7 +443,7 @@ void memorymode_okbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -508,7 +508,7 @@ void memorymode_okbt_event_cb(lv_event_t *e)
 void memorymode_deletebt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -537,6 +537,7 @@ void memorymode_clear_checking(void)
 
 void memorymode_loaded_event_cb(lv_event_t *e)
 {
+    bk_printf(TAG "memorymode loaded at tick=%u\n", lv_tick_get());
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
 
     ui_title_anim(bk_ui->memorymode_title);
@@ -563,8 +564,12 @@ void memorymode_loaded_event_cb(lv_event_t *e)
         _img_set_src_timed(bk_ui->memorymode_memorybox2, "/images/memory_box.png");
         _img_set_src_timed(bk_ui->memorymode_memorybox3, "/images/memory_box.png");
     }
+    bk_printf(TAG "memorymode loaded: memorybox1-3 ensured at tick=%u\n", lv_tick_get());
     _refresh_display(bk_ui);
     ui_lang_apply_memorymode(bk_ui);
+    bk_printf(TAG "memorymode loaded event done at tick=%u\n", lv_tick_get());
+
+    lv_refr_now(NULL);
 }
 
 void memorymode_unload_start_event_cb(lv_event_t *e)
