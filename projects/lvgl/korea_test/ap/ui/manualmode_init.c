@@ -40,6 +40,23 @@ void destroy_page_manualmode(bk_lv_ui_t *bk_ui)
     currentStep = 0;
     currentImageStep = 0;
     preRenderPageState[PAGE_MANUALMODE].isRendered = false;
+
+    const uint32_t imageCount = preRenderPageConfig[PAGE_MANUALMODE].preRenderImageCount;
+    for(uint32_t i = 0; i < imageCount; i++)
+    {
+        const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_MANUALMODE].preRenderImageInfo[i];
+        const char *languageSuffix = imageInfo->hasLanguageVariant ?
+                                     (settings_get_int("LANGUAGE") == 1 ? "_china" :
+                                      settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
+        const char *degreeSuffix = imageInfo->hasDegreeVariant &&
+                                   strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
+        const char *extension = imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
+        char imagePath[128] = {0};
+
+        snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
+                 imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
+        lv_image_cache_drop(imagePath);
+    }
 }
 
 // NOTE : discontinued initialize method. check _with_step()
@@ -273,17 +290,15 @@ rendererFuncStatus_t init_page_manualmode_with_step(bk_lv_ui_t *bk_ui)
             {
                 const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_MANUALMODE].preRenderImageInfo[currentImageStep];
                 char imagePath[128] = {0};
-                const bool hasVariant = imageInfo->hasLanguageVariant;
+                const char *languageSuffix = imageInfo->hasLanguageVariant ?
+                                             (settings_get_int("LANGUAGE") == 1 ? "_china" :
+                                              settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
+                const char *degreeSuffix = imageInfo->hasDegreeVariant &&
+                                           strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
+                const char *extension = imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
                 uint32_t imageStartTick = lv_tick_get();
-                if(hasVariant)
-                {
-                    const char *lang = settings_get_int("LANGUAGE") == 1 ? "_china.png" : settings_get_int("LANGUAGE") == 2 ? "_english.png" : ".png";
-                    snprintf(imagePath, sizeof(imagePath), "%s%s", imageInfo->imagePath, lang);
-                }
-                else
-                {
-                    snprintf(imagePath, sizeof(imagePath), "%s.png", imageInfo->imagePath);
-                }
+                snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
+                         imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
 
                 bk_printf(TAG "[PREWARM][MANUALMODE] image %lu/%lu start: %s\n",
                           (unsigned long)(currentImageStep + 1),

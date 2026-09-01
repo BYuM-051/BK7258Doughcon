@@ -107,11 +107,30 @@ void uiPagePreRenderTask(lv_timer_t *timer)
     }
     if(xQueueReceive(preRendererQueue, &pageId, 0) == pdPASS)
     {
-        if(preRenderPageState[pageId].config->init_func_with_step(&bk_lv_tool_ui) != RENDERER_FUNC_DONE)
+        if(pageId < PAGE_MAIN || pageId >= PAGE_COUNT ||
+           preRenderPageState[pageId].config == NULL ||
+           preRenderPageState[pageId].config->init_func_with_step == NULL)
+        {
+            bk_printf(TAG "[SCREEN] Invalid pre-render page or init function: %d\n", pageId);
+            goto fatal;
+        }
+
+        rendererFuncStatus_t result =
+            preRenderPageState[pageId].config->init_func_with_step(&bk_lv_tool_ui);
+        if(result == RENDERER_FUNC_NOT_DONE)
         {
             currentPreRenderPage = pageId;
             xQueueSendToBack(preRendererQueue, &pageId, 0);
             bk_printf(TAG "[SCREEN] Pre-rendering page %d is not finished yet, re-queueing\n", pageId);
+        }
+        else if(result == RENDERER_FUNC_FAILED)
+        {
+            bk_printf(TAG "[SCREEN] Pre-rendering page %d failed\n", pageId);
+            goto fatal;
+        }
+        else
+        {
+            currentPreRenderPage = PAGE_NONE;
         }
     }
 

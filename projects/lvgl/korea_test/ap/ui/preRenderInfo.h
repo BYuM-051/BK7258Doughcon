@@ -72,6 +72,8 @@ typedef struct
 {
     const char *imagePath;
     const bool hasLanguageVariant;
+    const bool hasDegreeVariant;
+    const char *fileExtension;
 } preRenderImageInfo_t;
 typedef struct
 {
@@ -173,6 +175,7 @@ extern void init_page_detailsettingdefrost(bk_lv_ui_t *bk_ui);
 extern rendererFuncStatus_t init_page_detailsettingdefrost_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_detailsettingdefrost(bk_lv_ui_t *bk_ui);
 extern void init_page_neurosys(bk_lv_ui_t *bk_ui);
+extern rendererFuncStatus_t init_page_neurosys_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_neurosys(bk_lv_ui_t *bk_ui);
 //=============================================
 

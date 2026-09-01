@@ -385,6 +385,7 @@ static void _handle_key_up(int key_code)
 
 static void _blackout_recovery(void)
 {
+    bk_printf("Entering blackout recovery...\n");
     main_activity_t *ma  = &g_main_activity;
     ma_send_t        *sd = &ma->send;
 
@@ -797,7 +798,7 @@ void main_activity_on_create(void)
     hal_backlight_set(100);
 
     /* ── 4. saveChecking 읽기 ─────────────────────────────────── */
-    ma->save_checking = _sget_int("saveChecking");
+    // ma->save_checking = _sget_int("saveChecking"); // 리팩토링 이전 테스트 드라이버
 
     /* ── 5. 에러 팝업 초기화 (LVGL 객체 생성은 별도 호출) ──────── */
     main_activity_show_connect_error();

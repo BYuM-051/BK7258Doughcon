@@ -51,21 +51,18 @@ void destroy_page_autodrymode(bk_lv_ui_t *bk_ui)
 
     bk_printf(TAG "[PREWARM][AUTODRYMODE] UNCACHE_CACHE_IMAGE start (%lu images)\n", (unsigned long)imageCount);
 
-    for(int i = 0 ; i < imageCount ; i++)
+    for(uint32_t i = 0; i < imageCount; i++)
     {
-        const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_AUTODRYMODE].preRenderImageInfo[currentImageStep];
+        const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_AUTODRYMODE].preRenderImageInfo[i];
         char imagePath[128] = {0};
-        const bool hasVariant = imageInfo->hasLanguageVariant;
-        uint32_t imageStartTick = lv_tick_get();
-        if(hasVariant)
-        {
-            const char *lang = settings_get_int("LANGUAGE") == 1 ? "_china.png" : settings_get_int("LANGUAGE") == 2 ? "_english.png" : ".png";
-            snprintf(imagePath, sizeof(imagePath), "%s%s", imageInfo->imagePath, lang);
-        }
-        else
-        {
-            snprintf(imagePath, sizeof(imagePath), "%s.png", imageInfo->imagePath);
-        }
+        const char *languageSuffix = imageInfo->hasLanguageVariant ?
+                                     (settings_get_int("LANGUAGE") == 1 ? "_china" :
+                                      settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
+        const char *degreeSuffix = imageInfo->hasDegreeVariant &&
+                                   strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
+        const char *extension = imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
+        snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
+                 imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
 
         bk_printf(TAG "[PREWARM][AUTODRYMODE] uncaching image %lu/%lu path=%s\n",
                     (unsigned long)(i + 1),
@@ -628,17 +625,15 @@ rendererFuncStatus_t init_page_autodrymode_with_step(bk_lv_ui_t *bk_ui)
             {
                 const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_AUTODRYMODE].preRenderImageInfo[currentImageStep];
                 char imagePath[128] = {0};
-                const bool hasVariant = imageInfo->hasLanguageVariant;
+                const char *languageSuffix = imageInfo->hasLanguageVariant ?
+                                             (settings_get_int("LANGUAGE") == 1 ? "_china" :
+                                              settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
+                const char *degreeSuffix = imageInfo->hasDegreeVariant &&
+                                           strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
+                const char *extension = imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
                 uint32_t imageStartTick = lv_tick_get();
-                if(hasVariant)
-                {
-                    const char *lang = settings_get_int("LANGUAGE") == 1 ? "_china.png" : settings_get_int("LANGUAGE") == 2 ? "_english.png" : ".png";
-                    snprintf(imagePath, sizeof(imagePath), "%s%s", imageInfo->imagePath, lang);
-                }
-                else
-                {
-                    snprintf(imagePath, sizeof(imagePath), "%s.png", imageInfo->imagePath);
-                }
+                snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
+                         imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
 
                 bk_printf(TAG "[PREWARM][AUTODRYMODE] image %lu/%lu start: %s\n",
                           (unsigned long)(currentImageStep + 1),
