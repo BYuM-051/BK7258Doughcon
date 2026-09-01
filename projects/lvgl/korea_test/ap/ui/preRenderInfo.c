@@ -75,6 +75,16 @@ static const preRenderImageInfo_t MemorymodePreRenderImages[] =
     { "/images/ok", true },
     { "/images/delete", true }
 };
+static const preRenderImageInfo_t AutodrymodePreRenderImages[] =
+{
+    { "/images/autodrymode_title", true},
+    { "/images/exit_bt", true },
+    { "/images/auto_dry_circle_basic", false },
+    { "/images/auto_dry_time_box", true },
+    { "/images/tempbox", true },
+    { "/images/start_bt", true },
+    { "/images/blackout", true }
+};
 
 // NOTE : preRenderTarget에 적어둔 순서대로 preRendering이 진행, 자주 쓰이는 페이지를 앞쪽에 배치하는 것이 좋음. (ex: PAGE_MAIN, PAGE_AUTOMODE, PAGE_MANUALMODE 등)
 const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
@@ -183,7 +193,9 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
         {
             PAGE_MAIN
         },
-        .preRenderTargetPageCount = 1
+        .preRenderTargetPageCount = 1,
+        .preRenderImageCount = ARRAY_COUNT(AutodrymodePreRenderImages),
+        .preRenderImageInfo = AutodrymodePreRenderImages
     },
 
     [PAGE_MEMORYMODE] =

@@ -652,7 +652,7 @@ void autodrymode_backbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_autodrymode) < 250) return;
     s_last_click_autodrymode = lv_tick_get();
     hal_buzzer_beep();
@@ -673,7 +673,7 @@ void autodrymode_auto_dry_temp_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (state->auto_dry_mode_start) return;
     s_tci_autodrymode = 1;
     _common_click_autodrymode(bk_ui);
@@ -683,7 +683,7 @@ void autodrymode_auto_dry_humidity_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (state->auto_dry_mode_start) return;
     s_tci_autodrymode = 2;
     _common_click_autodrymode(bk_ui);
@@ -693,7 +693,7 @@ void autodrymode_auto_dry_hour_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (state->auto_dry_mode_start) return;
     s_tci_autodrymode = 3;
     _common_click_autodrymode(bk_ui);
@@ -703,7 +703,7 @@ void autodrymode_auto_dry_min_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (state->auto_dry_mode_start) return;
     s_tci_autodrymode = 4;
     _common_click_autodrymode(bk_ui);
@@ -713,7 +713,7 @@ void autodrymode_auto_dry_start_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_autodrymode) < 250) return;
     s_last_click_autodrymode = lv_tick_get();
 
