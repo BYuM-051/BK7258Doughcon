@@ -12,7 +12,11 @@
 
 #define TAG "[automode_init.c] "
 #include "preRenderer.h"
-#define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
+static uint32_t currentStep = 0;
+static uint32_t currentImageStep = 0;
+
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 
@@ -49,11 +53,15 @@ void destroy_page_automode(bk_lv_ui_t *bk_ui)
 {
     bk_printf(TAG "[SCREEN] destroy_page_automode() called\n");
     if (bk_ui == NULL) return;
-    if (bk_ui->automode != NULL) {
+    if (bk_ui->automode != NULL) 
+    {
         lv_obj_del(bk_ui->automode);
         bk_ui->automode = NULL;
     }
     bk_printf(TAG "[SCREEN] destroyed\n");
+    // TODO : 적어도 image개체는 여기서 다 NULL하고 공유확인후에 없으면 buffer flush
+    
+
     /* Reset lazily-initialized child pointers. lv_obj_del() deletes all children,
      * leaving these as dangling pointers. If not cleared, lazy-create guards like
      * "if (!bk_ui->automode_auto_f1)" skip recreation on next visit. */
@@ -86,10 +94,9 @@ void destroy_page_automode(bk_lv_ui_t *bk_ui)
     bk_ui->automode_AutoModeFermentation2TimeMinUnderBarIm   = NULL;
     bk_printf(TAG "[SCREEN] child pointers reset\n");
 
-#if UI_PRENDERING_ENABLE
-    // TODO : free background image buffer if allocated
-    
-#endif /* UI_PRENDERING_ENABLE */
+    currentStep = 0;
+    currentImageStep = 0;
+    preRenderPageState[PAGE_AUTOMODE].isRendered = false;
 }
 
 // NOTE : discontinued initialize method. check _with_step()
@@ -673,8 +680,6 @@ void init_page_automode(bk_lv_ui_t * bk_ui)
 
 rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui) 
 {
-    static uint32_t currentStep = 0;
-    static uint32_t currentImageStep = 0;
     static uint32_t renderStartTick = 0;
 
     if(preRenderPageState[PAGE_AUTOMODE].isRendered)
