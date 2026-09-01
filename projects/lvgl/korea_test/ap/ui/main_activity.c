@@ -44,7 +44,7 @@
 #include "key_adapter.h"
 
 #define TAG "[main_activity.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 static void _toggle_lock(void);
 static void _toggle_lamp(void);

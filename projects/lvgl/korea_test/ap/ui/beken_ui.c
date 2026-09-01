@@ -115,7 +115,6 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
             LV_ASSERT(0);
         }
     }
-    preRenderPageState[PAGE_MAIN].isRendered = true;
     bk_printf(TAG "[BOOT] warmup main: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
     // init warmup automode
@@ -134,7 +133,6 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
             LV_ASSERT(0);
         }
     }
-    preRenderPageState[PAGE_AUTOMODE].isRendered = true;
     bk_printf(TAG "[BOOT] warmup automode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
     // init warmup manualmode
@@ -153,7 +151,6 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
             LV_ASSERT(0);
         }
     }
-    preRenderPageState[PAGE_MANUALMODE].isRendered = true;
     bk_printf(TAG "[BOOT] warmup manualmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
     // init warmup autodrymode
@@ -172,7 +169,6 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
             LV_ASSERT(0);
         }
     }
-    preRenderPageState[PAGE_AUTODRYMODE].isRendered = true;
     bk_printf(TAG "[BOOT] warmup autodrymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
     
     // init warmup memorymode
@@ -191,7 +187,6 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
             LV_ASSERT(0);
         }
     }
-    preRenderPageState[PAGE_MEMORYMODE].isRendered = true;
     bk_printf(TAG "[BOOT] warmup memorymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
     
     // init warmup settingmode
@@ -210,7 +205,6 @@ static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
             LV_ASSERT(0);
         }
     }
-    preRenderPageState[PAGE_SETTINGMODE].isRendered = true;
     bk_printf(TAG "[BOOT] warmup settingmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
 
     bk_printf(TAG "[BOOT] entering main\n");

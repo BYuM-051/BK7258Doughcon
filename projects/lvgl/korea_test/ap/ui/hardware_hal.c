@@ -398,7 +398,7 @@ void hal_rtc_set(int year, int month, int day,
 #include "device_state.h"
 
 #define TAG "[hardware_hal.c] "
-#define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 /* ----------------------------------------------------------------
  * Pin / channel constants
