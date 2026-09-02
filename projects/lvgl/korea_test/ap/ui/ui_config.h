@@ -138,7 +138,7 @@
 /* 1: settingmode→고장진단 재진입 시 화면을 destroy+재생성하지 않고 재사용
  *    (memorymode와 동일한 keep-alive). 오브젝트 수십 개 재생성 비용 제거.
  * 0: 기존처럼 진입마다 destroy 후 새로 생성. */
-#define UI_SETTINGMODETEST_KEEPALIVE_ENABLE   1
+#define UI_SETTINGMODETEST_KEEPALIVE_ENABLE   0
 
 /* 1: title/exit_bt/testmode_box.jpg를 오브젝트 생성 시점(_img_set_src_timed)과
  *    SCREEN_LOAD_START의 ui_lang_apply_settingmodetest() 두 곳에서 매번 중복
@@ -154,7 +154,7 @@
  *    popuppassword prewarm과 캐시를 두고 경쟁해 LRU eviction을 일으켰던 문제
  *    (settingmode_cb.c의 s_tm_bg_* 관련 주석 참고)를 원천적으로 피함.
  * 0: prewarm 없이 고장진단 진입 시점에 파일에서 직접 decode. */
-#define UI_SETTINGMODETEST_PREWARM_ENABLE   1
+#define UI_SETTINGMODETEST_PREWARM_ENABLE   0
 
 /* 1: 부팅 완료 후(main 화면 표시 직전) automode/memorymode/settingmode를
  *    "로딩중" 오버레이(lv_layer_top(), 불투명) 뒤에서 한 번씩 순서대로
@@ -214,7 +214,7 @@
  * 0: 3개 모두 예전 방식(화면 진입 시 malloc, 이탈 시 free)으로 되돌림 — 평소
  *    힙 여유는 늘지만(2.18MB 반환), 이 3개 각각의 원래 크래시가 다시 재현될 수
  *    있음. 비교/실측용. */
-#define UI_CANVAS_BUF_PERMANENT_ENABLE   1
+#define UI_CANVAS_BUF_PERMANENT_ENABLE   0
 
 /* 1: PSRAM 여유(rtos_get_psram_free_heap_size())가 임계값 아래로 떨어지면
  *    화면 전환 시점(uart_comm_tick, 매우 자주 호출됨)마다 체크해서 공유 이미지

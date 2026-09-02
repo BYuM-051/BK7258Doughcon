@@ -717,6 +717,7 @@ void main_activity_on_create(void)
     bg_canvas_buf_alloc();
 #endif
 
+// 이놈들을 안 없애면 메모리가 모자라.
 #if UI_CANVAS_BUF_PERMANENT_ENABLE
     /* reset_popup.png(알파 있는 RGBA) ARGB8888 버퍼(728KB) 선점 — psram_malloc_cm이
      * 실패 시 NULL 반환이 아니라 즉시 assert 크래시하므로, 이 위험한 할당을
