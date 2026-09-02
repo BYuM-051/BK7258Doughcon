@@ -1902,3 +1902,51 @@ void pvShowMemoryConfigInfo(void)
 
 }
 #endif
+
+size_t xPortGetPsramLargestFreeBlockSize(void)
+{
+#if (CONFIG_PSRAM_AS_SYS_MEMORY)
+	BlockLink_t *pxBlock;
+	size_t largestBlockSize = 0;
+
+#if CONFIG_FREERTOS_SMP
+	HeapEnterCritical();
+#endif
+
+	if(psram_pxEnd != NULL)
+	{
+		pxBlock = psram_xStart.pxNextFreeBlock;
+
+		while(pxBlock != NULL && pxBlock != psram_pxEnd)
+		{
+			if(pxBlock->xBlockSize > largestBlockSize)
+			{
+				largestBlockSize = pxBlock->xBlockSize;
+			}
+
+			pxBlock = pxBlock->pxNextFreeBlock;
+		}
+	}
+
+#if CONFIG_FREERTOS_SMP
+	HeapExitCritical();
+#endif
+
+	/*
+	 * xBlockSize includes the allocator's BlockLink_t header.
+	 * Return the maximum size actually available to psram_malloc().
+	 */
+	if(largestBlockSize > xHeapStructSize)
+	{
+		largestBlockSize -= xHeapStructSize;
+	}
+	else
+	{
+		largestBlockSize = 0;
+	}
+
+	return largestBlockSize;
+#else
+	return 0;
+#endif
+}

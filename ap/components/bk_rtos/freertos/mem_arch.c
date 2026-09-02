@@ -112,12 +112,14 @@ void *os_realloc(void *ptr, size_t size)
 #endif
 }
 
+__attribute__((noinline))
 void *psram_realloc(void *ptr, size_t size)
 {
 	void *tmp;
+	void *caller = __builtin_extract_return_addr(__builtin_return_address(0));
 
 	if (platform_is_in_interrupt_context() && (arch_is_enter_exception() == 0)) {
-		BK_LOGE(NULL, "psram_realloc_risk\r\n");
+		BK_LOGE(NULL, "psram_realloc_risk caller=%p\r\n", caller);
 		BK_ASSERT(false);
 	}
 
@@ -126,14 +128,22 @@ void *psram_realloc(void *ptr, size_t size)
 	}
 
 	tmp = psram_malloc(size);
-	if (tmp && ptr) {
+
+	if (!tmp) {
+		bk_printf("[mem_arch.c] psram_realloc FAILED: ptr=%p want=%u B caller=%p\r\n",
+				ptr,
+				(unsigned int)size,
+				caller);
+		return NULL;
+	}
+
+	if (ptr) {
 		os_memcpy_word((uint32_t *)tmp, (uint32_t *)ptr, size);
 		os_free((void *)ptr);
 	}
 
 	return tmp;
 }
-
 void *bk_psram_realloc(void *ptr, size_t size)
 {
 	return psram_realloc(ptr, size);
