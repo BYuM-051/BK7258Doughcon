@@ -29,10 +29,34 @@ Rename this file to lodepng.cpp to use it for C++, or to lodepng.c to use it for
 */
 
 #include "lodepng.h"
+#include "../../../../../../../projects/lvgl/korea_test/ap/ui/ui_config.h"
 #if LV_USE_LODEPNG
 #include "../../core/lv_global.h"
 
 #define image_cache_draw_buf_handlers &(LV_GLOBAL_DEFAULT()->image_cache_draw_buf_handlers)
+
+#if UI_LODEPNG_565A8
+typedef struct
+{
+    unsigned char * data;
+
+    unsigned width;
+    unsigned height;
+
+    LodePNGColorType colorType;
+    unsigned bitDepth;
+    unsigned interlaceMethod;
+
+    unsigned keyDefined;
+    unsigned keyR;
+    unsigned keyG;
+    unsigned keyB;
+
+    size_t paletteSize;
+    unsigned char palette[256 * 4];
+} lodepng_native_image_t;
+#endif /*UI_LODEPNG_565A8*/
+
 
 #ifdef LODEPNG_COMPILE_DISK
     #include <limits.h> /* LONG_MAX */
@@ -84,11 +108,22 @@ static void * lodepng_malloc(size_t size)
 }
 
 /* NOTE: when realloc returns NULL, it leaves the original memory untouched */
-static void * lodepng_realloc(void * ptr, size_t new_size)
+static void * lodepng_realloc(void *ptr, size_t new_size)
 {
 #ifdef LODEPNG_MAX_ALLOC
-    if(new_size > LODEPNG_MAX_ALLOC) return 0;
+    if(new_size > LODEPNG_MAX_ALLOC)
+    {
+        return 0;
+    }
 #endif
+
+    if(new_size > 1024 * 1024)
+    {
+        printf("[LODEPNG] realloc ptr=%p size=%u\n",
+               ptr,
+               (unsigned int)new_size);
+    }
+
     return lv_realloc(ptr, new_size);
 }
 
@@ -2337,30 +2372,51 @@ unsigned lodepng_zlib_decompress(unsigned char ** out, size_t * outsize, const u
 }
 
 /*expected_size is expected output size, to avoid intermediate allocations. Set to 0 if not known. */
-static unsigned zlib_decompress(unsigned char ** out, size_t * outsize, size_t expected_size,
-                                const unsigned char * in, size_t insize, const LodePNGDecompressSettings * settings)
+static unsigned zlib_decompress(unsigned char **out, size_t *outsize, size_t expected_size,
+                                const unsigned char *in, size_t insize, const LodePNGDecompressSettings *settings)
 {
     unsigned error;
-    if(settings->custom_zlib) {
+
+    if(settings->custom_zlib)
+    {
         error = settings->custom_zlib(out, outsize, in, insize, settings);
-        if(error) {
+
+        if(error)
+        {
             /*the custom zlib is allowed to have its own error codes, however, we translate it to code 110*/
             error = 110;
+
             /*if there's a max output size, and the custom zlib returned error, then indicate that error instead*/
-            if(settings->max_output_size && *outsize > settings->max_output_size) error = 109;
+            if(settings->max_output_size && *outsize > settings->max_output_size)
+            {
+                error = 109;
+            }
         }
     }
-    else {
+    else
+    {
         ucvector v = ucvector_init(*out, *outsize);
-        if(expected_size) {
-            /*reserve the memory to avoid intermediate reallocations*/
-            ucvector_resize(&v, *outsize + expected_size);
+
+        if(expected_size)
+        {
+            /*
+             * inflateHuffmanBlock() requires 260 bytes of spare capacity.
+             * Reserve it up front to avoid a large realloc near the end.
+             */
+            if(!ucvector_reserve(&v, *outsize + expected_size + 260))
+            {
+                return 83;
+            }
+
             v.size = *outsize;
         }
+
         error = lodepng_zlib_decompressv(&v, in, insize, settings);
+
         *out = v.data;
         *outsize = v.size;
     }
+
     return error;
 }
 
@@ -5585,10 +5641,15 @@ unsigned lodepng_inspect_chunk(LodePNGState * state, size_t pos,
 }
 
 /*read a PNG, the result will be in the same color type as the PNG (hence "generic")*/
-static void decodeGeneric(unsigned char ** out, unsigned * w, unsigned * h,
-                          LodePNGState * state,
-                          const unsigned char * in, size_t insize)
+static void decodeGenericInternal(unsigned char ** out, unsigned * w, unsigned * h,
+                                  LodePNGState * state,
+                                  const unsigned char * in, size_t insize,
+                                  unsigned returnNativePixels)
 {
+#if !UI_LODEPNG_565A8
+    (void)returnNativePixels;
+#endif
+
     unsigned char IEND = 0;
     const unsigned char * chunk; /*points to beginning of next chunk*/
     unsigned char * idat; /*the data from idat chunks, zlib compressed*/
@@ -5789,20 +5850,95 @@ static void decodeGeneric(unsigned char ** out, unsigned * w, unsigned * h,
     if(!state->error && scanlines_size != expected_size) state->error = 91; /*decompressed size doesn't match prediction*/
     lodepng_free(idat);
 
-    if(!state->error) {
-        lv_draw_buf_t * decoded = lv_draw_buf_create_ex(image_cache_draw_buf_handlers, *w, *h, LV_COLOR_FORMAT_ARGB8888, 4 * *w);
-        if(decoded) {
-            *out = (unsigned char*)decoded;
+#if UI_LODEPNG_565A8
+    if(!state->error && returnNativePixels)
+    {
+        /*
+         * The RGB565A8 direct path keeps the PNG's native color type.
+         *
+         * postProcessScanlines() removes PNG filtering and row padding but
+         * does not perform color conversion. For non-interlaced images it
+         * supports in-place operation, so the inflate buffer itself becomes
+         * the native pixel buffer returned to lv_lodepng.c.
+         *
+         * Adam7 needs a separate deinterlace destination buffer, which would
+         * recreate the full-buffer peak this path is intended to remove.
+         */
+        if(state->info_png.interlace_method != 0)
+        {
+            state->error = 56; /*unsupported by zero-copy native path*/
+        }
+    }
+
+    if(!state->error && returnNativePixels)
+    {
+        state->error = postProcessScanlines(
+            scanlines,
+            scanlines,
+            *w,
+            *h,
+            &state->info_png
+        );
+
+        if(!state->error)
+        {
+            /*
+             * Transfer ownership of the inflate buffer to the caller.
+             *
+             * Depending on info_png.color this contains native:
+             * GREY / RGB / PALETTE / GREY_ALPHA / RGBA pixels.
+             */
+            *out = scanlines;
+            scanlines = NULL;
+        }
+    }
+    else
+#endif /*UI_LODEPNG_565A8*/
+    if(!state->error)
+    {
+        /* Original LVGL/LodePNG output path. */
+        lv_draw_buf_t * decoded = lv_draw_buf_create_ex(
+            image_cache_draw_buf_handlers,
+            *w,
+            *h,
+            LV_COLOR_FORMAT_ARGB8888,
+            4 * *w
+        );
+
+        if(decoded)
+        {
+            *out = (unsigned char *)decoded;
             outsize = decoded->data_size;
         }
-        else state->error = 83; /*alloc fail*/
+        else
+        {
+            state->error = 83; /*alloc fail*/
+        }
+
+        if(!state->error)
+        {
+            lodepng_memset(decoded->data, 0, outsize);
+            state->error = postProcessScanlines(
+                decoded->data,
+                scanlines,
+                *w,
+                *h,
+                &state->info_png
+            );
+        }
     }
-    if(!state->error) {
-        lv_draw_buf_t * decoded = (lv_draw_buf_t *)*out;
-        lodepng_memset(decoded->data, 0, outsize);
-        state->error = postProcessScanlines(decoded->data, scanlines, *w, *h, &state->info_png);
-    }
+
     lodepng_free(scanlines);
+}
+
+/*
+ * Keep the original internal API unchanged for every existing caller.
+ */
+static void decodeGeneric(unsigned char ** out, unsigned * w, unsigned * h,
+                          LodePNGState * state,
+                          const unsigned char * in, size_t insize)
+{
+    decodeGenericInternal(out, w, h, state, in, insize, 0);
 }
 
 unsigned lodepng_decode(unsigned char ** out, unsigned * w, unsigned * h,
@@ -5868,6 +6004,118 @@ unsigned lodepng_decode_memory(unsigned char ** out, unsigned * w, unsigned * h,
     lodepng_state_cleanup(&state);
     return error;
 }
+
+#if UI_LODEPNG_565A8
+unsigned lodepng_decode_native(lodepng_native_image_t * out,
+                               const unsigned char * in,
+                               size_t insize)
+{
+    unsigned error;
+    unsigned width = 0;
+    unsigned height = 0;
+    unsigned char * nativeData = NULL;
+    LodePNGState state;
+
+    if(out == NULL)
+    {
+        return 83;
+    }
+
+    lodepng_memset(out, 0, sizeof(*out));
+
+    lodepng_state_init(&state);
+
+#ifdef LODEPNG_COMPILE_ANCILLARY_CHUNKS
+    /*
+     * The direct renderer only needs pixel/color information.
+     * PLTE and tRNS are still parsed regardless of this setting.
+     */
+    state.decoder.read_text_chunks = 0;
+    state.decoder.remember_unknown_chunks = 0;
+#endif /*LODEPNG_COMPILE_ANCILLARY_CHUNKS*/
+
+    decodeGenericInternal(
+        &nativeData,
+        &width,
+        &height,
+        &state,
+        in,
+        insize,
+        1
+    );
+
+    error = state.error;
+
+    if(!error)
+    {
+        const LodePNGColorMode * color = &state.info_png.color;
+
+        out->width = width;
+        out->height = height;
+
+        out->colorType = color->colortype;
+        out->bitDepth = color->bitdepth;
+        out->interlaceMethod = state.info_png.interlace_method;
+
+        out->keyDefined = color->key_defined;
+        out->keyR = color->key_r;
+        out->keyG = color->key_g;
+        out->keyB = color->key_b;
+
+        out->paletteSize = color->palettesize;
+
+        if(color->colortype == LCT_PALETTE)
+        {
+            if(color->palette == NULL || color->palettesize == 0)
+            {
+                error = 106;
+            }
+            else if(color->palettesize > 256)
+            {
+                error = 38;
+            }
+            else
+            {
+                lodepng_memcpy(
+                    out->palette,
+                    color->palette,
+                    color->palettesize * 4u
+                );
+            }
+        }
+    }
+
+    if(!error)
+    {
+        /*
+         * Ownership of the post-processed inflate buffer moves to the caller.
+         */
+        out->data = nativeData;
+        nativeData = NULL;
+    }
+
+    lodepng_free(nativeData);
+    lodepng_state_cleanup(&state);
+
+    if(error)
+    {
+        lodepng_memset(out, 0, sizeof(*out));
+    }
+
+    return error;
+}
+
+void lodepng_native_image_cleanup(lodepng_native_image_t * image)
+{
+    if(image == NULL)
+    {
+        return;
+    }
+
+    lodepng_free(image->data);
+    lodepng_memset(image, 0, sizeof(*image));
+}
+#endif /*UI_LODEPNG_565A8*/
 
 unsigned lodepng_decode32(unsigned char ** out, unsigned * w, unsigned * h, const unsigned char * in, size_t insize)
 {

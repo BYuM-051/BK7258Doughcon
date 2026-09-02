@@ -22,6 +22,41 @@
 #include "lodepng.h"
 #include <stdlib.h>
 #include <stdio.h>
+
+/*
+ * Custom native-output entry point implemented in lodepng.c.
+ *
+ * It returns LodePNG's decompressed/post-processed native PNG pixel buffer
+ * without allocating an intermediate ARGB8888/RGBA8888 lv_draw_buf_t.
+ *
+ * The buffer format is described by colorType/bitDepth. Palette entries are
+ * copied into this structure so they remain valid after LodePNGState cleanup.
+ */
+typedef struct
+{
+    unsigned char * data;
+
+    unsigned width;
+    unsigned height;
+
+    LodePNGColorType colorType;
+    unsigned bitDepth;
+    unsigned interlaceMethod;
+
+    unsigned keyDefined;
+    unsigned keyR;
+    unsigned keyG;
+    unsigned keyB;
+
+    size_t paletteSize;
+    unsigned char palette[256 * 4];
+} lodepng_native_image_t;
+
+unsigned lodepng_decode_native(lodepng_native_image_t * out,
+                               const unsigned char * in,
+                               size_t insize);
+
+void lodepng_native_image_cleanup(lodepng_native_image_t * image);
 #define TAG "[lv_lodepng.c] "
 #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
@@ -290,7 +325,17 @@ static void decoder_close(lv_image_decoder_t * decoder, lv_image_decoder_dsc_t *
 }
 
 /**
- * Decode PNG as RGBA8888 temporarily and convert it to RGB565A8.
+ * Decode PNG from LodePNG's native post-processed pixel buffer directly to RGB565A8.
+ *
+ * No intermediate ARGB8888/RGBA8888 lv_draw_buf_t is allocated.
+ *
+ * Supported native PNG color formats:
+ *
+ *     LCT_PALETTE    1/2/4/8 bit
+ *     LCT_GREY       1/2/4/8/16 bit
+ *     LCT_RGB        8/16 bit
+ *     LCT_GREY_ALPHA 8/16 bit
+ *     LCT_RGBA       8/16 bit
  *
  * RGB565A8 buffer layout used by LVGL:
  *
@@ -303,22 +348,14 @@ static void decoder_close(lv_image_decoder_t * decoder, lv_image_decoder_dsc_t *
  */
 static lv_draw_buf_t * decode_png_data(const void * png_data, size_t png_data_size)
 {
-    unsigned png_width;
-    unsigned png_height;
-
-    lv_draw_buf_t * decoded32 = NULL;
+    lodepng_native_image_t nativeImage;
+    lv_memzero(&nativeImage, sizeof(nativeImage));
 
     uint32_t totalStart = lv_tick_get();
     uint32_t decodeStart = lv_tick_get();
 
-    /*
-     * The modified LodePNG implementation in this LVGL port returns
-     * an lv_draw_buf_t containing RGBA8888 pixel data.
-     */
-    unsigned error = lodepng_decode32(
-        (unsigned char **)&decoded32,
-        &png_width,
-        &png_height,
+    unsigned error = lodepng_decode_native(
+        &nativeImage,
         png_data,
         png_data_size
     );
@@ -327,22 +364,32 @@ static lv_draw_buf_t * decode_png_data(const void * png_data, size_t png_data_si
 
     if(error)
     {
-        if(decoded32 != NULL)
-        {
-            lv_draw_buf_destroy(decoded32);
-        }
+        lodepng_native_image_cleanup(&nativeImage);
+
+        LV_LOG_WARN(
+            "lodepng_decode_native failed: error=%u (%s)",
+            error,
+            lodepng_error_text(error)
+        );
 
         return NULL;
     }
 
-    /*
-     * Measure the complete extra RGB565A8 stage separately from decode32:
-     * allocation + clear + conversion loop + temporary ARGB8888 release.
-     */
+    const unsigned png_width = nativeImage.width;
+    const unsigned png_height = nativeImage.height;
+
+    if(nativeImage.data == NULL ||
+       png_width == 0 ||
+       png_height == 0)
+    {
+        lodepng_native_image_cleanup(&nativeImage);
+        return NULL;
+    }
+
     uint32_t stage565Start = lv_tick_get();
 
     /*
-     * Allocate the final image-cache buffer as RGB565A8.
+     * Allocate only the final image-cache buffer as RGB565A8.
      *
      * LVGL allocates:
      *
@@ -362,7 +409,7 @@ static lv_draw_buf_t * decode_png_data(const void * png_data, size_t png_data_si
 
     if(decoded == NULL)
     {
-        lv_draw_buf_destroy(decoded32);
+        lodepng_native_image_cleanup(&nativeImage);
         return NULL;
     }
 
@@ -372,9 +419,6 @@ static lv_draw_buf_t * decode_png_data(const void * png_data, size_t png_data_si
      */
     lv_memzero(decoded->data, decoded->data_size);
 
-    const uint8_t * srcData = decoded32->data;
-
-    const uint32_t srcStride = decoded32->header.stride;
     const uint32_t dstStride = decoded->header.stride;
 
     uint8_t * colorData = decoded->data;
@@ -388,67 +432,409 @@ static lv_draw_buf_t * decode_png_data(const void * png_data, size_t png_data_si
 
     const uint32_t alphaStride = dstStride / 2;
 
-    /* Pure pixel conversion loop timing. */
     uint32_t convertStart = lv_tick_get();
 
-    for(uint32_t y = 0; y < png_height; y++)
+    if(nativeImage.colorType == LCT_PALETTE)
     {
-        const uint8_t * srcRow =
-            srcData +
-            (y * srcStride);
-
-        uint16_t * colorRow =
-            (uint16_t *)(colorData +
-                         (y * dstStride));
-
-        uint8_t * alphaRow =
-            alphaData +
-            (y * alphaStride);
-
-        for(uint32_t x = 0; x < png_width; x++)
+        if(nativeImage.bitDepth != 1 &&
+           nativeImage.bitDepth != 2 &&
+           nativeImage.bitDepth != 4 &&
+           nativeImage.bitDepth != 8)
         {
-            /*
-             * lodepng_decode32() output:
-             *
-             * byte 0 = R
-             * byte 1 = G
-             * byte 2 = B
-             * byte 3 = A
-             */
-            const uint8_t r = srcRow[x * 4 + 0];
-            const uint8_t g = srcRow[x * 4 + 1];
-            const uint8_t b = srcRow[x * 4 + 2];
-            const uint8_t a = srcRow[x * 4 + 3];
-
-            /*
-             * RGB888 -> RGB565
-             *
-             * RRRRR GGGGGG BBBBB
-             */
-            colorRow[x] =
-                ((uint16_t)(r & 0xF8) << 8) |
-                ((uint16_t)(g & 0xFC) << 3) |
-                ((uint16_t)(b & 0xF8) >> 3);
-
-            alphaRow[x] = a;
+            lv_draw_buf_destroy(decoded);
+            lodepng_native_image_cleanup(&nativeImage);
+            return NULL;
         }
+
+        const uint8_t * srcData = nativeImage.data;
+        const unsigned bitDepth = nativeImage.bitDepth;
+        const unsigned mask = (1u << bitDepth) - 1u;
+
+        for(uint32_t y = 0; y < png_height; y++)
+        {
+            uint16_t * colorRow =
+                (uint16_t *)(colorData +
+                             (y * dstStride));
+
+            uint8_t * alphaRow =
+                alphaData +
+                (y * alphaStride);
+
+            for(uint32_t x = 0; x < png_width; x++)
+            {
+                const size_t pixelIndex =
+                    ((size_t)y * png_width) + x;
+
+                unsigned paletteIndex;
+
+                if(bitDepth == 8)
+                {
+                    paletteIndex = srcData[pixelIndex];
+                }
+                else
+                {
+                    const size_t bitIndex =
+                        pixelIndex * bitDepth;
+
+                    const size_t byteIndex =
+                        bitIndex >> 3u;
+
+                    const unsigned bitOffset =
+                        (unsigned)(bitIndex & 7u);
+
+                    const unsigned shift =
+                        8u - bitDepth - bitOffset;
+
+                    paletteIndex =
+                        (srcData[byteIndex] >> shift) & mask;
+                }
+
+                if(paletteIndex >= nativeImage.paletteSize)
+                {
+                    lv_draw_buf_destroy(decoded);
+                    lodepng_native_image_cleanup(&nativeImage);
+                    return NULL;
+                }
+
+                const uint8_t * palette =
+                    &nativeImage.palette[paletteIndex * 4u];
+
+                const uint8_t r = palette[0];
+                const uint8_t g = palette[1];
+                const uint8_t b = palette[2];
+                const uint8_t a = palette[3];
+
+                colorRow[x] =
+                    ((uint16_t)(r & 0xF8) << 8) |
+                    ((uint16_t)(g & 0xFC) << 3) |
+                    ((uint16_t)(b & 0xF8) >> 3);
+
+                alphaRow[x] = a;
+            }
+        }
+    }
+    else if(nativeImage.colorType == LCT_RGB)
+    {
+        if(nativeImage.bitDepth != 8 &&
+           nativeImage.bitDepth != 16)
+        {
+            lv_draw_buf_destroy(decoded);
+            lodepng_native_image_cleanup(&nativeImage);
+            return NULL;
+        }
+
+        const uint8_t * srcData = nativeImage.data;
+        const uint32_t srcBytesPerPixel =
+            nativeImage.bitDepth == 8 ? 3u : 6u;
+
+        for(uint32_t y = 0; y < png_height; y++)
+        {
+            const uint8_t * srcRow =
+                srcData +
+                ((size_t)y * png_width * srcBytesPerPixel);
+
+            uint16_t * colorRow =
+                (uint16_t *)(colorData +
+                             (y * dstStride));
+
+            uint8_t * alphaRow =
+                alphaData +
+                (y * alphaStride);
+
+            for(uint32_t x = 0; x < png_width; x++)
+            {
+                const uint8_t * srcPixel =
+                    srcRow +
+                    ((size_t)x * srcBytesPerPixel);
+
+                uint8_t r;
+                uint8_t g;
+                uint8_t b;
+                uint8_t a = 255;
+
+                if(nativeImage.bitDepth == 8)
+                {
+                    r = srcPixel[0];
+                    g = srcPixel[1];
+                    b = srcPixel[2];
+
+                    if(nativeImage.keyDefined &&
+                       r == nativeImage.keyR &&
+                       g == nativeImage.keyG &&
+                       b == nativeImage.keyB)
+                    {
+                        a = 0;
+                    }
+                }
+                else
+                {
+                    const unsigned r16 =
+                        ((unsigned)srcPixel[0] << 8u) |
+                        srcPixel[1];
+
+                    const unsigned g16 =
+                        ((unsigned)srcPixel[2] << 8u) |
+                        srcPixel[3];
+
+                    const unsigned b16 =
+                        ((unsigned)srcPixel[4] << 8u) |
+                        srcPixel[5];
+
+                    r = srcPixel[0];
+                    g = srcPixel[2];
+                    b = srcPixel[4];
+
+                    if(nativeImage.keyDefined &&
+                       r16 == nativeImage.keyR &&
+                       g16 == nativeImage.keyG &&
+                       b16 == nativeImage.keyB)
+                    {
+                        a = 0;
+                    }
+                }
+
+                colorRow[x] =
+                    ((uint16_t)(r & 0xF8) << 8) |
+                    ((uint16_t)(g & 0xFC) << 3) |
+                    ((uint16_t)(b & 0xF8) >> 3);
+
+                alphaRow[x] = a;
+            }
+        }
+    }
+    else if(nativeImage.colorType == LCT_RGBA)
+    {
+        if(nativeImage.bitDepth != 8 &&
+           nativeImage.bitDepth != 16)
+        {
+            lv_draw_buf_destroy(decoded);
+            lodepng_native_image_cleanup(&nativeImage);
+            return NULL;
+        }
+
+        const uint8_t * srcData = nativeImage.data;
+        const uint32_t srcBytesPerPixel =
+            nativeImage.bitDepth == 8 ? 4u : 8u;
+
+        for(uint32_t y = 0; y < png_height; y++)
+        {
+            const uint8_t * srcRow =
+                srcData +
+                ((size_t)y * png_width * srcBytesPerPixel);
+
+            uint16_t * colorRow =
+                (uint16_t *)(colorData +
+                             (y * dstStride));
+
+            uint8_t * alphaRow =
+                alphaData +
+                (y * alphaStride);
+
+            for(uint32_t x = 0; x < png_width; x++)
+            {
+                const uint8_t * srcPixel =
+                    srcRow +
+                    ((size_t)x * srcBytesPerPixel);
+
+                uint8_t r;
+                uint8_t g;
+                uint8_t b;
+                uint8_t a;
+
+                if(nativeImage.bitDepth == 8)
+                {
+                    r = srcPixel[0];
+                    g = srcPixel[1];
+                    b = srcPixel[2];
+                    a = srcPixel[3];
+                }
+                else
+                {
+                    r = srcPixel[0];
+                    g = srcPixel[2];
+                    b = srcPixel[4];
+                    a = srcPixel[6];
+                }
+
+                colorRow[x] =
+                    ((uint16_t)(r & 0xF8) << 8) |
+                    ((uint16_t)(g & 0xFC) << 3) |
+                    ((uint16_t)(b & 0xF8) >> 3);
+
+                alphaRow[x] = a;
+            }
+        }
+    }
+    else if(nativeImage.colorType == LCT_GREY)
+    {
+        if(nativeImage.bitDepth != 1 &&
+           nativeImage.bitDepth != 2 &&
+           nativeImage.bitDepth != 4 &&
+           nativeImage.bitDepth != 8 &&
+           nativeImage.bitDepth != 16)
+        {
+            lv_draw_buf_destroy(decoded);
+            lodepng_native_image_cleanup(&nativeImage);
+            return NULL;
+        }
+
+        const uint8_t * srcData = nativeImage.data;
+        const unsigned bitDepth = nativeImage.bitDepth;
+        const unsigned highest =
+            bitDepth < 16 ? ((1u << bitDepth) - 1u) : 65535u;
+
+        for(uint32_t y = 0; y < png_height; y++)
+        {
+            uint16_t * colorRow =
+                (uint16_t *)(colorData +
+                             (y * dstStride));
+
+            uint8_t * alphaRow =
+                alphaData +
+                (y * alphaStride);
+
+            for(uint32_t x = 0; x < png_width; x++)
+            {
+                const size_t pixelIndex =
+                    ((size_t)y * png_width) + x;
+
+                unsigned greyValue;
+
+                if(bitDepth == 8)
+                {
+                    greyValue = srcData[pixelIndex];
+                }
+                else if(bitDepth == 16)
+                {
+                    const size_t byteIndex =
+                        pixelIndex * 2u;
+
+                    greyValue =
+                        ((unsigned)srcData[byteIndex] << 8u) |
+                        srcData[byteIndex + 1u];
+                }
+                else
+                {
+                    const size_t bitIndex =
+                        pixelIndex * bitDepth;
+
+                    const size_t byteIndex =
+                        bitIndex >> 3u;
+
+                    const unsigned bitOffset =
+                        (unsigned)(bitIndex & 7u);
+
+                    const unsigned shift =
+                        8u - bitDepth - bitOffset;
+
+                    greyValue =
+                        (srcData[byteIndex] >> shift) &
+                        ((1u << bitDepth) - 1u);
+                }
+
+                const uint8_t grey =
+                    (uint8_t)((greyValue * 255u) / highest);
+
+                uint8_t a = 255;
+
+                if(nativeImage.keyDefined &&
+                   greyValue == nativeImage.keyR)
+                {
+                    a = 0;
+                }
+
+                colorRow[x] =
+                    ((uint16_t)(grey & 0xF8) << 8) |
+                    ((uint16_t)(grey & 0xFC) << 3) |
+                    ((uint16_t)(grey & 0xF8) >> 3);
+
+                alphaRow[x] = a;
+            }
+        }
+    }
+    else if(nativeImage.colorType == LCT_GREY_ALPHA)
+    {
+        if(nativeImage.bitDepth != 8 &&
+           nativeImage.bitDepth != 16)
+        {
+            lv_draw_buf_destroy(decoded);
+            lodepng_native_image_cleanup(&nativeImage);
+            return NULL;
+        }
+
+        const uint8_t * srcData = nativeImage.data;
+        const uint32_t srcBytesPerPixel =
+            nativeImage.bitDepth == 8 ? 2u : 4u;
+
+        for(uint32_t y = 0; y < png_height; y++)
+        {
+            const uint8_t * srcRow =
+                srcData +
+                ((size_t)y * png_width * srcBytesPerPixel);
+
+            uint16_t * colorRow =
+                (uint16_t *)(colorData +
+                             (y * dstStride));
+
+            uint8_t * alphaRow =
+                alphaData +
+                (y * alphaStride);
+
+            for(uint32_t x = 0; x < png_width; x++)
+            {
+                const uint8_t * srcPixel =
+                    srcRow +
+                    ((size_t)x * srcBytesPerPixel);
+
+                uint8_t grey;
+                uint8_t a;
+
+                if(nativeImage.bitDepth == 8)
+                {
+                    grey = srcPixel[0];
+                    a = srcPixel[1];
+                }
+                else
+                {
+                    grey = srcPixel[0];
+                    a = srcPixel[2];
+                }
+
+                colorRow[x] =
+                    ((uint16_t)(grey & 0xF8) << 8) |
+                    ((uint16_t)(grey & 0xFC) << 3) |
+                    ((uint16_t)(grey & 0xF8) >> 3);
+
+                alphaRow[x] = a;
+            }
+        }
+    }
+    else
+    {
+        lv_draw_buf_destroy(decoded);
+        lodepng_native_image_cleanup(&nativeImage);
+        return NULL;
     }
 
     uint32_t convertMs = lv_tick_elaps(convertStart);
 
+    const unsigned decodedColorType = (unsigned)nativeImage.colorType;
+    const unsigned decodedBitDepth = nativeImage.bitDepth;
+
     /*
-     * ARGB8888/RGBA8888 temporary decode buffer is no longer needed.
+     * The native PNG pixel allocation is no longer needed.
      * Only RGB565A8 remains resident and can enter the LVGL image cache.
      */
-    lv_draw_buf_destroy(decoded32);
+    lodepng_native_image_cleanup(&nativeImage);
 
     uint32_t stage565Ms = lv_tick_elaps(stage565Start);
     uint32_t totalMs = lv_tick_elaps(totalStart);
 
-
-    bk_printf(TAG "[PNG_PERF] mode=RGB565A8 size=%ux%u decode32=%lu ms convert_loop=%lu ms 565A8_stage=%lu ms total=%lu ms\\n",
+    bk_printf(TAG "[PNG_PERF] mode=RGB565A8_NATIVE size=%ux%u type=%u depth=%u decode_native=%lu ms convert_loop=%lu ms 565A8_stage=%lu ms total=%lu ms\\n",
         png_width,
         png_height,
+        decodedColorType,
+        decodedBitDepth,
         (unsigned long)decodeMs,
         (unsigned long)convertMs,
         (unsigned long)stage565Ms,
