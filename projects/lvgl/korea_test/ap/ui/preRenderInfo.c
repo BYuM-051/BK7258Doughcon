@@ -31,176 +31,176 @@ preRendererImageState_t sharedImageAssetState[SHARED_IMAGE_COUNT] = {0};
 
 static const preRenderImageInfo_t MainPreRenderImages[] =
 {
-    { "/images/automode", true, false, ".png" },
-    { "/images/manualmode", true, false, ".png" },
+    { "/images/settingmode", true, false, ".png" },
     { "/images/autodrymode", true, false, ".png" },
-    { "/images/memorymode", true, false, ".png" },
-    { "/images/settingmode", true, false, ".png" }
+    { "/images/manualmode", true, false, ".png" },
+    { "/images/automode", true, false, ".png" },
+    { "/images/memorymode", true, false, ".png" }
 };
 static const preRenderImageInfo_t AutomodePreRenderImages[] =
 {
-    { "/images/automode_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" },
-    { "/images/start_bt", true, false, ".png" },
-    { "/images/auto_mode_start_box_time", true, false, ".png" },
-    { "/images/load_bt", true, false, ".png" },
-    { "/images/save_bt", true, false, ".png" },
     { "/images/auto_mode_freeze_board", true, false, ".png" },
-    { "/images/auto_mode_defrost_board", true, false, ".png" },
+    { "/images/keypad", true, false, ".png" },
     { "/images/auto_mode_fermentation1_board", true, false, ".png" },
     { "/images/auto_mode_fermentation2_board", true, false, ".png" },
+    { "/images/auto_mode_defrost_board", true, false, ".png" },
     { "/images/defrost_auto_time_box", true, false, ".png" },
-    { "/images/keypad", true, false, ".png" }
+    { "/images/auto_mode_start_box_time", true, false, ".png" },
+    { "/images/automode_title", true, false, ".png" },
+    { "/images/load_bt", true, false, ".png" },
+    { "/images/exit_bt", true, false, ".png" },
+    { "/images/save_bt", true, false, ".png" },
+    { "/images/start_bt", true, false, ".png" }
 };
 static const preRenderImageInfo_t SettingmodePreRenderImages[] =
 {
 #if UI_SETTINGMODE_COMBINED_BG_ENABLE
     { "/images/feature-setting", true, false, ".jpg" }
 #else
-    { "/images/setting_title", true, false, ".png" },
-    { "/images/setting_mode_detailsetting", true, false, ".png" },
     { "/images/setting_mode_degree", true, false, ".png" },
-    { "/images/setting_mode_record", true, false, ".png" },
-    { "/images/setting_mode_test", true, false, ".png" },
     { "/images/setting_mode_time", true, false, ".png" },
     { "/images/setting_mode_language", true, false, ".png" },
+    { "/images/setting_mode_detailsetting", true, false, ".png" },
+    { "/images/setting_mode_test", true, false, ".png" },
+    { "/images/setting_mode_record", true, false, ".png" },
+    { "/images/setting_title", true, false, ".png" },
     { "/images/exit_bt", true, false, ".png" }
 #endif
 };
 static const preRenderImageInfo_t ManualmodePreRenderImages[] =
 {
+    { "/images/manual_menu", true, false, ".png" },
     { "/images/manualmode_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" },
-    { "/images/manual_menu", true, false, ".png" }
+    { "/images/exit_bt", true, false, ".png" }
 };
 static const preRenderImageInfo_t MemorymodePreRenderImages[] =
 {
-    { "/images/memorymode_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" },
     { "/images/memory_title_line", true, false, ".png" },
     { "/images/memory_box", true, false, ".png" },
+    { "/images/delete", true, false, ".png" },
+    { "/images/ok", true, false, ".png" },
+    { "/images/exit_bt", true, false, ".png" },
     { "/images/memory_left", false, false, ".png" },
     { "/images/memory_right", false, false, ".png" },
-    { "/images/ok", true, false, ".png" },
-    { "/images/delete", true, false, ".png" }
+    { "/images/memorymode_title", true, false, ".png" }
 };
 static const preRenderImageInfo_t AutodrymodePreRenderImages[] =
 {
+    { "/images/auto_dry_circle_basic", false, false, ".png" },
+    { "/images/keypad", true, false, ".png" },
+    { "/images/tempbox", true, true, ".png" },
+    { "/images/auto_dry_circle_txt", true, true, ".png" },
+    { "/images/blackout", true, false, ".png" },
+    { "/images/auto_dry_time_box", true, false, ".png" },
     { "/images/autodrymode_title", true, false, ".png" },
     { "/images/exit_bt", true, false, ".png" },
-    { "/images/auto_dry_circle_basic", false, false, ".png" },
-    { "/images/auto_dry_circle_txt", true, true, ".png" },
-    { "/images/auto_dry_time_box", true, false, ".png" },
-    { "/images/tempbox", true, true, ".png" },
-    { "/images/start_bt", true, false, ".png" },
-    { "/images/blackout", true, false, ".png" },
-    { "/images/keypad", true, false, ".png" }
+    { "/images/start_bt", true, false, ".png" }
 };
 static const preRenderImageInfo_t AutomodestartPreRenderImages[] =
 {
+    { "/images/tempbox", true, true, ".png" },
+    { "/images/blackout", true, false, ".png" },
+    { "/images/auto_mode_start_box_time", true, false, ".png" },
     { "/images/automode_title", true, false, ".png" },
     { "/images/stop_bt", true, false, ".png" },
-    { "/images/tempbox", true, true, ".png" },
-    { "/images/auto_mode_start_box_time", true, false, ".png" },
-    { "/images/freeze_gif", false, false, ".png" },
-    { "/images/defrost_gif", false, false, ".png" },
-    { "/images/fermentation1_gif", false, false, ".png" },
     { "/images/fermentation2_gif", false, false, ".png" },
-    { "/images/blackout", true, false, ".png" }
+    { "/images/fermentation1_gif", false, false, ".png" },
+    { "/images/freeze_gif", false, false, ".png" },
+    { "/images/defrost_gif", false, false, ".png" }
 };
 static const preRenderImageInfo_t AutomodeendPreRenderImages[] =
 {
-    { "/images/auto_mode_end_bgi", true, false, ".jpg" },
     { "/images/auto_mode_end_bgi1", true, false, ".jpg" },
+    { "/images/auto_mode_end_bgi", true, false, ".jpg" },
+    { "/images/blackout", true, false, ".png" },
     { "/images/automode_title", true, false, ".png" },
-    { "/images/stop_bt", true, false, ".png" },
-    { "/images/blackout", true, false, ".png" }
+    { "/images/stop_bt", true, false, ".png" }
 };
 static const preRenderImageInfo_t ManualmodestartPreRenderImages[] =
 {
-    { "/images/manualmode_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" },
-    { "/images/start_bt", true, false, ".png" },
-    { "/images/stop_bt", true, false, ".png" },
-    { "/images/tempbox", true, true, ".png" },
     { "/images/manual_freeze_circle_basic", false, false, ".png" },
-    { "/images/manual_defrost_circle_basic", false, false, ".png" },
     { "/images/manual_fermentation2_circle_basic", false, false, ".png" },
-    { "/images/manual_freeze_circle_txt", true, true, ".png" },
-    { "/images/manual_defrost_circle_txt", true, true, ".png" },
+    { "/images/manual_defrost_circle_basic", false, false, ".png" },
+    { "/images/tempbox", true, true, ".png" },
     { "/images/manual_fermentation1_circle_txt", true, true, ".png" },
     { "/images/manual_fermentation2_circle_txt", true, true, ".png" },
+    { "/images/blackout", true, false, ".png" },
+    { "/images/manual_freeze_circle_txt", true, true, ".png" },
+    { "/images/manual_defrost_circle_txt", true, true, ".png" },
+    { "/images/manualmode_title", true, false, ".png" },
     { "/images/manual_freeze_gif", false, false, ".png" },
-    { "/images/manual_defrost_gif", false, false, ".png" },
     { "/images/manual_fermentation1_gif", false, false, ".png" },
+    { "/images/exit_bt", true, false, ".png" },
     { "/images/manual_fermentation2_gif", false, false, ".png" },
-    { "/images/blackout", true, false, ".png" }
+    { "/images/start_bt", true, false, ".png" },
+    { "/images/stop_bt", true, false, ".png" },
+    { "/images/manual_defrost_gif", false, false, ".png" }
 };
 static const preRenderImageInfo_t SettingmodedetailsettingPreRenderImages[] =
 {
 #if UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE
     { "/images/advancedsetting", true, false, ".jpg" }
 #else
-    { "/images/detail_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" },
-    { "/images/detail_temp_bt", true, false, ".png" },
     { "/images/detail_humidity_bt", true, false, ".png" },
     { "/images/detail_time_bt", true, false, ".png" },
-    { "/images/detail_damper_bt", true, false, ".png" },
     { "/images/detail_defrost_bt", true, false, ".png" },
-    { "/images/detail_reset_bt", true, false, ".png" }
+    { "/images/detail_temp_bt", true, false, ".png" },
+    { "/images/detail_damper_bt", true, false, ".png" },
+    { "/images/detail_reset_bt", true, false, ".png" },
+    { "/images/detail_title", true, false, ".png" },
+    { "/images/exit_bt", true, false, ".png" }
 #endif
 };
 static const preRenderImageInfo_t SettingmodedegreePreRenderImages[] =
 {
-    { "/images/symbol_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" },
-    { "/images/degree_bt_c_off", false, false, ".png" },
     { "/images/degree_bt_c_on", false, false, ".png" },
+    { "/images/degree_bt_c_off", false, false, ".png" },
+    { "/images/degree_bt_f_on", false, false, ".png" },
     { "/images/degree_bt_f_off", false, false, ".png" },
-    { "/images/degree_bt_f_on", false, false, ".png" }
+    { "/images/symbol_title", true, false, ".png" },
+    { "/images/exit_bt", true, false, ".png" }
 };
 static const preRenderImageInfo_t SettingmoderecordPreRenderImages[] =
 {
-    { "/images/record_title", true, false, ".png" },
-    { "/images/deleteall_bt", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" },
     { "/images/setting_record_chart_title", true, false, ".png" },
-    { "/images/setting_record_chart_box", false, true, ".png" }
+    { "/images/setting_record_chart_box", false, true, ".png" },
+    { "/images/deleteall_bt", true, false, ".png" },
+    { "/images/record_title", true, false, ".png" },
+    { "/images/exit_bt", true, false, ".png" }
 };
 static const preRenderImageInfo_t SettingmodetestPreRenderImages[] =
 {
+    { "/images/testmode_box", true, false, ".png" },
+    { "/images/test_error_check_im", false, false, ".png" },
     { "/images/test_title", true, false, ".png" },
     { "/images/exit_bt", true, false, ".png" },
-    { "/images/testmode_box", true, false, ".jpg" },
-    { "/images/test_comp_off", true, false, ".png" },
-    { "/images/test_roomfan_off", true, false, ".png" },
-    { "/images/test_fireheater_off", true, false, ".png" },
-    { "/images/test_humidityheater_off", true, false, ".png" },
-    { "/images/test_water_off", true, false, ".png" },
     { "/images/test_defrost_off", true, false, ".png" },
-    { "/images/test_led_off", true, false, ".png" },
+    { "/images/test_fireheater_off", true, false, ".png" },
     { "/images/test_cabinetheater_off", true, false, ".png" },
-    { "/images/test_damper_off", true, false, ".png" },
-    { "/images/test_error_check_im", false, false, ".png" }
+    { "/images/test_humidityheater_off", true, false, ".png" },
+    { "/images/test_comp_off", true, false, ".png" },
+    { "/images/test_water_off", true, false, ".png" },
+    { "/images/test_led_off", true, false, ".png" },
+    { "/images/test_roomfan_off", true, false, ".png" },
+    { "/images/test_damper_off", true, false, ".png" }
 };
 static const preRenderImageInfo_t SettingmodetimePreRenderImages[] =
 {
-    { "/images/detail_time_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" },
+    { "/images/setting_time_clock", true, false, ".png" },
     { "/images/setting_time_date", true, false, ".png" },
-    { "/images/setting_time_clock", true, false, ".png" }
+    { "/images/detail_time_title", true, false, ".png" },
+    { "/images/exit_bt", true, false, ".png" }
 };
 static const preRenderImageInfo_t SettingmodelanguagePreRenderImages[] =
 {
-    { "/images/language_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" },
-    { "/images/language_korean_off", false, false, ".png" },
-    { "/images/language_korean_on", false, false, ".png" },
-    { "/images/language_china_off", false, false, ".png" },
-    { "/images/language_china_on", false, false, ".png" },
+    { "/images/language_english_on", false, false, ".png" },
     { "/images/language_english_off", false, false, ".png" },
-    { "/images/language_english_on", false, false, ".png" }
+    { "/images/language_korean_on", false, false, ".png" },
+    { "/images/language_korean_off", false, false, ".png" },
+    { "/images/language_china_on", false, false, ".png" },
+    { "/images/language_title", true, false, ".png" },
+    { "/images/language_china_off", false, false, ".png" },
+    { "/images/exit_bt", true, false, ".png" }
 };
 static const preRenderImageInfo_t SettingmodemanualPreRenderImages[] =
 {
@@ -213,32 +213,32 @@ static const preRenderImageInfo_t SettingmodedefrostPreRenderImages[] =
 };
 static const preRenderImageInfo_t DetailsettingtempPreRenderImages[] =
 {
-    { "/images/detail_temp_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" },
     { "/images/detail_temp_2_off", true, true, ".png" },
     { "/images/detail_temp_3_off", true, true, ".png" },
     { "/images/detail_temp_4_off", true, true, ".png" },
     { "/images/detail_temp_5_off", true, true, ".png" },
-    { "/images/left_bt", false, false, ".png" },
-    { "/images/right_bt", false, false, ".png" }
+    { "/images/detail_temp_title", true, false, ".png" },
+    { "/images/exit_bt", true, false, ".png" },
+    { "/images/right_bt", false, false, ".png" },
+    { "/images/left_bt", false, false, ".png" }
 };
 static const preRenderImageInfo_t DetailsettinghumidityPreRenderImages[] =
 {
-    { "/images/detail_humidity_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" },
-    { "/images/detail_humidity_1_off", true, false, ".png" },
+    { "/images/detail_humidity_3_off", true, false, ".png" },
     { "/images/detail_humidity_2_off", true, false, ".png" },
-    { "/images/detail_humidity_3_off", true, false, ".png" }
+    { "/images/detail_humidity_1_off", true, false, ".png" },
+    { "/images/detail_humidity_title", true, false, ".png" },
+    { "/images/exit_bt", true, false, ".png" }
 };
 static const preRenderImageInfo_t DetailsettingtimePreRenderImages[] =
 {
-    { "/images/detail_time_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" },
-    { "/images/detail_time_1_off", true, false, ".png" },
-    { "/images/detail_time_2_off", true, false, ".png" },
     { "/images/detail_time_3_off", true, false, ".png" },
+    { "/images/detail_time_5_off", true, false, ".png" },
+    { "/images/detail_time_2_off", true, false, ".png" },
+    { "/images/detail_time_1_off", true, false, ".png" },
     { "/images/detail_time_4_off", true, false, ".png" },
-    { "/images/detail_time_5_off", true, false, ".png" }
+    { "/images/detail_time_title", true, false, ".png" },
+    { "/images/exit_bt", true, false, ".png" }
 };
 static const preRenderImageInfo_t DetailsettingdamperPreRenderImages[] =
 {
@@ -247,11 +247,11 @@ static const preRenderImageInfo_t DetailsettingdamperPreRenderImages[] =
 };
 static const preRenderImageInfo_t DetailsettingdefrostPreRenderImages[] =
 {
-    { "/images/detail_defrost_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" },
-    { "/images/detail_defrost_1_off", true, false, ".png" },
     { "/images/detail_defrost_2_off", true, true, ".png" },
-    { "/images/detail_defrost_3_off", true, false, ".png" }
+    { "/images/detail_defrost_1_off", true, false, ".png" },
+    { "/images/detail_defrost_3_off", true, false, ".png" },
+    { "/images/detail_defrost_title", true, false, ".png" },
+    { "/images/exit_bt", true, false, ".png" }
 };
 // NOTE : preRenderTarget에 적어둔 순서대로 preRendering이 진행, 자주 쓰이는 페이지를 앞쪽에 배치하는 것이 좋음. (ex: PAGE_MAIN, PAGE_AUTOMODE, PAGE_MANUALMODE 등)
 const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
@@ -265,9 +265,9 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
         .preRenderTargetPages = (const pageId_t[])
         {
             PAGE_AUTOMODE,
+            PAGE_MEMORYMODE,
             PAGE_MANUALMODE,
             PAGE_AUTODRYMODE,
-            PAGE_MEMORYMODE,
             PAGE_SETTINGMODE
         },
         .preRenderTargetPageCount = 5,
