@@ -13,7 +13,7 @@ PSRAM_MEM_SLAB_AUDIO,   PSRAM,           , 0x001000
 PSRAM_MEM_SLAB_ENCODE,  PSRAM,           , 0x001000
 PSRAM_MEM_SLAB_DISPLAY, PSRAM,           , 0x280000
 CP_PSRAM_HEAP,          PSRAM,           , 0x020000
-AP_PSRAM_HEAP,          PSRAM,           , 0xD1D000
+AP_PSRAM_HEAP,          PSRAM,           , 0x31D000
+#activate when prerender algorithm is ready : reduce AP_PSRAM_HEAP
+AP_PSRAM_GRAPHICS,      PSRAM,           , 0xA00000
 AP_PSRAM_SECTION,       PSRAM,           , 0x040000
-#AP_PSRAM_PRERENDER,    PSRAM,           , 0x  #activate when prerender algorithm is ready : reduce AP_PSRAM_HEAP
-#AP_PSRAM_PRERENDER is last region : so the size is calculated by PSRAM_CAPCAITY_SIZE - other allocated size

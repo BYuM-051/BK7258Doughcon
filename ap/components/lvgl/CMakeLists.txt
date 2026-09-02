@@ -171,6 +171,7 @@ if(CONFIG_LVGL)
 		set(incs
 			lvgl_v9/.
 			lvgl_v9/porting
+			${PROJECT_DIR}/ap/memory
 		)
 
 		set(srcs
@@ -491,3 +492,8 @@ if (CONFIG_LVGL)
 target_compile_options(${COMPONENT_LIB} PRIVATE -O3)
 endif()
 
+if(CONFIG_LVGL_V9)
+	target_compile_definitions(${COMPONENT_LIB} PRIVATE
+		LODEPNG_NO_COMPILE_ALLOCATORS
+	)
+endif()

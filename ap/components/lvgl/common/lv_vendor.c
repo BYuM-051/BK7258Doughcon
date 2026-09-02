@@ -9,6 +9,8 @@
 #include "lv_vendor.h"
 #include "frame_buffer.h"
 
+#include "gfx_heap.h"
+
 #define TAG "lvgl"
 
 #define LOGI(...) BK_LOGW(TAG, ##__VA_ARGS__)
@@ -221,6 +223,8 @@ bk_err_t lv_vendor_init(lv_vnd_config_t *config)
     }
 
     lv_init();
+
+    gfx_heap_init(); // Change lvgl cache allocator to the graphics heap allocator
 
     lv_port_disp_init();
 

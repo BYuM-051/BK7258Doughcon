@@ -4,11 +4,13 @@ set(incs .
     /images
     ./screens
     ./ui
+    ./memory
     )
 
 set(srcs
     ap_main.c
     lvgl_vfs_init.c
+    ./memory/gfx_heap.c
     )
 
 file(GLOB_RECURSE UI_EXTRA_SRCS "ui/*.c")
