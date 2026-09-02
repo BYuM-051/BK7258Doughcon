@@ -48,7 +48,7 @@
  *    나가기 버튼을 /images/advancedsetting.jpg(+_china/_english) 1장으로 대체.
  * 0: 기존처럼 bg.jpg + 개별 이미지 8장 사용.
  * 주의: 위 두 옵션과 동일한 복원 절차 필요. */
-#define UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE   1
+#define UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE   0
 
 /* 1: password 팝업 키패드 12장(pop_keypad0~9, back, alldel)을 하나의 canvas에
  *    1회만 decode해 스프라이트시트처럼 재사용 (버튼별로 lv_image_set_offset()
