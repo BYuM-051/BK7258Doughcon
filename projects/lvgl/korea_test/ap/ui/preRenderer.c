@@ -105,7 +105,7 @@ void uiPagePreRenderTask(lv_timer_t *timer)
     {
         goto fatal;
     }
-    if(xQueueReceive(preRendererQueue, &pageId, 0) == pdPASS)
+    if(xQueuePeek(preRendererQueue, &pageId, 0) == pdPASS)
     {
         if(pageId < PAGE_MAIN || pageId >= PAGE_COUNT ||
            preRenderPageState[pageId].config == NULL ||
@@ -120,8 +120,7 @@ void uiPagePreRenderTask(lv_timer_t *timer)
         if(result == RENDERER_FUNC_NOT_DONE)
         {
             currentPreRenderPage = pageId;
-            xQueueSendToBack(preRendererQueue, &pageId, 0);
-            bk_printf(TAG "[SCREEN] Pre-rendering page %d is not finished yet, re-queueing\n", pageId);
+            bk_printf(TAG "[SCREEN] Pre-rendering page %d is not finished yet\n", pageId);
         }
         else if(result == RENDERER_FUNC_FAILED)
         {
@@ -130,6 +129,7 @@ void uiPagePreRenderTask(lv_timer_t *timer)
         }
         else
         {
+            xQueueReceive(preRendererQueue, &pageId, 0);
             currentPreRenderPage = PAGE_NONE;
         }
     }
