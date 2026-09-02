@@ -220,9 +220,7 @@ create_children:
 
     // ImageView: title
     bk_ui->settingmodetest_title = lv_image_create(bk_ui->settingmodetest);
-#if !UI_SETTINGMODETEST_DEFERRED_LOAD_ENABLE
     _img_set_src_timed(bk_ui->settingmodetest_title, "/images/test_title.png");
-#endif
     lv_obj_set_pos(bk_ui->settingmodetest_title, 0, 10);
     lv_obj_set_size(bk_ui->settingmodetest_title, 380, 80);
     lv_image_set_inner_align(bk_ui->settingmodetest_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -239,17 +237,13 @@ create_children:
 
     // ImageView: imageview3
     bk_ui->settingmodetest_imageview3 = lv_image_create(bk_ui->settingmodetest);
-#if !UI_SETTINGMODETEST_DEFERRED_LOAD_ENABLE
     _img_set_src_timed(bk_ui->settingmodetest_imageview3, "/images/exit_bt.png");
-#endif
     lv_obj_set_pos(bk_ui->settingmodetest_imageview3, 825, 13);
     lv_obj_set_size(bk_ui->settingmodetest_imageview3, 179, 74);
 
     // ImageView: imageview4
     bk_ui->settingmodetest_imageview4 = lv_image_create(bk_ui->settingmodetest);
-#if !UI_SETTINGMODETEST_DEFERRED_LOAD_ENABLE
-    _img_set_src_timed(bk_ui->settingmodetest_imageview4, "/images/testmode_box.jpg");
-#endif
+    _img_set_src_timed(bk_ui->settingmodetest_imageview4, "/images/testmode_box.png");
     lv_obj_set_pos(bk_ui->settingmodetest_imageview4, 20, 100);
     lv_obj_set_size(bk_ui->settingmodetest_imageview4, 984, 433);
 
@@ -547,16 +541,12 @@ create_children:
     lv_obj_set_size(bk_ui->settingmodetest_test_error_check_im, 249, 74);
     _img_set_src_deferred(bk_ui->settingmodetest_test_error_check_im, "/images/test_error_check_im.png");
 
-#if UI_SETTINGMODETEST_DEFERRED_LOAD_ENABLE
     ui_lang_apply_settingmodetest(bk_ui);  /* fallback: 파일 경로 설정 (canvas 없을 때) */
-#if UI_SETTINGMODETEST_PREWARM_ENABLE
     /* canvas 버퍼가 준비됐으면 raw 픽셀로 덮어씀 → decode 없이 즉시 렌더.
      * keep-alive라 이 오브젝트 생성은 처음 한 번뿐이지만, canvas는 매 진입마다
      * settingmodetest_apply_bg()(settingmodetest_cb.c의 SCREEN_LOAD_START)가
      * 다시 보장/재적용하므로 canvas가 나갔다 들어왔다 free/재decode돼도 안전하다. */
-    settingmodetest_apply_bg(bk_ui);
-#endif
-#endif
+    // settingmodetest_apply_bg(bk_ui);
 }
 
 rendererFuncStatus_t init_page_settingmodetest_with_step(bk_lv_ui_t *bk_ui)
