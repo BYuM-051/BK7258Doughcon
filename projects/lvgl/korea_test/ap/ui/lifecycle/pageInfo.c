@@ -783,6 +783,23 @@ preRendererPageState_t preRenderPageState[PAGE_COUNT] =
     },
 };
 
+bool getImageFullPath(const char *basePath, bool hasLanguageVariant, bool hasDegreeVariant, const char *extension, char *imagePath, size_t imagePathSize)
+{
+    if(basePath == NULL || extension == NULL || imagePath == NULL || *basePath == '\0')
+    {
+        bk_printf(TAG "[IMAGE_PATH] getImageFullPath: Invalid input\n");
+        return false;
+    }
+    int currentlanguage = settings_get_int("LANGUAGE");
+    #define _DEGREE_F_STR  "\xc2\xb0""F"
+    int currentDegreeUnit = (strcmp(settings_get_str("Degree"), _DEGREE_F_STR) == 0) ? 1 : 0;
+    const char *languageSuffix = hasLanguageVariant ? (currentlanguage == 1 ? "_china" : (currentlanguage == 2 ? "_english" : "")) : "";
+    const char *degreeSuffix = hasDegreeVariant ? (currentDegreeUnit == 1 ? "_f" : "") : "";
+
+    int ret =snprintf(imagePath, imagePathSize, "%s%s%s%s", basePath, degreeSuffix, languageSuffix, extension);
+    return ret >= 0 && (size_t)ret < imagePathSize;
+}
+
 pageLifecycleFuncWithStep_t getPageInitFunc(pageId_t pageId)
 {
     bk_printf(TAG "[SCREEN] getPageInitFunc(%d)\n", pageId);

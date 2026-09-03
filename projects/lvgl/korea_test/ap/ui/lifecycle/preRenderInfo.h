@@ -187,10 +187,12 @@ extern rendererFuncStatus_t init_page_neurosys_with_step(bk_lv_ui_t *bk_ui);
 extern void destroy_page_neurosys(bk_lv_ui_t *bk_ui);
 //=============================================
 
-pageLifecycleFuncWithStep_t getPageInitFunc(pageId_t pageId);
-pageLifecycleFunc_t getPageDeinitFunc(pageId_t pageId);
+extern pageLifecycleFuncWithStep_t getPageInitFunc(pageId_t pageId);
+extern pageLifecycleFunc_t getPageDeinitFunc(pageId_t pageId);
 
-extern rendererFuncStatus_t init_shared_image_asset();
+extern bool getImageFullPath(const char *basePath, bool hasLanguageVariant, bool hasDegreeVariant, const char *extension, char *imagePath, size_t imagePathSize);
+
+extern rendererFuncStatus_t init_shared_image_asset(void);
 extern rendererFuncStatus_t set_shared_image_asset(lv_obj_t *imageObj, sharedImageAssetId_t assetId);
 
 extern bool isPageIdValid(pageId_t pageId);
