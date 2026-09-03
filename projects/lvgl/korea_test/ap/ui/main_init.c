@@ -61,21 +61,21 @@ void destroy_page_main(bk_lv_ui_t *bk_ui) {
     for(uint32_t i = 0; i < imageCount; i++)
     {
         const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_MAIN].preRenderImageInfo[i];
-        const char *languageSuffix = imageInfo->hasLanguageVariant ?
-                                     (settings_get_int("LANGUAGE") == 1 ? "_china" :
-                                      settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
-        const char *degreeSuffix = imageInfo->hasDegreeVariant &&
-                                   strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
-        const char *extension = imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
         char imagePath[128] = {0};
-
-        snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
-                 imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
-        lv_image_cache_drop(imagePath);
+        if(getImageFullPath(imageInfo->imagePath, imageInfo->hasLanguageVariant, imageInfo->hasDegreeVariant, imageInfo->fileExtension, imagePath, sizeof(imagePath)))
+        {
+            lv_image_cache_drop(imagePath);
+        }
     }
 }
 
+// NOTE : deprecated, use pre-rendering mechanism instead
 void init_page_main(bk_lv_ui_t * bk_ui) 
+{
+    lv_delay_ms(2000);
+    LV_ASSERT(0);
+}
+/* void init_page_main(bk_lv_ui_t * bk_ui) 
 {
     uint32_t _t_start = lv_tick_get();
     bk_printf(TAG "[SCREEN] init_page_main() called\n");
@@ -229,7 +229,7 @@ void init_page_main(bk_lv_ui_t * bk_ui)
     // lv_obj_set_style_text_opa(bk_ui->main_dclock_1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     // lv_obj_set_style_text_font(bk_ui->main_dclock_1, &lv_font_scdream_regular_22, LV_PART_MAIN | LV_STATE_DEFAULT);
     // lv_obj_set_style_text_align(bk_ui->main_dclock_1, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
-}
+} */
 
 rendererFuncStatus_t init_page_main_with_step(bk_lv_ui_t *bk_ui)
 {
@@ -248,8 +248,6 @@ rendererFuncStatus_t init_page_main_with_step(bk_lv_ui_t *bk_ui)
 
             bk_printf(TAG "[RENDER][MAIN] start tick=%lu\n", (unsigned long)renderStartTick);
 
-            ui_lang_reset_main_cache();
-
             bk_ui->main = lv_obj_create(preRenderRoot);
             lv_obj_remove_style_all(bk_ui->main);
             lv_obj_add_flag(bk_ui->main, LV_OBJ_FLAG_HIDDEN);
@@ -267,6 +265,7 @@ rendererFuncStatus_t init_page_main_with_step(bk_lv_ui_t *bk_ui)
         case RENDER_STEP_CREATE_CHILD :
         {
             uint32_t stepStartTick = lv_tick_get();
+            char fullPath[128];
 
             bk_printf(TAG "[RENDER][MAIN] CREATE_CHILD start\n");
 
@@ -284,7 +283,8 @@ rendererFuncStatus_t init_page_main_with_step(bk_lv_ui_t *bk_ui)
 
             // ImageView: imageview2
             bk_ui->main_imageview2 = lv_image_create(bk_ui->main);
-            _img_set_src_timed(bk_ui->main_imageview2, "/images/automode.png");
+            getImageFullPath("/images/automode", true, false, ".png", fullPath, sizeof(fullPath));
+            lv_image_set_src(bk_ui->main_imageview2, fullPath);
             lv_obj_set_pos(bk_ui->main_imageview2, 33, 108);
             lv_obj_set_size(bk_ui->main_imageview2, 288, 158);
 
@@ -299,7 +299,8 @@ rendererFuncStatus_t init_page_main_with_step(bk_lv_ui_t *bk_ui)
 
             // ImageView: imageview4
             bk_ui->main_imageview4 = lv_image_create(bk_ui->main);
-            _img_set_src_timed(bk_ui->main_imageview4, "/images/manualmode.png");
+            getImageFullPath("/images/manualmode", true, false, ".png", fullPath, sizeof(fullPath));
+            lv_image_set_src(bk_ui->main_imageview4, fullPath);
             lv_obj_set_pos(bk_ui->main_imageview4, 368, 108);
             lv_obj_set_size(bk_ui->main_imageview4, 288, 158);
 
@@ -314,7 +315,8 @@ rendererFuncStatus_t init_page_main_with_step(bk_lv_ui_t *bk_ui)
 
             // ImageView: imageview6
             bk_ui->main_imageview6 = lv_image_create(bk_ui->main);
-            _img_set_src_timed(bk_ui->main_imageview6, "/images/autodrymode.png");
+            getImageFullPath("/images/autodrymode", true, false, ".png", fullPath, sizeof(fullPath));
+            lv_image_set_src(bk_ui->main_imageview6, fullPath);
             lv_obj_set_pos(bk_ui->main_imageview6, 703, 108);
             lv_obj_set_size(bk_ui->main_imageview6, 288, 158);
 
@@ -329,7 +331,8 @@ rendererFuncStatus_t init_page_main_with_step(bk_lv_ui_t *bk_ui)
 
             // ImageView: imageview8
             bk_ui->main_imageview8 = lv_image_create(bk_ui->main);
-            _img_set_src_timed(bk_ui->main_imageview8, "/images/memorymode.png");
+            getImageFullPath("/images/memorymode", true, false, ".png", fullPath, sizeof(fullPath));
+            lv_image_set_src(bk_ui->main_imageview8, fullPath);
             lv_obj_set_pos(bk_ui->main_imageview8, 200, 323);
             lv_obj_set_size(bk_ui->main_imageview8, 288, 158);
 
@@ -344,11 +347,10 @@ rendererFuncStatus_t init_page_main_with_step(bk_lv_ui_t *bk_ui)
 
             // ImageView: imageview10
             bk_ui->main_imageview10 = lv_image_create(bk_ui->main);
-            _img_set_src_timed(bk_ui->main_imageview10, "/images/settingmode.png");
+            getImageFullPath("/images/settingmode", true, false, ".png", fullPath, sizeof(fullPath));
+            lv_image_set_src(bk_ui->main_imageview10, fullPath);
             lv_obj_set_pos(bk_ui->main_imageview10, 536, 323);
             lv_obj_set_size(bk_ui->main_imageview10, 288, 158);
-
-            ui_lang_apply_main(bk_ui);
 
             bk_printf(TAG "[RENDER][MAIN] CREATE_CHILD done elapsed=%lu ms total=%lu ms\n",
                       (unsigned long)lv_tick_elaps(stepStartTick),
@@ -380,39 +382,30 @@ rendererFuncStatus_t init_page_main_with_step(bk_lv_ui_t *bk_ui)
             {
                 const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_MAIN].preRenderImageInfo[currentImageStep];
                 char imagePath[128] = {0};
-                const char *languageSuffix = imageInfo->hasLanguageVariant ?
-                                             (settings_get_int("LANGUAGE") == 1 ? "_china" :
-                                              settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
-                const char *degreeSuffix = imageInfo->hasDegreeVariant &&
-                                           strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
-                const char *extension = imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
-                uint32_t imageStartTick = lv_tick_get();
-                snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
-                         imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
+                lv_result_t res = LV_RESULT_INVALID;
+                if(getImageFullPath(imageInfo->imagePath, imageInfo->hasLanguageVariant, imageInfo->hasDegreeVariant, imageInfo->fileExtension, imagePath, sizeof(imagePath)))
+                {
+                    res = lv_image_decoder_prewarm(imagePath);
+                }
 
                 bk_printf(TAG "[PREWARM][MAIN] image %lu/%lu start: %s\n",
                           (unsigned long)(currentImageStep + 1),
                           (unsigned long)imageCount,
                           imagePath);
 
-                lv_result_t res = lv_image_decoder_prewarm(imagePath);
-                uint32_t imageElapsed = lv_tick_elaps(imageStartTick);
-
                 if(res != LV_RESULT_OK)
                 {
-                    bk_printf(TAG "[PREWARM][MAIN] image %lu/%lu FAILED res=%d elapsed=%lu ms path=%s\n",
+                    bk_printf(TAG "[PREWARM][MAIN] image %lu/%lu FAILED res=%d ms path=%s\n",
                               (unsigned long)(currentImageStep + 1),
                               (unsigned long)imageCount,
                               (int)res,
-                              (unsigned long)imageElapsed,
                               imagePath);
                     return RENDERER_FUNC_FAILED;
                 }
 
-                bk_printf(TAG "[PREWARM][MAIN] image %lu/%lu OK elapsed=%lu ms path=%s\n",
+                bk_printf(TAG "[PREWARM][MAIN] image %lu/%lu OK ms path=%s\n",
                           (unsigned long)(currentImageStep + 1),
                           (unsigned long)imageCount,
-                          (unsigned long)imageElapsed,
                           imagePath);
 
                 currentImageStep++;

@@ -664,30 +664,30 @@ void ui_lang_apply_timebar(bk_lv_ui_t *bk_ui)
 }
 
 /* ── main ───────────────────────────────────────────────────────────── */
-static int s_last_key_main = -1;
+// static int s_last_key_main = -1;
 
-void ui_lang_reset_main_cache(void)
-{
-    s_last_key_main = -1;
-}
+// void ui_lang_reset_main_cache(void)
+// {
+//     s_last_key_main = -1;
+// }
 
-void ui_lang_apply_main(bk_lv_ui_t *bk_ui)
-{
-    int lang, is_f;
-    _get_state(&lang, &is_f);
-    int _key_main = lang * 10 + is_f;
-    if (_key_main == s_last_key_main) return;
-    s_last_key_main = _key_main;
-#if UI_MAIN_COMBINED_BG_ENABLE
-    _L(bk_ui->main_bg,         "/images/main",        ".jpg");
-#else
-    _L(bk_ui->main_imageview2,  "/images/automode",    ".png");
-    _L(bk_ui->main_imageview4,  "/images/manualmode",  ".png");
-    _L(bk_ui->main_imageview6,  "/images/autodrymode", ".png");
-    _L(bk_ui->main_imageview8,  "/images/memorymode",  ".png");
-    _L(bk_ui->main_imageview10, "/images/settingmode", ".png");
-#endif
-}
+// void ui_lang_apply_main(bk_lv_ui_t *bk_ui)
+// {
+//     int lang, is_f;
+//     _get_state(&lang, &is_f);
+//     int _key_main = lang * 10 + is_f;
+//     if (_key_main == s_last_key_main) return;
+//     s_last_key_main = _key_main;
+// #if UI_MAIN_COMBINED_BG_ENABLE
+//     _L(bk_ui->main_bg,         "/images/main",        ".jpg");
+// #else
+//     _L(bk_ui->main_imageview2,  "/images/automode",    ".png");
+//     _L(bk_ui->main_imageview4,  "/images/manualmode",  ".png");
+//     _L(bk_ui->main_imageview6,  "/images/autodrymode", ".png");
+//     _L(bk_ui->main_imageview8,  "/images/memorymode",  ".png");
+//     _L(bk_ui->main_imageview10, "/images/settingmode", ".png");
+// #endif
+// }
 
 /* ── popupcaution ───────────────────────────────────────────────────── */
 static int s_last_key_popupcaution = -1;
@@ -894,7 +894,7 @@ void ui_lang_apply_all(bk_lv_ui_t *bk_ui)
     do { if (bk_ui->screen && lv_obj_is_valid(bk_ui->screen)) fn(bk_ui); } while(0)
 
     _A(timebar,                  ui_lang_apply_timebar);
-    _A(main,                     ui_lang_apply_main);
+    // _A(main,                     ui_lang_apply_main);
     _A(manualmode,               ui_lang_apply_manualmode);
     _A(manualmodestart,          ui_lang_apply_manualmodestart);
     _A(automode,                 ui_lang_apply_automode);

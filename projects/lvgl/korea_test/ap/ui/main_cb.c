@@ -302,45 +302,22 @@ void main_settingmode_event_cb(lv_event_t *e)
 
 void main_load_start_event_cb(lv_event_t *e)
 {
-    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-
     state->auto_mode = false;
-    ui_lang_apply_main(bk_ui);
+    return;
 }
 
 void main_loaded_event_cb(lv_event_t *e)
 {
-#if !(UI_PRENDERING_ENABLE)
-    _periodic_cache_drop_if_due();
-    _sm_prewarm_start();
-    automode_mm_prewarm_start();
-    _am_prewarm_start();
-#endif /* NOT UI_PRENDERING_ENABLE */
+    return;
 }
 
 void main_unload_start_event_cb(lv_event_t *e)
 {
-#if !(UI_PRENDERING_ENABLE)
-    if (s_sm_prewarm_timer)
-    {
-        lv_timer_delete(s_sm_prewarm_timer);
-        s_sm_prewarm_timer = NULL;
-    }
-
-    if (s_sm_prewarm_dummy)
-    {
-        lv_obj_del(s_sm_prewarm_dummy);
-        s_sm_prewarm_dummy = NULL;
-    }
-
-    s_sm_prewarm_idx = 0;
-
-    automode_mm_prewarm_cancel();
-    main_automode_prewarm_reset();
-#endif /* NOT UI_PRENDERING_ENABLE */
+    return;
 }
 
 void main_unloaded_event_cb(lv_event_t *e)
 {
+    return;
 }

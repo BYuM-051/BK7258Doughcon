@@ -63,8 +63,8 @@ void ui_lang_apply_detailsettingdamper(bk_lv_ui_t *bk_ui);
 void ui_lang_reset_detailsettingdamper_cache(void);
 void ui_lang_apply_timebar(bk_lv_ui_t *bk_ui);
 void ui_lang_reset_timebar_cache(void);  /* timebar는 destroy 안 되므로 실제 호출처는 없음 */
-void ui_lang_apply_main(bk_lv_ui_t *bk_ui);
-void ui_lang_reset_main_cache(void);
+// void ui_lang_apply_main(bk_lv_ui_t *bk_ui);
+// void ui_lang_reset_main_cache(void);
 void ui_lang_apply_popupcaution(bk_lv_ui_t *bk_ui);
 void ui_lang_reset_popupcaution_cache(void);
 void ui_lang_apply_popupreset(bk_lv_ui_t *bk_ui);
