@@ -10,10 +10,10 @@
 #include "ui_animations.h"
 #include "ui_lang.h"
 #include "hardware_hal.h"
-#include "preRenderer.h"
+#include "pageManager.h"
 
 #define TAG "[settingmodedetailsetting_cb.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 
@@ -274,8 +274,7 @@ void settingmodedetailsetting_loaded_event_cb(lv_event_t *e)
 
     /* Re-cache reset_popup.png on every entry (including returns from sub-screens).
      * 20 ms delay lets the screen render complete before the decode starts. */
-    ui_page_build_enqueue_task(_rst_prewarm_start,
-                               "reset popup prewarm start");
+    _rst_prewarm_start();
 }
 
 void settingmodedetailsetting_unloaded_event_cb(lv_event_t *e)

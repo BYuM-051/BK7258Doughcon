@@ -34,7 +34,6 @@
 #include "uart_comm.h"
 #include "lv_vendor.h"
 #include <os/os.h>
-#include "preRenderer.h"
 
 /* CN2 확장보드 Lock/Power/Lamp 물리 키 — 공식 key 컴포넌트(CONFIG_BUTTON,
  * multi_button 기반)로 GPIO 27/28/29(회로도 원본 배정, active-low)를 구동.
@@ -44,7 +43,14 @@
 #include "key_adapter.h"
 
 #define TAG "[main_activity.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+#include "pageManager.h"
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
+static pageId_t recoveredPageID = PAGE_NONE;
+pageId_t getRecoveredPageID(void)
+{
+    return recoveredPageID;
+}
 
 static void _toggle_lock(void);
 static void _toggle_lamp(void);
@@ -130,17 +136,52 @@ static void _apply_ui_scale(lv_obj_t *scr)
 // REFATOR : 아마 이거 안쓰는 부분 같은데, 중복 매니저니까 확인해보고 지워도 되면 리팩터링 할 때 지우자
 static void _load_screen(int screen_id)
 {
+#if UI_PRENDERING_ENABLE
+    if(ui_get_current_page_id() != PAGE_NONE)
+    {
+        bk_printf(TAG "[SCREEN] It is not first load, assert program due to unexpected state\n");
+        lv_delay_ms(2000);
+        LV_ASSERT(0);
+    }
+    else
+    {
+        bk_printf(TAG "[SCREEN] No current page, if it is not first load, this might be an issue\n");
+        pageId_t newPageID = PAGE_NONE;
+        switch (screen_id) 
+        {
+            case SCR_MAIN :
+                newPageID = PAGE_MAIN;
+                break;
+            case SCR_AUTOMODE_START :
+                newPageID = PAGE_AUTOMODESTART;
+                break;
+            case SCR_AUTOMODE_END :
+                newPageID = PAGE_AUTOMODEEND;
+                break;
+            case SCR_AUTODRYMODE :
+                newPageID = PAGE_AUTODRYMODE;
+                break;
+            case SCR_MANUAL_START :
+                newPageID = PAGE_MANUALMODESTART;
+                break;
+            case SCR_MANUAL_MODE :
+                newPageID = PAGE_MANUALMODE;
+                break;
+            default :
+                newPageID = PAGE_NONE;
+                break;
+        }
+        bk_printf(TAG "[SCREEN] New page ID determined: %d\n", newPageID);
+        recoveredPageID = newPageID;
+    }
+#else
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     uint32_t _ls_t = lv_tick_get();
     bk_printf(TAG "[SCREEN] _load_screen(%d) start\n", screen_id);
     switch (screen_id) {
         case SCR_MAIN:
-#if UI_PRENDERING_ENABLE
-            ui_page_change(PAGE_MAIN);
-#else
             init_page_main(bk_ui);
             lv_scr_load(bk_ui->main);
-#endif /* UI_PRENDERING_ENABLE */
             _apply_ui_scale(bk_ui->main);
             break;
         // case SCR_MAIN_CHINA:
@@ -152,54 +193,35 @@ static void _load_screen(int screen_id)
         //     lv_scr_load(bk_ui->mainenglish);
             // break;
         case SCR_AUTOMODE_START:
-#if UI_PRENDERING_ENABLE
-            ui_page_change(PAGE_AUTOMODESTART);
-#else
             init_page_automodestart(bk_ui);
             lv_scr_load(bk_ui->automodestart);
-#endif /* UI_PRENDERING_ENABLE */
             _apply_ui_scale(bk_ui->automodestart);
             break;
         case SCR_AUTOMODE_END:
-#if UI_PRENDERING_ENABLE
-            ui_page_change(PAGE_AUTOMODEEND);
-#else
             init_page_automodeend(bk_ui);
             lv_scr_load(bk_ui->automodeend);
-#endif /* UI_PRENDERING_ENABLE */
             _apply_ui_scale(bk_ui->automodeend);
             break;
         case SCR_AUTODRYMODE:
-#if UI_PRENDERING_ENABLE
-            ui_page_change(PAGE_AUTODRYMODE);
-#else
             init_page_autodrymode(bk_ui);
             lv_scr_load(bk_ui->autodrymode);
-#endif /* UI_PRENDERING_ENABLE */
             _apply_ui_scale(bk_ui->autodrymode);
             break;
         case SCR_MANUAL_START:
-#if UI_PRENDERING_ENABLE
-            ui_page_change(PAGE_MANUALMODESTART);
-#else
             init_page_manualmodestart(bk_ui);
             lv_scr_load(bk_ui->manualmodestart);
-#endif /* UI_PRENDERING_ENABLE */
             _apply_ui_scale(bk_ui->manualmodestart);
             break;
         case SCR_MANUAL_MODE:
-#if UI_PRENDERING_ENABLE
-            ui_page_change(PAGE_MANUALMODE);
-#else
             init_page_manualmode(bk_ui);
             lv_scr_load(bk_ui->manualmode);
-#endif /* UI_PRENDERING_ENABLE */
             _apply_ui_scale(bk_ui->manualmode);
             break;
         default:
             break;
     }
     bk_printf(TAG "[SCREEN] _load_screen(%d) done (init+scr_load): %lu ms\n", screen_id, lv_tick_elaps(_ls_t));
+#endif /* UI_PRENDERING_ENABLE */
 }
 
 /*
@@ -308,7 +330,11 @@ static void _screen_toggle(void)
          * 다른 자동 화면전환 로직과 겹칠 타이밍 창이 줄어든다. */
         hal_led_power_set(false);
         hal_backlight_set(0);
+#if UI_PRENDERING_ENABLE
+        ui_page_change(PAGE_MAIN);
+#else
         _load_screen(SCR_MAIN);
+#endif /* UI_PRENDERING_ENABLE */
         ma->screen_on = false;
     } else {
         /* ON: 백라이트만 켠다 — 화면 전환 없음 (OFF 때 이미 선택화면으로 가 있음) */
@@ -331,8 +357,11 @@ static void _power_long_reset(void)
     /* 먼저 메인 화면으로 전환 — 정전 재가동(_blackout_recovery) 로직과 겹치지
      * 않게 한다. */
     hal_backlight_set(100);
+#if UI_PRENDERING_ENABLE
+    ui_page_change(PAGE_MAIN);
+#else
     _load_screen(SCR_MAIN);
-
+#endif
     /* saveChecking=0으로 정전복구 플래그를 끈다. settings_set_str()+
      * settings_save_dirty()는 실제 flash 쓰기를 uart_comm 백그라운드 태스크로
      * 미루므로(200ms 주기), reboot이 그 전에 실행되면 값이 flash에 반영되지
@@ -385,6 +414,7 @@ static void _handle_key_up(int key_code)
 
 static void _blackout_recovery(void)
 {
+    bk_printf(TAG "Entering blackout recovery...\n");
     main_activity_t *ma  = &g_main_activity;
     ma_send_t        *sd = &ma->send;
 
@@ -709,6 +739,7 @@ void main_activity_on_create(void)
     main_activity_t *ma = &g_main_activity;
     memset(ma, 0, sizeof(*ma));
 
+#if !UI_PRENDERING_ENABLE
 #if !UI_BG_SOLID_COLOR && UI_BG_CANVAS_PRELOAD_ENABLE
     /* ── 0. bg.jpg 버퍼 선점 (malloc만) ─────────────────────────
      * LVGL task 시작 전에 1.06 MB 연속 블록 확보.
@@ -716,6 +747,7 @@ void main_activity_on_create(void)
     bg_canvas_buf_alloc();
 #endif
 
+// 이놈들을 안 없애면 메모리가 모자라.
 #if UI_CANVAS_BUF_PERMANENT_ENABLE
     /* reset_popup.png(알파 있는 RGBA) ARGB8888 버퍼(728KB) 선점 — psram_malloc_cm이
      * 실패 시 NULL 반환이 아니라 즉시 assert 크래시하므로, 이 위험한 할당을
@@ -735,7 +767,7 @@ void main_activity_on_create(void)
      * password_popup preload 직후 settingmodetest_bg_preload()에서 발생). */
     settingmodetest_canvas_buf_alloc();
 #endif /* UI_CANVAS_BUF_PERMANENT_ENABLE */
-
+#endif /* !UI_PRENDERING_ENABLE */
     /* password_popup / manualmodestart ferm2 캔버스는 영구 고정을 시도했으나,
      * 실측 결과(4개 버퍼 2.77MB 고정만으로도 free 4.19MB→1.25MB, 공유 캐시 쪽
      * 평범한 아이콘 decode가 단편화로 실패) 여유 공간을 지나치게 압박함이 확인되어

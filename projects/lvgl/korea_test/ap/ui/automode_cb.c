@@ -20,12 +20,11 @@
 #include <driver/aon_rtc.h>
 
 #define TAG "[automode_cb.c] "
-#include "preRenderer.h"
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+#include "pageManager.h"
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 
-extern void init_keypad_group();
 extern void memory_save_to_slot(int slot);
 
 static uint32_t s_last_click_automode = 0;
@@ -284,39 +283,38 @@ static void _underbar_show_automode(bk_lv_ui_t *bk_ui)
 
 static void _keypad_on_automode(bk_lv_ui_t *bk_ui)
 {
-    bk_printf(TAG "keypad on ");
-    if (!bk_ui->automode_keypadbaseim) {
-        bk_ui->automode_keypadbaseim = lv_image_create(bk_ui->automode);
-        lv_obj_add_flag(bk_ui->automode_keypadbaseim, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_set_pos(bk_ui->automode_keypadbaseim, 0, 430);
-        lv_obj_set_size(bk_ui->automode_keypadbaseim, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    }
-    int _lang = settings_get_int("LANGUAGE");
-    const char *_lsuf = (_lang == 1) ? "_china" : (_lang == 2) ? "_english" : "";
-    {
-        char _kp[64];
-        snprintf(_kp, sizeof(_kp), "/images/keypadn%s.jpg", _lsuf);
-        _img_set_src_timed(bk_ui->automode_keypadbaseim, _kp);
-    }
-    if (!bk_ui->automode_KeyPadBt[0]) {
-        init_keypad_group(bk_ui);
-    }
-    if (!bk_ui->automode_keypadhide_im) {
-        bk_ui->automode_keypadhide_im = lv_image_create(bk_ui->automode);
-        lv_obj_set_pos(bk_ui->automode_keypadhide_im, 884, 453);
-        lv_obj_set_size(bk_ui->automode_keypadhide_im, 120, 75);
-        lv_obj_remove_flag(bk_ui->automode_keypadhide_im, LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_add_flag(bk_ui->automode_keypadhide_im, LV_OBJ_FLAG_HIDDEN);
-    }
-    {
-        char _kc[64];
-        snprintf(_kc, sizeof(_kc), "/images/keypadback_close%s.png", _lsuf);
-        _img_set_src_timed(bk_ui->automode_keypadhide_im, _kc);
-    }
+    // bk_printf(TAG "keypad on ");
+    // if (!bk_ui->automode_keypadbaseim) {
+    //     bk_ui->automode_keypadbaseim = lv_image_create(bk_ui->automode);
+    //     lv_obj_add_flag(bk_ui->automode_keypadbaseim, LV_OBJ_FLAG_HIDDEN);
+    //     lv_obj_set_pos(bk_ui->automode_keypadbaseim, 0, 430);
+    //     lv_obj_set_size(bk_ui->automode_keypadbaseim, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    // }
+    // int _lang = settings_get_int("LANGUAGE");
+    // const char *_lsuf = (_lang == 1) ? "_china" : (_lang == 2) ? "_english" : "";
+    // {
+    //     char _kp[64];
+    //     snprintf(_kp, sizeof(_kp), "/images/keypadn%s.jpg", _lsuf);
+    //     _img_set_src_timed(bk_ui->automode_keypadbaseim, _kp);
+    // }
+    // if (!bk_ui->automode_KeyPadBt[0]) {
+    //     init_keypad_group(bk_ui);
+    // }
+    // if (!bk_ui->automode_keypadhide_im) {
+    //     bk_ui->automode_keypadhide_im = lv_image_create(bk_ui->automode);
+    //     lv_obj_set_pos(bk_ui->automode_keypadhide_im, 884, 453);
+    //     lv_obj_set_size(bk_ui->automode_keypadhide_im, 120, 75);
+    //     lv_obj_remove_flag(bk_ui->automode_keypadhide_im, LV_OBJ_FLAG_CLICKABLE);
+    //     lv_obj_add_flag(bk_ui->automode_keypadhide_im, LV_OBJ_FLAG_HIDDEN);
+    // }
+    // char _kc[64];
+    // snprintf(_kc, sizeof(_kc), "/images/keypadback_close%s.png", _lsuf);
+    // _img_set_src_timed(bk_ui->automode_keypadhide_im, _kc);
     /* 키패드 버튼 활성화 */
-    for (int i = 0; i < 12; i++) {
-        if (bk_ui->automode_KeyPadBt[i])
-            lv_obj_add_flag(bk_ui->automode_KeyPadBt[i], LV_OBJ_FLAG_CLICKABLE);
+    for (int i = 0; i < 12; i++) 
+    {
+        lv_obj_add_flag(bk_ui->automode_KeyPadBt[i], LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_clear_flag(bk_ui->automode_KeyPadBt[i], LV_OBJ_FLAG_HIDDEN);
     }
     lv_obj_clear_flag(bk_ui->automode_keypadhide, LV_OBJ_FLAG_HIDDEN);
     /* keypadhide_im: 항상 보이지 않고 눌렀을 때만 표시(press feedback) — event_cb에서 처리 */
@@ -851,7 +849,7 @@ static void _keypad_hide_automode(bk_lv_ui_t *bk_ui)
 void automode_backbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_backbt) < 250) return;
     s_last_click_backbt = lv_tick_get();
     hal_buzzer_beep();
@@ -881,7 +879,7 @@ void automode_startbt_event_cb(lv_event_t *e)
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
 
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_automode) < 250) return;
     s_last_click_automode = lv_tick_get();
     hal_buzzer_beep();
@@ -1134,7 +1132,7 @@ void automode_startbt_event_cb(lv_event_t *e)
 void automode_AutoModeCompleteYearBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 14;
     _common_click_automode(bk_ui);
 }
@@ -1142,7 +1140,7 @@ void automode_AutoModeCompleteYearBt_event_cb(lv_event_t *e)
 void automode_AutoModeCompleteMonthBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 15;
     _common_click_automode(bk_ui);
 }
@@ -1150,7 +1148,7 @@ void automode_AutoModeCompleteMonthBt_event_cb(lv_event_t *e)
 void automode_AutoModeCompleteDayBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 16;
     _common_click_automode(bk_ui);
 }
@@ -1158,7 +1156,7 @@ void automode_AutoModeCompleteDayBt_event_cb(lv_event_t *e)
 void automode_AutoModeCompleteHourBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 17;
     _common_click_automode(bk_ui);
 }
@@ -1166,7 +1164,7 @@ void automode_AutoModeCompleteHourBt_event_cb(lv_event_t *e)
 void automode_AutoModeCompleteMinBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 18;
     _common_click_automode(bk_ui);
 }
@@ -1175,7 +1173,7 @@ void automode_loadbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_automode) < 250) return;
     s_last_click_automode = lv_tick_get();
     hal_buzzer_beep();
@@ -1403,7 +1401,7 @@ void process_auto_mode_save(bk_lv_ui_t *ui) {
 
 void automode_savebt_event_cb(lv_event_t *e)
 {
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_automode) < 250) return;
     s_last_click_automode = lv_tick_get();
     hal_buzzer_beep();
@@ -1428,7 +1426,7 @@ void automode_savebt_event_cb(lv_event_t *e)
 void automode_AutoFreezeTempBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 1;
     _common_click_automode(bk_ui);
 }
@@ -1436,7 +1434,7 @@ void automode_AutoFreezeTempBt_event_cb(lv_event_t *e)
 void automode_AutoDefrostTempBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 2;
     _common_click_automode(bk_ui);
 }
@@ -1444,7 +1442,7 @@ void automode_AutoDefrostTempBt_event_cb(lv_event_t *e)
 void automode_AutoDefrostTimeHourBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 4;
     _common_click_automode(bk_ui);
 }
@@ -1452,7 +1450,7 @@ void automode_AutoDefrostTimeHourBt_event_cb(lv_event_t *e)
 void automode_AutoDefrostTimeMinBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 5;
     _common_click_automode(bk_ui);
 }
@@ -1460,7 +1458,7 @@ void automode_AutoDefrostTimeMinBt_event_cb(lv_event_t *e)
 void automode_AutoFermentation1TempBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 6;
     _common_click_automode(bk_ui);
 }
@@ -1468,7 +1466,7 @@ void automode_AutoFermentation1TempBt_event_cb(lv_event_t *e)
 void automode_AutoFermentation1HumidityBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 7;
     _common_click_automode(bk_ui);
 }
@@ -1476,7 +1474,7 @@ void automode_AutoFermentation1HumidityBt_event_cb(lv_event_t *e)
 void automode_AutoFermentation1TimeHourBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 8;
     _common_click_automode(bk_ui);
 }
@@ -1484,7 +1482,7 @@ void automode_AutoFermentation1TimeHourBt_event_cb(lv_event_t *e)
 void automode_AutoFermentation1TimeMinBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 9;
     _common_click_automode(bk_ui);
 }
@@ -1492,7 +1490,7 @@ void automode_AutoFermentation1TimeMinBt_event_cb(lv_event_t *e)
 void automode_AutoFermentation2TempBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 10;
     _common_click_automode(bk_ui);
 }
@@ -1500,7 +1498,7 @@ void automode_AutoFermentation2TempBt_event_cb(lv_event_t *e)
 void automode_AutoFermentation2HumidityBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 11;
     _common_click_automode(bk_ui);
 }
@@ -1508,7 +1506,7 @@ void automode_AutoFermentation2HumidityBt_event_cb(lv_event_t *e)
 void automode_AutoFermentation2TimeHourBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 12;
     _common_click_automode(bk_ui);
 }
@@ -1516,7 +1514,7 @@ void automode_AutoFermentation2TimeHourBt_event_cb(lv_event_t *e)
 void automode_AutoFermentation2TimeMinBt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_automode = 13;
     _common_click_automode(bk_ui);
 }
@@ -1672,7 +1670,8 @@ void automode_keypadhide_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     lv_event_code_t code = lv_event_get_code(e);
-    if (code == LV_EVENT_PRESSED) {
+    if (code == LV_EVENT_PRESSED) 
+    {
         if (bk_ui->automode_keypadhide_im) lv_obj_clear_flag(bk_ui->automode_keypadhide_im, LV_OBJ_FLAG_HIDDEN);
         return;
     }
@@ -1803,28 +1802,22 @@ static void _calc_completion_date(bk_lv_ui_t *bk_ui, bool from_mem)
     g_device_state.send_complete_min   = smn;
 }
 
-
 void automode_loaded_event_cb(lv_event_t *e)
 {
+#if UI_TITLE_ANIM_ENABLE
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     ui_title_anim(bk_ui->automode_title);
-    ui_page_build_enqueue_task(_ams_pw_start,
-                               "automodestart prewarm start");
-    ui_page_build_enqueue_task(automode_mm_prewarm_start,
-                               "memorymode prewarm start");
+#endif /* UI_TITLE_ANIM_ENABLE */
     return;
 }
 
 void automode_unload_start_event_cb(lv_event_t *e)
 {
-    _ams_pw_cancel();
-    automode_mm_prewarm_cancel();
     return; 
 }
 
 void automode_unloaded_event_cb(lv_event_t *e)
 {
-    (void)0;
     return;
 }
 
@@ -1844,27 +1837,6 @@ void automode_load_start_event_cb(lv_event_t *e)
      * 여기서 한 번만 읽고 즉시 클리어한다 (아래에서 반복 참조하기 위해 화면 로드 최상단으로 이동). */
     bool _from_mem_load = (g_device_state.memory_mode_check == MEMORY_MODE_LOAD);
     g_device_state.memory_mode_check = MEMORY_MODE_NONE;
-
-    // lv_label_set_text(bk_ui->automode_AutoFreezeTempTxt, settings_get_str("BasicCurrentSaveFreezeTemp"));
-    // lv_label_set_text(bk_ui->automode_AutoDefrostTempTxt, settings_get_str("BasicCurrentSaveDefreezeTemp"));
-    // lv_label_set_text(bk_ui->automode_AutoDefrostTimeHourTxt, settings_get_str("BasicCurrentSaveDefreezeTimeHour"));
-    // lv_label_set_text(bk_ui->automode_AutoDefrostTimeMinTxt, settings_get_str("BasicCurrentSaveDefreezeTimeMin"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation1TempTxt, settings_get_str("BasicCurrentSaveFermentation1Temp"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation1HumidityTxt, settings_get_str("BasicCurrentSaveFermentation1Humidity"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation1TimeHourTxt, settings_get_str("BasicCurrentSaveFermentation1TimeHour"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation1TimeMinTxt, settings_get_str("BasicCurrentSaveFermentation1TimeMin"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation2TempTxt, settings_get_str("BasicCurrentSaveFermentation2Temp"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation2HumidityTxt, settings_get_str("BasicCurrentSaveFermentation2Humidity"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation2TimeHourTxt, settings_get_str("BasicCurrentSaveFermentation2TimeHour"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation2TimeMinTxt, settings_get_str("BasicCurrentSaveFermentation2TimeMin"));
-    // lv_label_set_text(bk_ui->automode_AutoDefrostTimeHourTxt, settings_get_str("BasicCurrentSaveDefreezeTimeHour"));
-    // lv_label_set_text(bk_ui->automode_AutoDefrostTimeMinTxt, settings_get_str("BasicCurrentSaveDefreezeTimeMin"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation1HumidityTxt, settings_get_str("BasicCurrentSaveFermentation1Humidity"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation1TimeHourTxt, settings_get_str("BasicCurrentSaveFermentation1TimeHour"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation1TimeMinTxt, settings_get_str("BasicCurrentSaveFermentation1TimeMin"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation2HumidityTxt, settings_get_str("BasicCurrentSaveFermentation2Humidity"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation2TimeHourTxt, settings_get_str("BasicCurrentSaveFermentation2TimeHour"));
-    // lv_label_set_text(bk_ui->automode_AutoFermentation2TimeMinTxt, settings_get_str("BasicCurrentSaveFermentation2TimeMin"));
     
     /* settings는 항상 C 저장, F 모드이면 C→F 변환 후 표시 */
     /* 이전 버전에서 _maxmin_automode가 C값을 F범위로 클램핑해 저장한 stale 데이터 정규화:
@@ -1885,9 +1857,11 @@ void automode_load_start_event_cb(lv_event_t *e)
             }
         }
         int _is_f = (strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0);
-#define _LT(obj, key) do { \
+#define _LT(obj, key) do \
+{ \
     const char *_sv = settings_get_str(key); \
-    if (_sv && _sv[0]) { \
+    if (_sv && _sv[0]) \
+    { \
         char _fb[16]; \
         int _tv = _is_f ? (atoi(_sv) * 9 / 5 + 32) : atoi(_sv); \
         snprintf(_fb, sizeof(_fb), "%02d", _tv); \
@@ -1903,10 +1877,12 @@ void automode_load_start_event_cb(lv_event_t *e)
          * 유지한다 (Android AutoModeFragment.java:505-506,527-528 동일).
          * 메모리 불러오기일 때는 memory_load_from_slot()이 CurrentSave*만 갱신하고 Basic*는
          * 건드리지 않으므로, 이 경우는 CurrentSave*를 그대로 써야 불러온 슬롯 값이 보인다. */
-        if (_from_mem_load) {
+        if (_from_mem_load) 
+        {
             lv_label_set_text(bk_ui->automode_AutoDefrostTimeHourTxt,   settings_get_str("CurrentSaveDefreezeTimeHour"));
             lv_label_set_text(bk_ui->automode_AutoDefrostTimeMinTxt,    settings_get_str("CurrentSaveDefreezeTimeMin"));
-        } else {
+        } else 
+        {
             lv_label_set_text(bk_ui->automode_AutoDefrostTimeHourTxt,   settings_get_str("BasicCurrentSaveDefreezeTimeHour"));
             lv_label_set_text(bk_ui->automode_AutoDefrostTimeMinTxt,    settings_get_str("BasicCurrentSaveDefreezeTimeMin"));
         }
@@ -1937,43 +1913,4 @@ void automode_load_start_event_cb(lv_event_t *e)
     _calc_completion_date(bk_ui, _from_mem_load);
     _rclr_automode(bk_ui);  /* 저장된 완료시간 유효성 → 초기 색상 설정 */
 
-    /* 화씨일 때만 °F 아이콘 lazy 생성 후 노출 */
-    if (strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0) {
-        if (!bk_ui->automode_auto_f1) {
-            lv_obj_t *scr = bk_ui->automode;
-            bk_ui->automode_auto_f1 = lv_image_create(scr);
-            _img_set_src_timed(bk_ui->automode_auto_f1, "/images/temp_f.png");
-            lv_obj_set_pos(bk_ui->automode_auto_f1, 215, 215);
-            lv_obj_set_size(bk_ui->automode_auto_f1, 24, 23);
-            bk_ui->automode_auto_f2 = lv_image_create(scr);
-            _img_set_src_timed(bk_ui->automode_auto_f2, "/images/temp_f.png");
-            lv_obj_set_pos(bk_ui->automode_auto_f2, 719, 215);
-            lv_obj_set_size(bk_ui->automode_auto_f2, 24, 23);
-            bk_ui->automode_auto_f3 = lv_image_create(scr);
-            _img_set_src_timed(bk_ui->automode_auto_f3, "/images/temp_f.png");
-            lv_obj_set_pos(bk_ui->automode_auto_f3, 215, 347);
-            lv_obj_set_size(bk_ui->automode_auto_f3, 24, 23);
-            bk_ui->automode_auto_f4 = lv_image_create(scr);
-            _img_set_src_timed(bk_ui->automode_auto_f4, "/images/temp_f.png");
-            lv_obj_set_pos(bk_ui->automode_auto_f4, 719, 347);
-            lv_obj_set_size(bk_ui->automode_auto_f4, 24, 23);
-        }
-        _img_ensure_src(bk_ui->automode_auto_f1);
-        lv_obj_clear_flag(bk_ui->automode_auto_f1, LV_OBJ_FLAG_HIDDEN);
-        _img_ensure_src(bk_ui->automode_auto_f2);
-        lv_obj_clear_flag(bk_ui->automode_auto_f2, LV_OBJ_FLAG_HIDDEN);
-        _img_ensure_src(bk_ui->automode_auto_f3);
-        lv_obj_clear_flag(bk_ui->automode_auto_f3, LV_OBJ_FLAG_HIDDEN);
-        _img_ensure_src(bk_ui->automode_auto_f4);
-        lv_obj_clear_flag(bk_ui->automode_auto_f4, LV_OBJ_FLAG_HIDDEN);
-    } else {
-        if (bk_ui->automode_auto_f1) {
-            lv_obj_add_flag(bk_ui->automode_auto_f1, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(bk_ui->automode_auto_f2, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(bk_ui->automode_auto_f3, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(bk_ui->automode_auto_f4, LV_OBJ_FLAG_HIDDEN);
-        }
-    }
-
-    ui_lang_apply_automode(bk_ui);
 }

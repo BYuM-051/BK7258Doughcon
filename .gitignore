@@ -13,6 +13,9 @@ __pycache__/
 # Firmware outputs
 *.elf
 #*.bin # standard bootloader binary should be included
+# LittleFS filesystem image should be untracked
+/littlefs.bin 
+/projects/lvgl/korea_test/littlefs.bin
 *.hex
 *.map
 

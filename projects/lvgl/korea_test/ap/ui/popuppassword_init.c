@@ -8,8 +8,9 @@
 #include "ui_lang.h"
 #include "settings.h"
 
+#include "pageManager.h"
 #define TAG "[popuppassword_init.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void popuppassword_pop_keypad1_event_cb(lv_event_t *e);
@@ -546,3 +547,8 @@ void init_page_popuppassword(bk_lv_ui_t * bk_ui) {
 //     }
         
 // }
+
+rendererFuncStatus_t init_page_popuppassword_with_step(bk_lv_ui_t *bk_ui)
+{
+    return RENDERER_FUNC_FAILED;
+}

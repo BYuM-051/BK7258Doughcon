@@ -14,7 +14,7 @@
 #include "settings.h"
 #include "device_state.h"
 #include "hardware_hal.h"
-#include "preRenderer.h"
+#include "pageManager.h"
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern double degree_basic_change(double ch);

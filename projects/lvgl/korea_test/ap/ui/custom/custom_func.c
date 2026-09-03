@@ -25,25 +25,21 @@
 #include "custom_func.h"
 #include "beken_ui.h"
 #include "event_runtime.h"
-#include "preRenderer.h"
 #include <stdio.h>
 
 #define TAG "[custom_func.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 void _img_set_src_timed(lv_obj_t *obj, const void *src)
 {
     uint32_t t = lv_tick_get();
-    ui_page_build_set_image_src(obj, src);
+    lv_image_set_src(obj, src);
 // ?#ifdef HAL_USE_EMULATOR
     // lv_delay_ms(20);
     
     // _img_set_src_timed(obj, path);
     uint32_t ms = lv_tick_elaps(t);
-    const char *srcName = lv_image_src_get_type(src) == LV_IMAGE_SRC_FILE
-                        ? (const char *)src : "<variable>";
-    bk_printf(TAG "[IMGTIME] %-52s %4lu ms\n",
-              srcName, (unsigned long)ms);
+    bk_printf(TAG "[IMGTIME] %-52s %4lu ms\n", src, ms);
 // ?#endif
 }
 
@@ -60,7 +56,7 @@ void _img_ensure_src(lv_obj_t *obj)
     if (!lv_obj_check_type(obj, &lv_image_class)) return;
     if (lv_image_get_src(obj) != NULL) return;
     const char *src = (const char *)lv_obj_get_user_data(obj);
-    if (src) ui_page_build_set_image_src(obj, src);
+    if (src) _img_set_src_timed(obj, src);
     // uint32_t ms = lv_tick_elaps(t);
     // printf("[IMGTIME1] %-52s %4lu ms\n", src, ms);
 }

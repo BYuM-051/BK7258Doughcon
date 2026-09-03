@@ -8,8 +8,9 @@
 #include "ui_lang.h"
 #include "settings.h"
 
+#include "pageManager.h"
 #define TAG "[popupreset_init.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void popupreset_yesbt_event_cb(lv_event_t *e);
@@ -172,4 +173,9 @@ void init_page_popupreset(bk_lv_ui_t * bk_ui) {
     ui_lang_apply_popupreset(bk_ui);  /* fallback: PNG 경로 설정 (canvas 없을 때) */
     if (s_rp_canvas && lv_obj_is_valid(s_rp_canvas))
         lv_image_set_src(bk_ui->popupreset_imageview1, lv_canvas_get_image(s_rp_canvas));
+}
+
+rendererFuncStatus_t init_page_popupreset_with_step(bk_lv_ui_t *bk_ui)
+{
+    return RENDERER_FUNC_FAILED;
 }

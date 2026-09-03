@@ -4,6 +4,7 @@ set(incs .
     /images
     ./screens
     ./ui
+    ./ui/lifecycle
     )
 
 set(srcs
@@ -14,6 +15,8 @@ set(srcs
 file(GLOB_RECURSE UI_EXTRA_SRCS "ui/*.c")
 list(APPEND srcs ${UI_EXTRA_SRCS})
 # Explicitly list new ui files so cmake detects them without a full clean
+file(GLOB_RECURSE UI_LIFECYCLE_SRCS "ui/lifecycle/*.c")
+list(APPEND srcs ${UI_LIFECYCLE_SRCS})
 list(APPEND srcs
     ui/rtc_sync.c
     ui/fonts/lv_font_onoff_cn_32.c

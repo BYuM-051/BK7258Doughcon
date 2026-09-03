@@ -10,7 +10,7 @@
 #include "ui_lang.h"
 #include "settings.h"
 #include "hardware_hal.h"
-#include "preRenderer.h"
+#include "pageManager.h"
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 

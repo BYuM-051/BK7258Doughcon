@@ -19,9 +19,9 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "preRenderer.h"
+#include "pageManager.h"
 #define TAG "[ui_lang.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 #define _DEGREE_F_STR  "\xc2\xb0""F"
 
@@ -37,7 +37,7 @@ static void _img(lv_obj_t *obj, const char *base, const char *ext,
                      : (lang == 2) ? "_english"
                      :               "";
     snprintf(path, sizeof(path), "%s%s%s%s", base, fsuf, lsuf, ext);
-    ui_page_build_set_image_src(obj, path);
+    _img_set_src_timed(obj, path);
 }
 
 /* Read current language and degree state from settings. */
@@ -72,117 +72,117 @@ void ui_lang_apply_manualmode(bk_lv_ui_t *bk_ui)
 }
 
 /* ── manualmodestart ────────────────────────────────────────────────── */
-static int s_last_key_manualmodestart = -1;
+// static int s_last_key_manualmodestart = -1;
 
-void ui_lang_reset_manualmodestart_cache(void)
-{
-    s_last_key_manualmodestart = -1;
-}
+// void ui_lang_reset_manualmodestart_cache(void)
+// {
+//     s_last_key_manualmodestart = -1;
+// }
 
-void ui_lang_apply_manualmodestart(bk_lv_ui_t *bk_ui)
-{
-    int lang, is_f;
-    _get_state(&lang, &is_f);
-    device_state_t *state = &g_device_state;
+// void ui_lang_apply_manualmodestart(bk_lv_ui_t *bk_ui)
+// {
+//     int lang, is_f;
+//     _get_state(&lang, &is_f);
+//     device_state_t *state = &g_device_state;
 
-    /* manualmodestart_load_event_cb에서 black_out_checking일 때 _img_ensure_src()로
-     * blackout을 이미 로드한 직후 여기서 또 무조건 재설정해 이중 로드가 발생했다.
-     * 언어/단위/모드가 실제로 바뀐 경우 또는 화면이 새로 만들어진 직후에만 재적용. */
-    int key = lang * 100 + is_f * 10 + state->manual_current_mode;
-    if (key == s_last_key_manualmodestart) return;
-    s_last_key_manualmodestart = key;
+//     /* manualmodestart_load_event_cb에서 black_out_checking일 때 _img_ensure_src()로
+//      * blackout을 이미 로드한 직후 여기서 또 무조건 재설정해 이중 로드가 발생했다.
+//      * 언어/단위/모드가 실제로 바뀐 경우 또는 화면이 새로 만들어진 직후에만 재적용. */
+//     int key = lang * 100 + is_f * 10 + state->manual_current_mode;
+//     if (key == s_last_key_manualmodestart) return;
+//     s_last_key_manualmodestart = key;
 
-    _L(bk_ui->manualmodestart_title,    "/images/manualmode_title", ".png");
-    _L(bk_ui->manualmodestart_backim,   "/images/exit_bt",          ".png");
-    _L(bk_ui->manualmodestart_startim,  "/images/start_bt",         ".png");
-    /* 냉동(1)/해동(2)은 tempbox_zero, 발효(3)는 tempbox
-     * 파일명 규칙: tempbox[_f]_zero[_china|_english].png  (_f는 _zero 앞에 위치) */
-    if (state->manual_current_mode == 1 || state->manual_current_mode == 2) {
-        char _tbz[128];
-        snprintf(_tbz, sizeof(_tbz), "/images/tempbox%s_zero%s.png",
-                 is_f ? "_f" : "",
-                 (lang == 1) ? "_china" : (lang == 2) ? "_english" : "");
-        ui_page_build_set_image_src(bk_ui->manualmodestart_tempbox, _tbz);
-    } else
-        _LF(bk_ui->manualmodestart_tempbox, "/images/tempbox",      ".png");
-    _L(bk_ui->manualmodestart_blackout, "/images/blackout",         ".png");
-#if 0
-    /* Mode-specific circle text and keypad background */
-    if (state->manual_current_mode == 1) {
-        _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_freeze_circle_txt",        ".png");
-        _L(bk_ui->manualmodestart_keypadbaseim,
-            "/images/freeze_keypad",                    ".png");
-    } else if (state->manual_current_mode == 2) {
-        _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_defrost_circle_txt",       ".png");
-        _L(bk_ui->manualmodestart_keypadbaseim,
-            "/images/defrost_keypad",                   ".png");
-    } else if (state->manual_current_mode == 3) {
-        _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_fermentation2_circle_txt", ".png");
-        _L(bk_ui->manualmodestart_keypadbaseim,
-            "/images/fermentation_keypad",              ".png");
-    }else if (state->manual_current_mode == 4){
-         _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_fermentation1_circle_txt", ".png");
+//     _L(bk_ui->manualmodestart_title,    "/images/manualmode_title", ".png");
+//     _L(bk_ui->manualmodestart_backim,   "/images/exit_bt",          ".png");
+//     _L(bk_ui->manualmodestart_startim,  "/images/start_bt",         ".png");
+//     /* 냉동(1)/해동(2)은 tempbox_zero, 발효(3)는 tempbox
+//      * 파일명 규칙: tempbox[_f]_zero[_china|_english].png  (_f는 _zero 앞에 위치) */
+//     if (state->manual_current_mode == 1 || state->manual_current_mode == 2) {
+//         char _tbz[128];
+//         snprintf(_tbz, sizeof(_tbz), "/images/tempbox%s_zero%s.png",
+//                  is_f ? "_f" : "",
+//                  (lang == 1) ? "_china" : (lang == 2) ? "_english" : "");
+//         _img_set_src_timed(bk_ui->manualmodestart_tempbox, _tbz);
+//     } else
+//         _LF(bk_ui->manualmodestart_tempbox, "/images/tempbox",      ".png");
+//     _L(bk_ui->manualmodestart_blackout, "/images/blackout",         ".png");
+// #if 0
+//     /* Mode-specific circle text and keypad background */
+//     if (state->manual_current_mode == 1) {
+//         _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_freeze_circle_txt",        ".png");
+//         _L(bk_ui->manualmodestart_keypadbaseim,
+//             "/images/freeze_keypad",                    ".png");
+//     } else if (state->manual_current_mode == 2) {
+//         _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_defrost_circle_txt",       ".png");
+//         _L(bk_ui->manualmodestart_keypadbaseim,
+//             "/images/defrost_keypad",                   ".png");
+//     } else if (state->manual_current_mode == 3) {
+//         _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_fermentation2_circle_txt", ".png");
+//         _L(bk_ui->manualmodestart_keypadbaseim,
+//             "/images/fermentation_keypad",              ".png");
+//     }else if (state->manual_current_mode == 4){
+//          _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_fermentation1_circle_txt", ".png");
 
-    }
-    #endif
-     if (state->manual_current_mode == 1) {
-        _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_freeze_circle_txt",        ".png");
-        _L(bk_ui->manualmodestart_keypadbaseim,
-            "/images/keypadn",                    ".png");
-    } else if (state->manual_current_mode == 2) {
-        _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_defrost_circle_txt",       ".png");
-        _L(bk_ui->manualmodestart_keypadbaseim,
-            "/images/keypadn",                   ".png");
-    } else if (state->manual_current_mode == 3) {
-        _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_fermentation2_circle_txt", ".png");
-        _L(bk_ui->manualmodestart_keypadbaseim,
-            "/images/keypadn",              ".png");
-    }else if (state->manual_current_mode == 4){
-         _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_fermentation1_circle_txt", ".png");
+//     }
+//     #endif
+//      if (state->manual_current_mode == 1) {
+//         _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_freeze_circle_txt",        ".png");
+//         _L(bk_ui->manualmodestart_keypadbaseim,
+//             "/images/keypadn",                    ".png");
+//     } else if (state->manual_current_mode == 2) {
+//         _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_defrost_circle_txt",       ".png");
+//         _L(bk_ui->manualmodestart_keypadbaseim,
+//             "/images/keypadn",                   ".png");
+//     } else if (state->manual_current_mode == 3) {
+//         _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_fermentation2_circle_txt", ".png");
+//         _L(bk_ui->manualmodestart_keypadbaseim,
+//             "/images/keypadn",              ".png");
+//     }else if (state->manual_current_mode == 4){
+//          _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_fermentation1_circle_txt", ".png");
 
-    }
-}
+//     }
+// }
 
 /* ── automode ───────────────────────────────────────────────────────── */
-static int s_last_key_automode = -1;
+// static int s_last_key_automode = -1;
 
-void ui_lang_reset_automode_cache(void)
-{
-    s_last_key_automode = -1;
-}
+// void ui_lang_reset_automode_cache(void)
+// {
+//     s_last_key_automode = -1;
+// }
 
-void ui_lang_apply_automode(bk_lv_ui_t *bk_ui)
-{
-    int lang, is_f;
-    _get_state(&lang, &is_f);
-    /* automode 오브젝트가 살아있는 채로 재진입할 때마다(언어 변경 없이도) 매번
-     * 호출되어 board 이미지 4장 포함 11장을 재decode — lv_refr_now에서 1초 이상
-     * 소요. 언어/단위가 실제로 바뀐 경우 또는 init_page_automode가 오브젝트를
-     * 새로 만든 직후(ui_lang_reset_automode_cache 호출됨)에만 재적용한다. */
-    int key = lang * 10 + is_f;
-    if (key == s_last_key_automode) return;
-    s_last_key_automode = key;
-    _L(bk_ui->automode_title,                   "/images/automode_title",                ".png");
-    _L(bk_ui->automode_imageview3,              "/images/exit_bt",                       ".png");
-    _L(bk_ui->automode_imageview5,              "/images/start_bt",                      ".png");
-    _L(bk_ui->automode_imageview6,              "/images/auto_mode_start_box_time",      ".png");
-    _L(bk_ui->automode_imageview23,             "/images/load_bt",                       ".png");
-    _L(bk_ui->automode_imageview25,             "/images/save_bt",                       ".png");
-    _L(bk_ui->automode_imageview26,             "/images/auto_mode_freeze_board",        ".png");
-    _L(bk_ui->automode_imageview31,             "/images/auto_mode_defrost_board",       ".png");
-    _L(bk_ui->automode_imageview44,             "/images/auto_mode_fermentation1_board", ".png");
-    _L(bk_ui->automode_imageview60,             "/images/auto_mode_fermentation2_board", ".png");
-    _L(bk_ui->automode_AutoModeDefrostAutoTime, "/images/defrost_auto_time_box",         ".png");
-    _L(bk_ui->automode_keypadbaseim,            "/images/keypad",                        ".png");
-}
+// void ui_lang_apply_automode(bk_lv_ui_t *bk_ui)
+// {
+//     int lang, is_f;
+//     _get_state(&lang, &is_f);
+//     /* automode 오브젝트가 살아있는 채로 재진입할 때마다(언어 변경 없이도) 매번
+//      * 호출되어 board 이미지 4장 포함 11장을 재decode — lv_refr_now에서 1초 이상
+//      * 소요. 언어/단위가 실제로 바뀐 경우 또는 init_page_automode가 오브젝트를
+//      * 새로 만든 직후(ui_lang_reset_automode_cache 호출됨)에만 재적용한다. */
+//     int key = lang * 10 + is_f;
+//     if (key == s_last_key_automode) return;
+//     s_last_key_automode = key;
+//     _L(bk_ui->automode_title,                   "/images/automode_title",                ".png");
+//     _L(bk_ui->automode_imageview3,              "/images/exit_bt",                       ".png");
+//     _L(bk_ui->automode_imageview5,              "/images/start_bt",                      ".png");
+//     _L(bk_ui->automode_imageview6,              "/images/auto_mode_start_box_time",      ".png");
+//     _L(bk_ui->automode_imageview23,             "/images/load_bt",                       ".png");
+//     _L(bk_ui->automode_imageview25,             "/images/save_bt",                       ".png");
+//     _L(bk_ui->automode_imageview26,             "/images/auto_mode_freeze_board",        ".png");
+//     _L(bk_ui->automode_imageview31,             "/images/auto_mode_defrost_board",       ".png");
+//     _L(bk_ui->automode_imageview44,             "/images/auto_mode_fermentation1_board", ".png");
+//     _L(bk_ui->automode_imageview60,             "/images/auto_mode_fermentation2_board", ".png");
+//     _L(bk_ui->automode_AutoModeDefrostAutoTime, "/images/defrost_auto_time_box",         ".png");
+//     _L(bk_ui->automode_keypadbaseim,            "/images/keypad",                        ".png");
+// }
 
 /* ── automodestart ──────────────────────────────────────────────────── */
 static int s_last_key_automodestart = -1;
@@ -214,7 +214,7 @@ void ui_lang_apply_automodestart(bk_lv_ui_t *bk_ui)
         snprintf(_tbz, sizeof(_tbz), "/images/tempbox%s_zero%s.png",
                  is_f ? "_f" : "",
                  (lang == 1) ? "_china" : (lang == 2) ? "_english" : "");
-        ui_page_build_set_image_src(bk_ui->automodestart_auto_tempbox, _tbz);
+        _img_set_src_timed(bk_ui->automodestart_auto_tempbox, _tbz);
     } else
         _LF(bk_ui->automodestart_auto_tempbox, "/images/tempbox",      ".png");
     _L(bk_ui->automodestart_imageview12,    "/images/auto_mode_start_box_time", ".png");
@@ -622,13 +622,13 @@ void ui_lang_apply_detailsettingdamper(bk_lv_ui_t *bk_ui)
         char p[128];
         const char *csuf = (lang == 1) ? "_china" : "";
         snprintf(p, sizeof(p), "/images/detail_damper_1_off%s.png", csuf);
-        ui_page_build_set_image_src(bk_ui->detailsettingdamper_settingim1, p);
+        _img_set_src_timed(bk_ui->detailsettingdamper_settingim1, p);
         snprintf(p, sizeof(p), "/images/detail_damper_2_off%s.png", csuf);
-        ui_page_build_set_image_src(bk_ui->detailsettingdamper_settingim2, p);
+        _img_set_src_timed(bk_ui->detailsettingdamper_settingim2, p);
         snprintf(p, sizeof(p), "/images/detail_damper_3_off%s.png", csuf);
-        ui_page_build_set_image_src(bk_ui->detailsettingdamper_settingim3, p);
+        _img_set_src_timed(bk_ui->detailsettingdamper_settingim3, p);
         snprintf(p, sizeof(p), "/images/detail_damper_4_off%s.png", csuf);
-        ui_page_build_set_image_src(bk_ui->detailsettingdamper_settingim4, p);
+        _img_set_src_timed(bk_ui->detailsettingdamper_settingim4, p);
     }
 }
 
@@ -658,36 +658,36 @@ void ui_lang_apply_timebar(bk_lv_ui_t *bk_ui)
     /* timebar_error_on_english.png 없음 → 영어만 기본(한국어) 이미지로 폴백.
      * 이전엔 이 이유로 중국어까지 통째로 스킵해서 중국어 모드에서도 기본
      * 이미지가 나오는 버그가 있었음 — 중국어는 정상 적용. */
-    ui_page_build_set_image_src(bk_ui->timebar_timebar_error_checkim,
+    _img_set_src_timed(bk_ui->timebar_timebar_error_checkim,
                         (lang == 1) ? "/images/timebar_error_on_china.png"
                                     : "/images/timebar_error_on.png");
 }
 
 /* ── main ───────────────────────────────────────────────────────────── */
-static int s_last_key_main = -1;
+// static int s_last_key_main = -1;
 
-void ui_lang_reset_main_cache(void)
-{
-    s_last_key_main = -1;
-}
+// void ui_lang_reset_main_cache(void)
+// {
+//     s_last_key_main = -1;
+// }
 
-void ui_lang_apply_main(bk_lv_ui_t *bk_ui)
-{
-    int lang, is_f;
-    _get_state(&lang, &is_f);
-    int _key_main = lang * 10 + is_f;
-    if (_key_main == s_last_key_main) return;
-    s_last_key_main = _key_main;
-#if UI_MAIN_COMBINED_BG_ENABLE
-    _L(bk_ui->main_bg,         "/images/main",        ".jpg");
-#else
-    _L(bk_ui->main_imageview2,  "/images/automode",    ".png");
-    _L(bk_ui->main_imageview4,  "/images/manualmode",  ".png");
-    _L(bk_ui->main_imageview6,  "/images/autodrymode", ".png");
-    _L(bk_ui->main_imageview8,  "/images/memorymode",  ".png");
-    _L(bk_ui->main_imageview10, "/images/settingmode", ".png");
-#endif
-}
+// void ui_lang_apply_main(bk_lv_ui_t *bk_ui)
+// {
+//     int lang, is_f;
+//     _get_state(&lang, &is_f);
+//     int _key_main = lang * 10 + is_f;
+//     if (_key_main == s_last_key_main) return;
+//     s_last_key_main = _key_main;
+// #if UI_MAIN_COMBINED_BG_ENABLE
+//     _L(bk_ui->main_bg,         "/images/main",        ".jpg");
+// #else
+//     _L(bk_ui->main_imageview2,  "/images/automode",    ".png");
+//     _L(bk_ui->main_imageview4,  "/images/manualmode",  ".png");
+//     _L(bk_ui->main_imageview6,  "/images/autodrymode", ".png");
+//     _L(bk_ui->main_imageview8,  "/images/memorymode",  ".png");
+//     _L(bk_ui->main_imageview10, "/images/settingmode", ".png");
+// #endif
+// }
 
 /* ── popupcaution ───────────────────────────────────────────────────── */
 static int s_last_key_popupcaution = -1;
@@ -793,11 +793,11 @@ void ui_lang_apply_popuperror(bk_lv_ui_t *bk_ui)
 
     /* box_error: china variant only — English falls back to Korean */
     snprintf(p, sizeof(p), "/images/box_error%s.png", (lang == 1) ? "_china" : "");
-    ui_page_build_set_image_src(bk_ui->popuperror_imageview2, p);
+    _img_set_src_timed(bk_ui->popuperror_imageview2, p);
 
 #define _EL(obj, name) \
     snprintf(p, sizeof(p), "/images/%s%s.png", (name), csuf); \
-    ui_page_build_set_image_src(obj, p)
+    _img_set_src_timed(obj, p)
 
     _EL(bk_ui->popuperror_e1,  "e1_off");
     _EL(bk_ui->popuperror_e2,  "e2_off");
@@ -826,7 +826,7 @@ void ui_lang_apply_picker(lv_obj_t *obj, int num)
      * 이 개별 호출 사이의 갭을 줄이기 위해 decode 직전에도 한 번 더 체크. */
     ui_cache_drop_if_low_mem();
 #endif
-    ui_page_build_set_image_src(obj, path);
+    _img_set_src_timed(obj, path);
 }
 
 /* ── ON/OFF value display (language-aware, text vs 开/关 font) ───── */
@@ -855,7 +855,7 @@ void ui_lang_apply_next_bt(lv_obj_t *obj, int num)
     const char *lsuf = (lang == 1) ? "_china" : (lang == 2) ? "_english" : "";
     char path[128];
     snprintf(path, sizeof(path), "/images/next_bt_%d%s.png", num, lsuf);
-    ui_page_build_set_image_src(obj, path);
+    _img_set_src_timed(obj, path);
 }
 
 /* ── popuppassword ──────────────────────────────────────────────────── */
@@ -894,10 +894,10 @@ void ui_lang_apply_all(bk_lv_ui_t *bk_ui)
     do { if (bk_ui->screen && lv_obj_is_valid(bk_ui->screen)) fn(bk_ui); } while(0)
 
     _A(timebar,                  ui_lang_apply_timebar);
-    _A(main,                     ui_lang_apply_main);
+    // _A(main,                     ui_lang_apply_main);
     _A(manualmode,               ui_lang_apply_manualmode);
     _A(manualmodestart,          ui_lang_apply_manualmodestart);
-    _A(automode,                 ui_lang_apply_automode);
+    // _A(automode,                 ui_lang_apply_automode);
     _A(automodestart,            ui_lang_apply_automodestart);
     _A(automodeend,              ui_lang_apply_automodeend);
     _A(autodrymode,              ui_lang_apply_autodrymode);
@@ -942,7 +942,8 @@ extern void automodestart_lang_invalidate(bk_lv_ui_t *bk_ui);
 void ui_lang_invalidate_cached_screens(bk_lv_ui_t *bk_ui)
 {
 #if UI_PRENDERING_ENABLE
-    lv_obj_t *active = ui_get_current_page();
+    lv_obj_t *current_page = ui_get_current_page();
+    lv_obj_t *active = current_page;
 #else
     lv_obj_t *active = lv_scr_act();
 #endif /* UI_PRENDERING_ENABLE */

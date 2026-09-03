@@ -16,10 +16,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "preRenderer.h"
 
+#include "pageManager.h"
 #define TAG "[manualmodestart_cb.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 
@@ -1335,7 +1335,7 @@ void manualmodestart_load_start_event_cb(lv_event_t *e)
     } else
         lv_obj_add_flag(bk_ui->manualmodestart_blackout,   LV_OBJ_FLAG_HIDDEN);
 
-    ui_lang_apply_manualmodestart(bk_ui);
+    // ui_lang_apply_manualmodestart(bk_ui);
 
     /* FERM2(저온발효): ui_lang이 manualmode_title로 덮어쓰므로 automode_title로 재설정
      * 온도/습도는 _refresh_running_ui_mms() °F 변환 적용 (1초 타이머) */

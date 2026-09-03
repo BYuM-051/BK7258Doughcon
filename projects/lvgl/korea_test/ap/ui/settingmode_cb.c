@@ -14,9 +14,9 @@
 #include "device_state.h"
 #include "hardware_hal.h"
 
-#include "preRenderer.h"
+#include "pageManager.h"
 #define TAG "[settingmode_cb.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void popuppassword_open(void);
@@ -115,7 +115,7 @@ void settingmode_load_event_cb(lv_event_t *e);
 void settingmode_setting_detailsettingbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -133,7 +133,7 @@ void settingmode_setting_detailsettingbt_event_cb(lv_event_t *e)
 void settingmode_setting_degreebt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -150,7 +150,7 @@ void settingmode_setting_degreebt_event_cb(lv_event_t *e)
 void settingmode_setting_recordbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -168,7 +168,7 @@ void settingmode_setting_testbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -199,7 +199,7 @@ void settingmode_setting_testbt_event_cb(lv_event_t *e)
 void settingmode_setting_timebt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -216,7 +216,7 @@ void settingmode_setting_timebt_event_cb(lv_event_t *e)
 void settingmode_setting_languagebt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -233,7 +233,7 @@ void settingmode_setting_languagebt_event_cb(lv_event_t *e)
 void settingmode_backbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -265,19 +265,16 @@ void settingmode_loaded_event_cb(lv_event_t *e)
 
     /* password_popup.png를 canvas 영구 버퍼에 1회 decode
      * (lv_image_cache_drop과 무관 — 팝업 열릴 때 즉시 렌더) */
-    ui_page_build_enqueue_task(popuppassword_bg_preload,
-                               "popuppassword background preload");
+    popuppassword_bg_preload();
 
 #if UI_POPUPPASSWORD_KEYPAD_COMBINED_ENABLE
     /* 키패드 12장을 스프라이트 canvas에 1회 decode */
-    ui_page_build_enqueue_task(popuppassword_keypad_preload,
-                               "popuppassword keypad preload");
+    popuppassword_keypad_preload();
 #endif
 
     /* testmode_box.jpg를 전용 canvas에 1회 decode
      * — 고장진단 진입 시 즉시 렌더 */
-    ui_page_build_enqueue_task(settingmodetest_bg_preload,
-                               "settingmodetest background preload");
+    settingmodetest_bg_preload();
 }
 
 void settingmode_unload_start_event_cb(lv_event_t *e)

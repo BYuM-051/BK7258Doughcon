@@ -7,13 +7,16 @@
 #include <string.h>
 
 #include "ui_config.h"
-#include "preRenderer.h"
+#include "settings.h"
 
 #define TAG "[automode_init.c] "
-#include "preRenderer.h"
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+#include "pageManager.h"
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
+static uint32_t currentStep = RENDER_STEP_CREATE_PAGE;
+static uint32_t currentImageStep = 0;
+static bool stepInitMode = false;
 
 extern void automodeend_stopbt_event_cb(lv_event_t *e);
 extern void automodeend_load_start_event_cb(lv_event_t *e);
@@ -30,9 +33,35 @@ void destroy_page_automodeend(bk_lv_ui_t *bk_ui)
         lv_obj_del(bk_ui->automodeend);
         bk_ui->automodeend = NULL;
     }
+
+    currentStep = RENDER_STEP_CREATE_PAGE;
+    currentImageStep = 0;
+    preRenderPageState[PAGE_AUTOMODEEND].isRendered = false;
+
+    const uint32_t imageCount = preRenderPageConfig[PAGE_AUTOMODEEND].preRenderImageCount;
+    for(uint32_t i = 0; i < imageCount; i++)
+    {
+        const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_AUTOMODEEND].preRenderImageInfo[i];
+        const char *languageSuffix = imageInfo->hasLanguageVariant ?
+                                     (settings_get_int("LANGUAGE") == 1 ? "_china" :
+                                      settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
+        const char *degreeSuffix = imageInfo->hasDegreeVariant &&
+                                   strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
+        const char *extension = imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
+        char imagePath[128] = {0};
+
+        snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
+                 imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
+        lv_image_cache_drop(imagePath);
+    }
 }
 
 void init_page_automodeend(bk_lv_ui_t * bk_ui) {
+    if(stepInitMode && currentStep == RENDER_STEP_CREATE_CHILD)
+    {
+        goto create_children;
+    }
+
     if (bk_ui->automodeend != NULL && lv_obj_is_valid(bk_ui->automodeend)) {
         destroy_page_automodeend(bk_ui);
     }
@@ -64,6 +93,13 @@ void init_page_automodeend(bk_lv_ui_t * bk_ui) {
     lv_obj_add_event_cb(bk_ui->automodeend, automodeend_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
 #endif /* UI_PRENDERING_ENABLE */
 
+    if(stepInitMode)
+    {
+        return;
+    }
+
+create_children:
+
     // ImageView: auto_mode_end_bg
     bk_ui->automodeend_auto_mode_end_bg = lv_image_create(bk_ui->automodeend);
     // _img_set_src_timed(bk_ui->automodeend_auto_mode_end_bg, "/images/auto_mode_end_bgi.jpg");
@@ -87,7 +123,7 @@ void init_page_automodeend(bk_lv_ui_t * bk_ui) {
 
     // ImageView: title
     bk_ui->automodeend_title = lv_image_create(bk_ui->automodeend);
-    ui_page_build_set_image_src(bk_ui->automodeend_title, "/images/automode_title.png");
+    _img_set_src_timed(bk_ui->automodeend_title, "/images/automode_title.png");
     lv_obj_set_pos(bk_ui->automodeend_title, 0, 10);
     lv_obj_set_size(bk_ui->automodeend_title, 380, 80);
     lv_image_set_inner_align(bk_ui->automodeend_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -104,7 +140,7 @@ void init_page_automodeend(bk_lv_ui_t * bk_ui) {
 
     // ImageView: imageview5
     bk_ui->automodeend_imageview5 = lv_image_create(bk_ui->automodeend);
-    ui_page_build_set_image_src(bk_ui->automodeend_imageview5, "/images/stop_bt.png");
+    _img_set_src_timed(bk_ui->automodeend_imageview5, "/images/stop_bt.png");
     lv_obj_set_pos(bk_ui->automodeend_imageview5, 847, 445);
     lv_obj_set_size(bk_ui->automodeend_imageview5, 164, 74);
 
@@ -160,4 +196,139 @@ void init_page_automodeend(bk_lv_ui_t * bk_ui) {
     lv_obj_set_pos(bk_ui->automodeend_blackout, 841, 384);
     // lv_obj_set_size(bk_ui->automodeend_blackout, 0, 0);
 
+}
+
+rendererFuncStatus_t init_page_automodeend_with_step(bk_lv_ui_t *bk_ui)
+{
+    static uint32_t renderStartTick = 0;
+
+    if(preRenderPageState[PAGE_AUTOMODEEND].isRendered)
+    {
+        return RENDERER_FUNC_DONE;
+    }
+
+    switch(currentStep)
+    {
+        case RENDER_STEP_CREATE_PAGE:
+        {
+            renderStartTick = lv_tick_get();
+            bk_printf(TAG "[RENDER][AUTOMODEEND] start tick=%lu\n", (unsigned long)renderStartTick);
+
+            if(bk_ui == NULL)
+            {
+                return RENDERER_FUNC_FAILED;
+            }
+
+            stepInitMode = true;
+            init_page_automodeend(bk_ui);
+            stepInitMode = false;
+            if(bk_ui->automodeend == NULL || !lv_obj_is_valid(bk_ui->automodeend))
+            {
+                bk_printf(TAG "[RENDER][AUTOMODEEND] CREATE_PAGE failed\n");
+                return RENDERER_FUNC_FAILED;
+            }
+
+#if UI_PRENDERING_ENABLE
+            lv_obj_add_flag(bk_ui->automodeend, LV_OBJ_FLAG_HIDDEN);
+#endif
+            currentStep = RENDER_STEP_CREATE_CHILD;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_CREATE_CHILD:
+        {
+            stepInitMode = true;
+            init_page_automodeend(bk_ui);
+            stepInitMode = false;
+            currentStep = RENDER_STEP_CACHE_BACKGROUND;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_CACHE_BACKGROUND:
+        {
+            if(preRenderPageConfig[PAGE_AUTOMODEEND].backgroundImageAssetId != SHARED_IMAGE_NONE)
+            {
+                const sharedImageAssetId_t assetId =
+                    preRenderPageConfig[PAGE_AUTOMODEEND].backgroundImageAssetId;
+                if(set_shared_image_asset(bk_ui->automodeend_auto_mode_end_bg, assetId) != RENDERER_FUNC_DONE)
+                {
+                    return RENDERER_FUNC_FAILED;
+                }
+            }
+
+            currentStep = RENDER_STEP_CACHE_IMAGE;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_CACHE_IMAGE:
+        {
+            const uint32_t imageCount = preRenderPageConfig[PAGE_AUTOMODEEND].preRenderImageCount;
+            if(currentImageStep < imageCount)
+            {
+                const preRenderImageInfo_t *imageInfo =
+                    &preRenderPageConfig[PAGE_AUTOMODEEND].preRenderImageInfo[currentImageStep];
+                const char *languageSuffix = imageInfo->hasLanguageVariant ?
+                                             (settings_get_int("LANGUAGE") == 1 ? "_china" :
+                                              settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
+                const char *degreeSuffix = imageInfo->hasDegreeVariant &&
+                                           strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
+                const char *extension =
+                    imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
+                char imagePath[128] = {0};
+                uint32_t imageStartTick = lv_tick_get();
+
+                snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
+                         imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
+
+                lv_result_t result = lv_image_decoder_prewarm(imagePath);
+                if(result != LV_RESULT_OK)
+                {
+                    bk_printf(TAG "[PREWARM][AUTOMODEEND] image %lu/%lu failed: %s (%lu ms)\n",
+                              (unsigned long)(currentImageStep + 1),
+                              (unsigned long)imageCount,
+                              imagePath,
+                              (unsigned long)lv_tick_elaps(imageStartTick));
+                    return RENDERER_FUNC_FAILED;
+                }
+
+                bk_printf(TAG "[PREWARM][AUTOMODEEND] image %lu/%lu done: %s (%lu ms)\n",
+                          (unsigned long)(currentImageStep + 1),
+                          (unsigned long)imageCount,
+                          imagePath,
+                          (unsigned long)lv_tick_elaps(imageStartTick));
+                currentImageStep++;
+                return RENDERER_FUNC_NOT_DONE;
+            }
+
+            currentImageStep = 0;
+            currentStep = RENDER_STEP_ATTACH_EVENT;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_ATTACH_EVENT:
+        {
+            /* init_page_automodeend() also attaches the page and control callbacks. */
+            currentStep = RENDER_STEP_DONE;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_DONE:
+        {
+            bk_printf(TAG "[RENDER][AUTOMODEEND] done total=%lu ms\n",
+                      (unsigned long)lv_tick_elaps(renderStartTick));
+
+            currentStep = RENDER_STEP_CREATE_PAGE;
+            currentImageStep = 0;
+            renderStartTick = 0;
+            preRenderPageState[PAGE_AUTOMODEEND].isRendered = true;
+            return RENDERER_FUNC_DONE;
+        }
+
+        default:
+        {
+            bk_printf(TAG "[RENDER][AUTOMODEEND] invalid step=%lu\n",
+                      (unsigned long)currentStep);
+            return RENDERER_FUNC_FAILED;
+        }
+    }
 }

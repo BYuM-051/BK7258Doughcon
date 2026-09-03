@@ -25,7 +25,7 @@
 #include "custom_func.h"
 
 #define TAG "[uart_comm.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 #define UART_LOG(fmt, ...) do {} while(0)
 //#define UART_LOG(fmt, ...) printf("[UART] " fmt "\n", ##__VA_ARGS__)
@@ -1020,24 +1020,30 @@ void uart_comm_tick(void)
 {
     rtc_sync_periodic_save();
 
-    /* PSRAM free 로그 — 화면 전환 시마다 출력 (crash 직전 추세 추적용) */
-    static lv_obj_t *s_last_scr = NULL;
-    lv_obj_t *_cur_scr = lv_scr_act();
-    if (_cur_scr != s_last_scr) {
-        s_last_scr = _cur_scr;
-        uint32_t _free_now = (uint32_t)rtos_get_psram_free_heap_size();
-        bk_printf(TAG "[PSRAM] screen_change  free=%u B  min=%u B  t=%lu ms\n",
-               (unsigned)_free_now,
-               (unsigned)rtos_get_psram_minimum_free_heap_size(),
-               (unsigned long)lv_tick_get());
+//     /* PSRAM free 로그 — 화면 전환 시마다 출력 (crash 직전 추세 추적용) */
+// #if !UI_PRENDERING_ENABLE
+//     static lv_obj_t *s_last_scr = NULL;
+//     lv_obj_t *_cur_scr = lv_scr_act();
+// #else
+//     static lv_obj_t *s_last_scr = NULL;
+//     extern lv_obj_t *currentPage;
+//     lv_obj_t *_cur_scr = currentPage;
+// #endif
+//     if (_cur_scr != s_last_scr) {
+//         s_last_scr = _cur_scr;
+//         uint32_t _free_now = (uint32_t)rtos_get_psram_free_heap_size();
+//         bk_printf(TAG "[PSRAM] screen_change  free=%u B  min=%u B  t=%lu ms\n",
+//                (unsigned)_free_now,
+//                (unsigned)rtos_get_psram_minimum_free_heap_size(),
+//                (unsigned long)lv_tick_get());
 
-#if UI_CACHE_DROP_LOW_MEM_ENABLE
-        /* 화면이 바뀔 때마다(=이 블록 진입 시점마다) 체크 — 실제 위험한 decode
-         * 호출 직전(예: ui_lang_apply_picker())에서도 동일 헬퍼를 호출해
-         * 체크 지점을 늘림(custom_func.c, 쿨다운 공유). */
-        ui_cache_drop_if_low_mem();
-#endif
-    }
+// #if UI_CACHE_DROP_LOW_MEM_ENABLE
+//         /* 화면이 바뀔 때마다(=이 블록 진입 시점마다) 체크 — 실제 위험한 decode
+//          * 호출 직전(예: ui_lang_apply_picker())에서도 동일 헬퍼를 호출해
+//          * 체크 지점을 늘림(custom_func.c, 쿨다운 공유). */
+//         ui_cache_drop_if_low_mem();
+// #endif
+//     }
 
     switch (s_cycle_state) {
 

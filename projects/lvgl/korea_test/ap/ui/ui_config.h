@@ -35,20 +35,20 @@
  * 0: 기존처럼 bg.jpg + 개별 아이콘 5장 사용.
  * 주의: vfs_file1/images/의 개별 아이콘 원본은 combinednimus/ 로 이동되어
  *       있으므로 0으로 되돌리려면 해당 파일들을 다시 옮겨와야 함. */
-#define UI_MAIN_COMBINED_BG_ENABLE   1
+#define UI_MAIN_COMBINED_BG_ENABLE   0
 
 /* 1: settingmode(기능설정) 화면의 bg.jpg + 타이틀 + 아이콘 6장 + 나가기 버튼을
  *    /images/feature-setting.jpg(+_china/_english) 1장으로 대체.
  * 0: 기존처럼 bg.jpg + 개별 이미지 8장 사용.
  * 주의: UI_MAIN_COMBINED_BG_ENABLE과 동일 — 0으로 되돌리려면 combinednimus/
  *       에 옮겨둔 개별 아이콘을 vfs_file1/images/로 복원해야 함. */
-#define UI_SETTINGMODE_COMBINED_BG_ENABLE   1
+#define UI_SETTINGMODE_COMBINED_BG_ENABLE   0
 
 /* 1: settingmodedetailsetting(기본설정) 화면의 bg.jpg + 타이틀 + 아이콘 6장 +
  *    나가기 버튼을 /images/advancedsetting.jpg(+_china/_english) 1장으로 대체.
  * 0: 기존처럼 bg.jpg + 개별 이미지 8장 사용.
  * 주의: 위 두 옵션과 동일한 복원 절차 필요. */
-#define UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE   1
+#define UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE   0
 
 /* 1: password 팝업 키패드 12장(pop_keypad0~9, back, alldel)을 하나의 canvas에
  *    1회만 decode해 스프라이트시트처럼 재사용 (버튼별로 lv_image_set_offset()
@@ -138,7 +138,7 @@
 /* 1: settingmode→고장진단 재진입 시 화면을 destroy+재생성하지 않고 재사용
  *    (memorymode와 동일한 keep-alive). 오브젝트 수십 개 재생성 비용 제거.
  * 0: 기존처럼 진입마다 destroy 후 새로 생성. */
-#define UI_SETTINGMODETEST_KEEPALIVE_ENABLE   1
+#define UI_SETTINGMODETEST_KEEPALIVE_ENABLE   0
 
 /* 1: title/exit_bt/testmode_box.jpg를 오브젝트 생성 시점(_img_set_src_timed)과
  *    SCREEN_LOAD_START의 ui_lang_apply_settingmodetest() 두 곳에서 매번 중복
@@ -154,7 +154,7 @@
  *    popuppassword prewarm과 캐시를 두고 경쟁해 LRU eviction을 일으켰던 문제
  *    (settingmode_cb.c의 s_tm_bg_* 관련 주석 참고)를 원천적으로 피함.
  * 0: prewarm 없이 고장진단 진입 시점에 파일에서 직접 decode. */
-#define UI_SETTINGMODETEST_PREWARM_ENABLE   1
+#define UI_SETTINGMODETEST_PREWARM_ENABLE   0
 
 /* 1: 부팅 완료 후(main 화면 표시 직전) automode/memorymode/settingmode를
  *    "로딩중" 오버레이(lv_layer_top(), 불투명) 뒤에서 한 번씩 순서대로
@@ -214,7 +214,7 @@
  * 0: 3개 모두 예전 방식(화면 진입 시 malloc, 이탈 시 free)으로 되돌림 — 평소
  *    힙 여유는 늘지만(2.18MB 반환), 이 3개 각각의 원래 크래시가 다시 재현될 수
  *    있음. 비교/실측용. */
-#define UI_CANVAS_BUF_PERMANENT_ENABLE   1
+#define UI_CANVAS_BUF_PERMANENT_ENABLE   0
 
 /* 1: PSRAM 여유(rtos_get_psram_free_heap_size())가 임계값 아래로 떨어지면
  *    화면 전환 시점(uart_comm_tick, 매우 자주 호출됨)마다 체크해서 공유 이미지
@@ -238,18 +238,16 @@
 
 #if !(UI_LFS_PSRAM_CACHE_ENABLE)
 #define UI_PRENDERING_ENABLE 1
-
-/* Incremental page renderer: pointer input polling period while pages are
- * completed one image per LVGL timer callback. */
-#define UI_PAGE_BUILD_TOUCH_PERIOD_MS 5
 #endif
 
-#define _BUZZER_ENABLED 1
+#define _BUZZER_ENABLED 0
 
 /* 
 * 0 : timebar도 preRenderRoot의 child로 만들기
 * 1 : timebar는 원래대로 (티온에서 구현한 대로)
 */
 #define TIMEBAR_INDEPENDENT 1
+
+#define UI_LODEPNG_565A8 1
 
 #endif /* UI_CONFIG_H */

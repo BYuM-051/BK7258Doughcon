@@ -11,10 +11,10 @@
 #include "settings.h"
 #include "hardware_hal.h"
 #include "rtc_sync.h"
-#include "preRenderer.h"
 
 #define TAG "[settingmodetime_cb.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+#include "pageManager.h"
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern void lv_digital_clock_set_datetime(int yr, int mo, int day, int hr, int mn, int sc);

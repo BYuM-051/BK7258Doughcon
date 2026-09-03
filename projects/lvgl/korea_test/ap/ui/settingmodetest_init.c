@@ -8,13 +8,16 @@
 #include <string.h>
 
 #include "ui_config.h"
-#include "preRenderer.h"
 
 #define TAG "[settingmodetest_init.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+#include "pageManager.h"
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
+static uint32_t currentStep = RENDER_STEP_CREATE_PAGE;
+static uint32_t currentImageStep = 0;
+static bool stepInitMode = false;
 extern void settingmodetest_backbt_event_cb(lv_event_t *e);
 extern void settingmodetest_compbt_event_cb(lv_event_t *e);
 extern void settingmodetest_roomfanbt_event_cb(lv_event_t *e);
@@ -140,9 +143,35 @@ void destroy_page_settingmodetest(bk_lv_ui_t *bk_ui)
      * (settingmode SCREEN_UNLOAD_START에서 해제하면 keep-alive로 살아있는
      * imageview4가 이미 해제된 메모리를 계속 참조하는 use-after-free 발생). */
     settingmodetest_canvas_free();
+
+    currentStep = RENDER_STEP_CREATE_PAGE;
+    currentImageStep = 0;
+    preRenderPageState[PAGE_SETTINGMODETEST].isRendered = false;
+
+    const uint32_t imageCount = preRenderPageConfig[PAGE_SETTINGMODETEST].preRenderImageCount;
+    for(uint32_t i = 0; i < imageCount; i++)
+    {
+        const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_SETTINGMODETEST].preRenderImageInfo[i];
+        const char *languageSuffix = imageInfo->hasLanguageVariant ?
+                                     (settings_get_int("LANGUAGE") == 1 ? "_china" :
+                                      settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
+        const char *degreeSuffix = imageInfo->hasDegreeVariant &&
+                                   strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
+        const char *extension = imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
+        char imagePath[128] = {0};
+
+        snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
+                 imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
+        lv_image_cache_drop(imagePath);
+    }
 }
 
 void init_page_settingmodetest(bk_lv_ui_t * bk_ui) {
+    if(stepInitMode && currentStep == RENDER_STEP_CREATE_CHILD)
+    {
+        goto create_children;
+    }
+
 #if UI_SETTINGMODETEST_KEEPALIVE_ENABLE
     if (bk_ui->settingmodetest != NULL && lv_obj_is_valid(bk_ui->settingmodetest)) {
         return;  /* keep-alive: reuse existing screen, load_event_cb handles refresh */
@@ -175,6 +204,13 @@ void init_page_settingmodetest(bk_lv_ui_t * bk_ui) {
     lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_loaded_event_cb, LV_EVENT_SCREEN_LOADED,       NULL);
     lv_obj_add_event_cb(bk_ui->settingmodetest, settingmodetest_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
 #endif /* UI_PRENDERING_ENABLE */
+
+    if(stepInitMode)
+    {
+        return;
+    }
+
+create_children:
     /* 배경 — bg.jpg 대신 단색(0xd9d9d9) */
     bk_ui->settingmodetest_bg = lv_image_create(bk_ui->settingmodetest);
     lv_obj_add_flag(bk_ui->settingmodetest_bg, LV_OBJ_FLAG_HIDDEN);
@@ -184,9 +220,7 @@ void init_page_settingmodetest(bk_lv_ui_t * bk_ui) {
 
     // ImageView: title
     bk_ui->settingmodetest_title = lv_image_create(bk_ui->settingmodetest);
-#if !UI_SETTINGMODETEST_DEFERRED_LOAD_ENABLE
-    ui_page_build_set_image_src(bk_ui->settingmodetest_title, "/images/test_title.png");
-#endif
+    _img_set_src_timed(bk_ui->settingmodetest_title, "/images/test_title.png");
     lv_obj_set_pos(bk_ui->settingmodetest_title, 0, 10);
     lv_obj_set_size(bk_ui->settingmodetest_title, 380, 80);
     lv_image_set_inner_align(bk_ui->settingmodetest_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -203,17 +237,13 @@ void init_page_settingmodetest(bk_lv_ui_t * bk_ui) {
 
     // ImageView: imageview3
     bk_ui->settingmodetest_imageview3 = lv_image_create(bk_ui->settingmodetest);
-#if !UI_SETTINGMODETEST_DEFERRED_LOAD_ENABLE
-    ui_page_build_set_image_src(bk_ui->settingmodetest_imageview3, "/images/exit_bt.png");
-#endif
+    _img_set_src_timed(bk_ui->settingmodetest_imageview3, "/images/exit_bt.png");
     lv_obj_set_pos(bk_ui->settingmodetest_imageview3, 825, 13);
     lv_obj_set_size(bk_ui->settingmodetest_imageview3, 179, 74);
 
     // ImageView: imageview4
     bk_ui->settingmodetest_imageview4 = lv_image_create(bk_ui->settingmodetest);
-#if !UI_SETTINGMODETEST_DEFERRED_LOAD_ENABLE
-    ui_page_build_set_image_src(bk_ui->settingmodetest_imageview4, "/images/testmode_box.jpg");
-#endif
+    _img_set_src_timed(bk_ui->settingmodetest_imageview4, "/images/testmode_box.png");
     lv_obj_set_pos(bk_ui->settingmodetest_imageview4, 20, 100);
     lv_obj_set_size(bk_ui->settingmodetest_imageview4, 984, 433);
 
@@ -511,14 +541,145 @@ void init_page_settingmodetest(bk_lv_ui_t * bk_ui) {
     lv_obj_set_size(bk_ui->settingmodetest_test_error_check_im, 249, 74);
     _img_set_src_deferred(bk_ui->settingmodetest_test_error_check_im, "/images/test_error_check_im.png");
 
-#if UI_SETTINGMODETEST_DEFERRED_LOAD_ENABLE
     ui_lang_apply_settingmodetest(bk_ui);  /* fallback: 파일 경로 설정 (canvas 없을 때) */
-#if UI_SETTINGMODETEST_PREWARM_ENABLE
     /* canvas 버퍼가 준비됐으면 raw 픽셀로 덮어씀 → decode 없이 즉시 렌더.
      * keep-alive라 이 오브젝트 생성은 처음 한 번뿐이지만, canvas는 매 진입마다
      * settingmodetest_apply_bg()(settingmodetest_cb.c의 SCREEN_LOAD_START)가
      * 다시 보장/재적용하므로 canvas가 나갔다 들어왔다 free/재decode돼도 안전하다. */
-    settingmodetest_apply_bg(bk_ui);
+    // settingmodetest_apply_bg(bk_ui);
+}
+
+rendererFuncStatus_t init_page_settingmodetest_with_step(bk_lv_ui_t *bk_ui)
+{
+    static uint32_t renderStartTick = 0;
+
+    if(preRenderPageState[PAGE_SETTINGMODETEST].isRendered)
+    {
+        return RENDERER_FUNC_DONE;
+    }
+
+    switch(currentStep)
+    {
+        case RENDER_STEP_CREATE_PAGE:
+        {
+            renderStartTick = lv_tick_get();
+            bk_printf(TAG "[RENDER][SETTINGMODETEST] start tick=%lu\n", (unsigned long)renderStartTick);
+
+            if(bk_ui == NULL)
+            {
+                return RENDERER_FUNC_FAILED;
+            }
+
+            stepInitMode = true;
+            init_page_settingmodetest(bk_ui);
+            stepInitMode = false;
+            if(bk_ui->settingmodetest == NULL || !lv_obj_is_valid(bk_ui->settingmodetest))
+            {
+                bk_printf(TAG "[RENDER][SETTINGMODETEST] CREATE_PAGE failed\n");
+                return RENDERER_FUNC_FAILED;
+            }
+
+#if UI_PRENDERING_ENABLE
+            lv_obj_add_flag(bk_ui->settingmodetest, LV_OBJ_FLAG_HIDDEN);
 #endif
-#endif
+            currentStep = RENDER_STEP_CREATE_CHILD;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_CREATE_CHILD:
+        {
+            stepInitMode = true;
+            init_page_settingmodetest(bk_ui);
+            stepInitMode = false;
+            currentStep = RENDER_STEP_CACHE_BACKGROUND;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_CACHE_BACKGROUND:
+        {
+            if(preRenderPageConfig[PAGE_SETTINGMODETEST].backgroundImageAssetId != SHARED_IMAGE_NONE)
+            {
+                const sharedImageAssetId_t assetId =
+                    preRenderPageConfig[PAGE_SETTINGMODETEST].backgroundImageAssetId;
+                if(set_shared_image_asset(bk_ui->settingmodetest_bg, assetId) != RENDERER_FUNC_DONE)
+                {
+                    return RENDERER_FUNC_FAILED;
+                }
+            }
+
+            currentStep = RENDER_STEP_CACHE_IMAGE;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_CACHE_IMAGE:
+        {
+            const uint32_t imageCount = preRenderPageConfig[PAGE_SETTINGMODETEST].preRenderImageCount;
+            if(currentImageStep < imageCount)
+            {
+                const preRenderImageInfo_t *imageInfo =
+                    &preRenderPageConfig[PAGE_SETTINGMODETEST].preRenderImageInfo[currentImageStep];
+                const char *languageSuffix = imageInfo->hasLanguageVariant ?
+                                             (settings_get_int("LANGUAGE") == 1 ? "_china" :
+                                              settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
+                const char *degreeSuffix = imageInfo->hasDegreeVariant &&
+                                           strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
+                const char *extension =
+                    imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
+                char imagePath[128] = {0};
+                uint32_t imageStartTick = lv_tick_get();
+
+                snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
+                         imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
+
+                lv_result_t result = lv_image_decoder_prewarm(imagePath);
+                if(result != LV_RESULT_OK)
+                {
+                    bk_printf(TAG "[PREWARM][SETTINGMODETEST] image %lu/%lu failed: %s (%lu ms)\n",
+                              (unsigned long)(currentImageStep + 1),
+                              (unsigned long)imageCount,
+                              imagePath,
+                              (unsigned long)lv_tick_elaps(imageStartTick));
+                    return RENDERER_FUNC_FAILED;
+                }
+
+                bk_printf(TAG "[PREWARM][SETTINGMODETEST] image %lu/%lu done: %s (%lu ms)\n",
+                          (unsigned long)(currentImageStep + 1),
+                          (unsigned long)imageCount,
+                          imagePath,
+                          (unsigned long)lv_tick_elaps(imageStartTick));
+                currentImageStep++;
+                return RENDERER_FUNC_NOT_DONE;
+            }
+
+            currentImageStep = 0;
+            currentStep = RENDER_STEP_ATTACH_EVENT;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_ATTACH_EVENT:
+        {
+            /* init_page_settingmodetest() also attaches the page and control callbacks. */
+            currentStep = RENDER_STEP_DONE;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_DONE:
+        {
+            bk_printf(TAG "[RENDER][SETTINGMODETEST] done total=%lu ms\n",
+                      (unsigned long)lv_tick_elaps(renderStartTick));
+
+            currentStep = RENDER_STEP_CREATE_PAGE;
+            currentImageStep = 0;
+            renderStartTick = 0;
+            preRenderPageState[PAGE_SETTINGMODETEST].isRendered = true;
+            return RENDERER_FUNC_DONE;
+        }
+
+        default:
+        {
+            bk_printf(TAG "[RENDER][SETTINGMODETEST] invalid step=%lu\n",
+                      (unsigned long)currentStep);
+            return RENDERER_FUNC_FAILED;
+        }
+    }
 }

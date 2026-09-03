@@ -12,8 +12,8 @@
 #include "hardware_hal.h"
 
 #define TAG "[manualmode_cb.c] "
-#include "preRenderer.h"
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+#include "pageManager.h"
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 
@@ -32,7 +32,7 @@ void manualmode_backbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -50,7 +50,7 @@ void manualmode_manual_freezebt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -69,7 +69,7 @@ void manualmode_manual_defrostbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -88,7 +88,7 @@ void manualmode_manual_fermentationbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -111,16 +111,15 @@ void manualmode_loaded_event_cb(lv_event_t *e)
 
 void manualmode_unload_start_event_cb(lv_event_t *e)
 {
-    (void)e;
+    return;
 }
 
 void manualmode_unloaded_event_cb(lv_event_t *e)
 {
-    (void)e;
+    return;
 }
 
 void manualmode_load_start_event_cb(lv_event_t *e)
 {
-    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    ui_lang_apply_manualmode(bk_ui);
+    return;
 }
