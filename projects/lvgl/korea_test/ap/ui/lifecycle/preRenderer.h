@@ -10,6 +10,8 @@
 extern "C" {
 #endif
 
+#define _PREPROCESSOR_YIELD_DELAY 1
+
 extern lv_event_code_t UI_EVENT_PAGE_SHOW_START;
 extern lv_event_code_t UI_EVENT_PAGE_SHOWN;
 extern lv_event_code_t UI_EVENT_PAGE_HIDE_START;
