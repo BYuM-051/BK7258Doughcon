@@ -77,7 +77,7 @@ void init_page_manualmodestart(bk_lv_ui_t * bk_ui) {
 
     /* 오브젝트를 새로 만드므로 ui_lang 캐시를 무효화 — 다음 ui_lang_apply_manualmodestart()가
      * 이전 세션과 언어/단위/모드가 우연히 같아도 반드시 새 이미지를 채우게 함 */
-    ui_lang_reset_manualmodestart_cache();
+    // ui_lang_reset_manualmodestart_cache();
 
     // Clear lazily-created child pointers (stale after destroy+re-init)
     bk_ui->manualmodestart_keypadbaseim            = NULL;

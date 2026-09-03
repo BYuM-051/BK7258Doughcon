@@ -72,84 +72,84 @@ void ui_lang_apply_manualmode(bk_lv_ui_t *bk_ui)
 }
 
 /* ── manualmodestart ────────────────────────────────────────────────── */
-static int s_last_key_manualmodestart = -1;
+// static int s_last_key_manualmodestart = -1;
 
-void ui_lang_reset_manualmodestart_cache(void)
-{
-    s_last_key_manualmodestart = -1;
-}
+// void ui_lang_reset_manualmodestart_cache(void)
+// {
+//     s_last_key_manualmodestart = -1;
+// }
 
-void ui_lang_apply_manualmodestart(bk_lv_ui_t *bk_ui)
-{
-    int lang, is_f;
-    _get_state(&lang, &is_f);
-    device_state_t *state = &g_device_state;
+// void ui_lang_apply_manualmodestart(bk_lv_ui_t *bk_ui)
+// {
+//     int lang, is_f;
+//     _get_state(&lang, &is_f);
+//     device_state_t *state = &g_device_state;
 
-    /* manualmodestart_load_event_cb에서 black_out_checking일 때 _img_ensure_src()로
-     * blackout을 이미 로드한 직후 여기서 또 무조건 재설정해 이중 로드가 발생했다.
-     * 언어/단위/모드가 실제로 바뀐 경우 또는 화면이 새로 만들어진 직후에만 재적용. */
-    int key = lang * 100 + is_f * 10 + state->manual_current_mode;
-    if (key == s_last_key_manualmodestart) return;
-    s_last_key_manualmodestart = key;
+//     /* manualmodestart_load_event_cb에서 black_out_checking일 때 _img_ensure_src()로
+//      * blackout을 이미 로드한 직후 여기서 또 무조건 재설정해 이중 로드가 발생했다.
+//      * 언어/단위/모드가 실제로 바뀐 경우 또는 화면이 새로 만들어진 직후에만 재적용. */
+//     int key = lang * 100 + is_f * 10 + state->manual_current_mode;
+//     if (key == s_last_key_manualmodestart) return;
+//     s_last_key_manualmodestart = key;
 
-    _L(bk_ui->manualmodestart_title,    "/images/manualmode_title", ".png");
-    _L(bk_ui->manualmodestart_backim,   "/images/exit_bt",          ".png");
-    _L(bk_ui->manualmodestart_startim,  "/images/start_bt",         ".png");
-    /* 냉동(1)/해동(2)은 tempbox_zero, 발효(3)는 tempbox
-     * 파일명 규칙: tempbox[_f]_zero[_china|_english].png  (_f는 _zero 앞에 위치) */
-    if (state->manual_current_mode == 1 || state->manual_current_mode == 2) {
-        char _tbz[128];
-        snprintf(_tbz, sizeof(_tbz), "/images/tempbox%s_zero%s.png",
-                 is_f ? "_f" : "",
-                 (lang == 1) ? "_china" : (lang == 2) ? "_english" : "");
-        _img_set_src_timed(bk_ui->manualmodestart_tempbox, _tbz);
-    } else
-        _LF(bk_ui->manualmodestart_tempbox, "/images/tempbox",      ".png");
-    _L(bk_ui->manualmodestart_blackout, "/images/blackout",         ".png");
-#if 0
-    /* Mode-specific circle text and keypad background */
-    if (state->manual_current_mode == 1) {
-        _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_freeze_circle_txt",        ".png");
-        _L(bk_ui->manualmodestart_keypadbaseim,
-            "/images/freeze_keypad",                    ".png");
-    } else if (state->manual_current_mode == 2) {
-        _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_defrost_circle_txt",       ".png");
-        _L(bk_ui->manualmodestart_keypadbaseim,
-            "/images/defrost_keypad",                   ".png");
-    } else if (state->manual_current_mode == 3) {
-        _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_fermentation2_circle_txt", ".png");
-        _L(bk_ui->manualmodestart_keypadbaseim,
-            "/images/fermentation_keypad",              ".png");
-    }else if (state->manual_current_mode == 4){
-         _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_fermentation1_circle_txt", ".png");
+//     _L(bk_ui->manualmodestart_title,    "/images/manualmode_title", ".png");
+//     _L(bk_ui->manualmodestart_backim,   "/images/exit_bt",          ".png");
+//     _L(bk_ui->manualmodestart_startim,  "/images/start_bt",         ".png");
+//     /* 냉동(1)/해동(2)은 tempbox_zero, 발효(3)는 tempbox
+//      * 파일명 규칙: tempbox[_f]_zero[_china|_english].png  (_f는 _zero 앞에 위치) */
+//     if (state->manual_current_mode == 1 || state->manual_current_mode == 2) {
+//         char _tbz[128];
+//         snprintf(_tbz, sizeof(_tbz), "/images/tempbox%s_zero%s.png",
+//                  is_f ? "_f" : "",
+//                  (lang == 1) ? "_china" : (lang == 2) ? "_english" : "");
+//         _img_set_src_timed(bk_ui->manualmodestart_tempbox, _tbz);
+//     } else
+//         _LF(bk_ui->manualmodestart_tempbox, "/images/tempbox",      ".png");
+//     _L(bk_ui->manualmodestart_blackout, "/images/blackout",         ".png");
+// #if 0
+//     /* Mode-specific circle text and keypad background */
+//     if (state->manual_current_mode == 1) {
+//         _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_freeze_circle_txt",        ".png");
+//         _L(bk_ui->manualmodestart_keypadbaseim,
+//             "/images/freeze_keypad",                    ".png");
+//     } else if (state->manual_current_mode == 2) {
+//         _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_defrost_circle_txt",       ".png");
+//         _L(bk_ui->manualmodestart_keypadbaseim,
+//             "/images/defrost_keypad",                   ".png");
+//     } else if (state->manual_current_mode == 3) {
+//         _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_fermentation2_circle_txt", ".png");
+//         _L(bk_ui->manualmodestart_keypadbaseim,
+//             "/images/fermentation_keypad",              ".png");
+//     }else if (state->manual_current_mode == 4){
+//          _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_fermentation1_circle_txt", ".png");
 
-    }
-    #endif
-     if (state->manual_current_mode == 1) {
-        _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_freeze_circle_txt",        ".png");
-        _L(bk_ui->manualmodestart_keypadbaseim,
-            "/images/keypadn",                    ".png");
-    } else if (state->manual_current_mode == 2) {
-        _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_defrost_circle_txt",       ".png");
-        _L(bk_ui->manualmodestart_keypadbaseim,
-            "/images/keypadn",                   ".png");
-    } else if (state->manual_current_mode == 3) {
-        _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_fermentation2_circle_txt", ".png");
-        _L(bk_ui->manualmodestart_keypadbaseim,
-            "/images/keypadn",              ".png");
-    }else if (state->manual_current_mode == 4){
-         _LF(bk_ui->manualmodestart_manual_txt_basic,
-            "/images/manual_fermentation1_circle_txt", ".png");
+//     }
+//     #endif
+//      if (state->manual_current_mode == 1) {
+//         _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_freeze_circle_txt",        ".png");
+//         _L(bk_ui->manualmodestart_keypadbaseim,
+//             "/images/keypadn",                    ".png");
+//     } else if (state->manual_current_mode == 2) {
+//         _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_defrost_circle_txt",       ".png");
+//         _L(bk_ui->manualmodestart_keypadbaseim,
+//             "/images/keypadn",                   ".png");
+//     } else if (state->manual_current_mode == 3) {
+//         _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_fermentation2_circle_txt", ".png");
+//         _L(bk_ui->manualmodestart_keypadbaseim,
+//             "/images/keypadn",              ".png");
+//     }else if (state->manual_current_mode == 4){
+//          _LF(bk_ui->manualmodestart_manual_txt_basic,
+//             "/images/manual_fermentation1_circle_txt", ".png");
 
-    }
-}
+//     }
+// }
 
 /* ── automode ───────────────────────────────────────────────────────── */
 // static int s_last_key_automode = -1;

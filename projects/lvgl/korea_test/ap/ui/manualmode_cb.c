@@ -111,16 +111,15 @@ void manualmode_loaded_event_cb(lv_event_t *e)
 
 void manualmode_unload_start_event_cb(lv_event_t *e)
 {
-    (void)e;
+    return;
 }
 
 void manualmode_unloaded_event_cb(lv_event_t *e)
 {
-    (void)e;
+    return;
 }
 
 void manualmode_load_start_event_cb(lv_event_t *e)
 {
-    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    ui_lang_apply_manualmode(bk_ui);
+    return;
 }

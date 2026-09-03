@@ -45,23 +45,21 @@ void destroy_page_manualmode(bk_lv_ui_t *bk_ui)
     for(uint32_t i = 0; i < imageCount; i++)
     {
         const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_MANUALMODE].preRenderImageInfo[i];
-        const char *languageSuffix = imageInfo->hasLanguageVariant ?
-                                     (settings_get_int("LANGUAGE") == 1 ? "_china" :
-                                      settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
-        const char *degreeSuffix = imageInfo->hasDegreeVariant &&
-                                   strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
-        const char *extension = imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
         char imagePath[128] = {0};
-
-        snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
-                 imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
-        lv_image_cache_drop(imagePath);
+        if(getImageFullPath(imageInfo->imagePath, imageInfo->hasLanguageVariant, imageInfo->hasDegreeVariant, imageInfo->fileExtension, imagePath, sizeof(imagePath)))
+        {
+            lv_image_cache_drop(imagePath);
+        }
     }
 }
 
 // NOTE : discontinued initialize method. check _with_step()
-void init_page_manualmode(bk_lv_ui_t * bk_ui) 
+void init_page_manualmode(bk_lv_ui_t * bk_ui)
 {
+    lv_delay_ms(2000);
+    LV_ASSERT(0);
+} 
+/* {
     uint32_t _t_start = lv_tick_get();
     bk_printf(TAG "[SCREEN] init_page_manualmode start\n");
 
@@ -93,7 +91,7 @@ void init_page_manualmode(bk_lv_ui_t * bk_ui)
     lv_obj_add_event_cb(bk_ui->manualmode, manualmode_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
     lv_obj_add_event_cb(bk_ui->manualmode, manualmode_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
     lv_obj_set_style_bg_color(bk_ui->manualmode, lv_color_hex(0xD9D9D9), 0);
-#endif /* UI_PRENDERING_ENABLE */
+#endif // UI_PRENDERING_ENABLE
 
     // bk_ui->manualmode_bg = lv_image_create(bk_ui->manualmode);
     // _img_set_src_timed(bk_ui->manualmode_bg, "/images/manual_bg.jpg");
@@ -125,9 +123,9 @@ void init_page_manualmode(bk_lv_ui_t * bk_ui)
     // ImageView: imageview4
     bk_ui->manualmode_imageview4 = lv_image_create(bk_ui->manualmode);
     _img_set_src_timed(bk_ui->manualmode_imageview4, "/images/manual_menu.png");
-    /* manual_menu.jpg 원본(1024x340, 상하 30px 투명)에서 상하 28px씩 크롭 후
-     * 잔여 2px 투명 여백은 화면 배경색(0xD9D9D9)으로 flatten하여 1024x284로 재저장 —
-     * 색상 블록 위치 유지 위해 y를 28px 내림 */
+    // manual_menu.jpg 원본(1024x340, 상하 30px 투명)에서 상하 28px씩 크롭 후
+    //  * 잔여 2px 투명 여백은 화면 배경색(0xD9D9D9)으로 flatten하여 1024x284로 재저장 —
+    //  * 색상 블록 위치 유지 위해 y를 28px 내림
     lv_obj_set_pos(bk_ui->manualmode_imageview4, 0, 109+28);
     lv_obj_set_size(bk_ui->manualmode_imageview4, 1024, 284);
 
@@ -161,7 +159,7 @@ void init_page_manualmode(bk_lv_ui_t * bk_ui)
     lv_obj_set_pos(bk_ui->manualmode_manual_fermentationbt, 685, 128);
     lv_obj_set_size(bk_ui->manualmode_manual_fermentationbt, 334, 290);
 
-}
+} */
 
 rendererFuncStatus_t init_page_manualmode_with_step(bk_lv_ui_t *bk_ui)
 {
@@ -181,7 +179,7 @@ rendererFuncStatus_t init_page_manualmode_with_step(bk_lv_ui_t *bk_ui)
 
             bk_printf(TAG "[RENDER][MANUALMODE] start tick=%lu\n", (unsigned long)renderStartTick);
 
-            ui_lang_reset_manualmode_cache();
+            // ui_lang_reset_manualmode_cache();
 
             bk_ui->manualmode = lv_obj_create(preRenderRoot);
             lv_obj_add_flag(bk_ui->manualmode, LV_OBJ_FLAG_HIDDEN);
@@ -202,12 +200,14 @@ rendererFuncStatus_t init_page_manualmode_with_step(bk_lv_ui_t *bk_ui)
         case RENDER_STEP_CREATE_CHILD :
         {
             uint32_t stepStartTick = lv_tick_get();
+            char fullPath[128];
 
             bk_printf(TAG "[RENDER][MANUALMODE] CREATE_CHILD start\n");
 
             // ImageView: title
             bk_ui->manualmode_title = lv_image_create(bk_ui->manualmode);
-            _img_set_src_timed(bk_ui->manualmode_title, "/images/manualmode_title.png");
+            getImageFullPath("/images/manualmode_title", true, false, ".png", fullPath, sizeof(fullPath));
+            lv_image_set_src(bk_ui->manualmode_title, fullPath);
             lv_obj_set_pos(bk_ui->manualmode_title, 0, 10);
             lv_obj_set_size(bk_ui->manualmode_title, 380, 80);
             lv_image_set_inner_align(bk_ui->manualmode_title, LV_IMAGE_ALIGN_TOP_LEFT);
@@ -223,13 +223,15 @@ rendererFuncStatus_t init_page_manualmode_with_step(bk_lv_ui_t *bk_ui)
 
             // ImageView: imageview3
             bk_ui->manualmode_imageview3 = lv_image_create(bk_ui->manualmode);
-            _img_set_src_timed(bk_ui->manualmode_imageview3, "/images/exit_bt.png");
+            getImageFullPath("/images/exit_bt", true, false, ".png", fullPath, sizeof(fullPath));
+            lv_image_set_src(bk_ui->manualmode_imageview3, fullPath);
             lv_obj_set_pos(bk_ui->manualmode_imageview3, 13, 445);
             lv_obj_set_size(bk_ui->manualmode_imageview3, 179, 74);
 
             // ImageView: imageview4
             bk_ui->manualmode_imageview4 = lv_image_create(bk_ui->manualmode);
-            _img_set_src_timed(bk_ui->manualmode_imageview4, "/images/manual_menu.png");
+            getImageFullPath("/images/manual_menu", true, false, ".png", fullPath, sizeof(fullPath));
+            lv_image_set_src(bk_ui->manualmode_imageview4, fullPath);
             /* manual_menu.jpg 원본(1024x340, 상하 30px 투명)에서 상하 28px씩 크롭 후
              * 잔여 2px 투명 여백은 화면 배경색(0xD9D9D9)으로 flatten하여 1024x284로 재저장 —
              * 색상 블록 위치 유지 위해 y를 28px 내림 */
@@ -290,39 +292,31 @@ rendererFuncStatus_t init_page_manualmode_with_step(bk_lv_ui_t *bk_ui)
             {
                 const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_MANUALMODE].preRenderImageInfo[currentImageStep];
                 char imagePath[128] = {0};
-                const char *languageSuffix = imageInfo->hasLanguageVariant ?
-                                             (settings_get_int("LANGUAGE") == 1 ? "_china" :
-                                              settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
-                const char *degreeSuffix = imageInfo->hasDegreeVariant &&
-                                           strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
-                const char *extension = imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
-                uint32_t imageStartTick = lv_tick_get();
-                snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
-                         imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
+                lv_result_t res = LV_RESULT_INVALID;
+                if(getImageFullPath(imageInfo->imagePath, imageInfo->hasLanguageVariant, imageInfo->hasDegreeVariant, imageInfo->fileExtension, imagePath, sizeof(imagePath)))
+                {
+                    res = lv_image_decoder_prewarm(imagePath);
+                }
 
                 bk_printf(TAG "[PREWARM][MANUALMODE] image %lu/%lu start: %s\n",
                           (unsigned long)(currentImageStep + 1),
                           (unsigned long)imageCount,
                           imagePath);
 
-                lv_result_t res = lv_image_decoder_prewarm(imagePath);
-                uint32_t imageElapsed = lv_tick_elaps(imageStartTick);
 
                 if(res != LV_RESULT_OK)
                 {
-                    bk_printf(TAG "[PREWARM][MANUALMODE] image %lu/%lu FAILED res=%d elapsed=%lu ms path=%s\n",
+                    bk_printf(TAG "[PREWARM][MANUALMODE] image %lu/%lu FAILED res=%d path=%s\n",
                               (unsigned long)(currentImageStep + 1),
                               (unsigned long)imageCount,
                               (int)res,
-                              (unsigned long)imageElapsed,
                               imagePath);
                     return RENDERER_FUNC_FAILED;
                 }
 
-                bk_printf(TAG "[PREWARM][MANUALMODE] image %lu/%lu OK elapsed=%lu ms path=%s\n",
+                bk_printf(TAG "[PREWARM][MANUALMODE] image %lu/%lu OK path=%s\n",
                           (unsigned long)(currentImageStep + 1),
                           (unsigned long)imageCount,
-                          (unsigned long)imageElapsed,
                           imagePath);
 
                 currentImageStep++;
