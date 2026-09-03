@@ -302,8 +302,6 @@ void main_settingmode_event_cb(lv_event_t *e)
 
 void main_load_start_event_cb(lv_event_t *e)
 {
-    device_state_t *state = &g_device_state;
-    state->auto_mode = false;
     return;
 }
 

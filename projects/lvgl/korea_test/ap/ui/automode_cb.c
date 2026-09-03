@@ -1806,27 +1806,22 @@ static void _calc_completion_date(bk_lv_ui_t *bk_ui, bool from_mem)
 
 void automode_loaded_event_cb(lv_event_t *e)
 {
+#if UI_TITLE_ANIM_ENABLE
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     ui_title_anim(bk_ui->automode_title);
-#if !UI_PRENDERING_ENABLE
-    _ams_pw_start();
-    automode_mm_prewarm_start();
-#endif /* !UI_PRENDERING_ENABLE */
+#endif /* UI_TITLE_ANIM_ENABLE */
     return;
 }
 
 void automode_unload_start_event_cb(lv_event_t *e)
 {
-#if !UI_PRENDERING_ENABLE
-    _ams_pw_cancel();
-    automode_mm_prewarm_cancel();
-#endif /* !UI_PRENDERING_ENABLE */
+    device_state_t *state = &g_device_state;
+    state->auto_mode = false;
     return; 
 }
 
 void automode_unloaded_event_cb(lv_event_t *e)
 {
-    (void)0;
     return;
 }
 
