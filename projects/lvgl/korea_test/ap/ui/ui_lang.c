@@ -152,37 +152,37 @@ void ui_lang_apply_manualmodestart(bk_lv_ui_t *bk_ui)
 }
 
 /* ── automode ───────────────────────────────────────────────────────── */
-static int s_last_key_automode = -1;
+// static int s_last_key_automode = -1;
 
-void ui_lang_reset_automode_cache(void)
-{
-    s_last_key_automode = -1;
-}
+// void ui_lang_reset_automode_cache(void)
+// {
+//     s_last_key_automode = -1;
+// }
 
-void ui_lang_apply_automode(bk_lv_ui_t *bk_ui)
-{
-    int lang, is_f;
-    _get_state(&lang, &is_f);
-    /* automode 오브젝트가 살아있는 채로 재진입할 때마다(언어 변경 없이도) 매번
-     * 호출되어 board 이미지 4장 포함 11장을 재decode — lv_refr_now에서 1초 이상
-     * 소요. 언어/단위가 실제로 바뀐 경우 또는 init_page_automode가 오브젝트를
-     * 새로 만든 직후(ui_lang_reset_automode_cache 호출됨)에만 재적용한다. */
-    int key = lang * 10 + is_f;
-    if (key == s_last_key_automode) return;
-    s_last_key_automode = key;
-    _L(bk_ui->automode_title,                   "/images/automode_title",                ".png");
-    _L(bk_ui->automode_imageview3,              "/images/exit_bt",                       ".png");
-    _L(bk_ui->automode_imageview5,              "/images/start_bt",                      ".png");
-    _L(bk_ui->automode_imageview6,              "/images/auto_mode_start_box_time",      ".png");
-    _L(bk_ui->automode_imageview23,             "/images/load_bt",                       ".png");
-    _L(bk_ui->automode_imageview25,             "/images/save_bt",                       ".png");
-    _L(bk_ui->automode_imageview26,             "/images/auto_mode_freeze_board",        ".png");
-    _L(bk_ui->automode_imageview31,             "/images/auto_mode_defrost_board",       ".png");
-    _L(bk_ui->automode_imageview44,             "/images/auto_mode_fermentation1_board", ".png");
-    _L(bk_ui->automode_imageview60,             "/images/auto_mode_fermentation2_board", ".png");
-    _L(bk_ui->automode_AutoModeDefrostAutoTime, "/images/defrost_auto_time_box",         ".png");
-    _L(bk_ui->automode_keypadbaseim,            "/images/keypad",                        ".png");
-}
+// void ui_lang_apply_automode(bk_lv_ui_t *bk_ui)
+// {
+//     int lang, is_f;
+//     _get_state(&lang, &is_f);
+//     /* automode 오브젝트가 살아있는 채로 재진입할 때마다(언어 변경 없이도) 매번
+//      * 호출되어 board 이미지 4장 포함 11장을 재decode — lv_refr_now에서 1초 이상
+//      * 소요. 언어/단위가 실제로 바뀐 경우 또는 init_page_automode가 오브젝트를
+//      * 새로 만든 직후(ui_lang_reset_automode_cache 호출됨)에만 재적용한다. */
+//     int key = lang * 10 + is_f;
+//     if (key == s_last_key_automode) return;
+//     s_last_key_automode = key;
+//     _L(bk_ui->automode_title,                   "/images/automode_title",                ".png");
+//     _L(bk_ui->automode_imageview3,              "/images/exit_bt",                       ".png");
+//     _L(bk_ui->automode_imageview5,              "/images/start_bt",                      ".png");
+//     _L(bk_ui->automode_imageview6,              "/images/auto_mode_start_box_time",      ".png");
+//     _L(bk_ui->automode_imageview23,             "/images/load_bt",                       ".png");
+//     _L(bk_ui->automode_imageview25,             "/images/save_bt",                       ".png");
+//     _L(bk_ui->automode_imageview26,             "/images/auto_mode_freeze_board",        ".png");
+//     _L(bk_ui->automode_imageview31,             "/images/auto_mode_defrost_board",       ".png");
+//     _L(bk_ui->automode_imageview44,             "/images/auto_mode_fermentation1_board", ".png");
+//     _L(bk_ui->automode_imageview60,             "/images/auto_mode_fermentation2_board", ".png");
+//     _L(bk_ui->automode_AutoModeDefrostAutoTime, "/images/defrost_auto_time_box",         ".png");
+//     _L(bk_ui->automode_keypadbaseim,            "/images/keypad",                        ".png");
+// }
 
 /* ── automodestart ──────────────────────────────────────────────────── */
 static int s_last_key_automodestart = -1;
@@ -897,7 +897,7 @@ void ui_lang_apply_all(bk_lv_ui_t *bk_ui)
     // _A(main,                     ui_lang_apply_main);
     _A(manualmode,               ui_lang_apply_manualmode);
     _A(manualmodestart,          ui_lang_apply_manualmodestart);
-    _A(automode,                 ui_lang_apply_automode);
+    // _A(automode,                 ui_lang_apply_automode);
     _A(automodestart,            ui_lang_apply_automodestart);
     _A(automodeend,              ui_lang_apply_automodeend);
     _A(autodrymode,              ui_lang_apply_autodrymode);

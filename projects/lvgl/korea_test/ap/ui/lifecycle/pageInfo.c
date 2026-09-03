@@ -62,7 +62,9 @@ static const preRenderImageInfo_t AutomodePreRenderImages[] =
     { "/images/load_bt", true, false, ".png" },
     { "/images/exit_bt", true, false, ".png" },
     { "/images/save_bt", true, false, ".png" },
-    { "/images/start_bt", true, false, ".png" }
+    { "/images/start_bt", true, false, ".png" },
+    { "/images/temp_f", false, false, ".png" },
+    { "/images/keypad", true, false, ".png" }
 };
 static const preRenderImageInfo_t SettingmodePreRenderImages[] =
 {
