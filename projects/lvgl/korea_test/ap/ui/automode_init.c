@@ -940,12 +940,12 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_style_text_align(bk_ui->automode_AutoFreezeTempTxt, LV_TEXT_ALIGN_RIGHT, 0);
 
             // ImageView: AutoModeFreezeTempCheckBoxIm
-            bk_ui->automode_AutoModeFreezeTempCheckBoxIm = lv_image_create(bk_ui->automode);
-            getImageFullPath("/images/auto_temp_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
-            lv_image_set_src(bk_ui->automode_AutoModeFreezeTempCheckBoxIm, fullPath);
-            lv_obj_add_flag(bk_ui->automode_AutoModeFreezeTempCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_set_pos(bk_ui->automode_AutoModeFreezeTempCheckBoxIm, 136, 188);
-            lv_obj_set_size(bk_ui->automode_AutoModeFreezeTempCheckBoxIm, 110, 99);
+            // bk_ui->automode_AutoModeFreezeTempCheckBoxIm = lv_image_create(bk_ui->automode);
+            // getImageFullPath("/images/auto_temp_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
+            // lv_image_set_src(bk_ui->automode_AutoModeFreezeTempCheckBoxIm, fullPath);
+            // lv_obj_add_flag(bk_ui->automode_AutoModeFreezeTempCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
+            // lv_obj_set_pos(bk_ui->automode_AutoModeFreezeTempCheckBoxIm, 136, 188);
+            // lv_obj_set_size(bk_ui->automode_AutoModeFreezeTempCheckBoxIm, 110, 99);
 
             // ImageView: imageview31
             bk_ui->automode_imageview31 = lv_image_create(bk_ui->automode);
@@ -974,12 +974,12 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_style_text_align(bk_ui->automode_AutoDefrostTempTxt, LV_TEXT_ALIGN_RIGHT, 0);
 
             // ImageView: AutoModeDefrostTempCheckBoxIm
-            bk_ui->automode_AutoModeDefrostTempCheckBoxIm = lv_image_create(bk_ui->automode);
-            getImageFullPath("/images/auto_temp_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
-            lv_image_set_src(bk_ui->automode_AutoModeDefrostTempCheckBoxIm, fullPath);
-            lv_obj_add_flag(bk_ui->automode_AutoModeDefrostTempCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_set_pos(bk_ui->automode_AutoModeDefrostTempCheckBoxIm, 640, 188);
-            lv_obj_set_size(bk_ui->automode_AutoModeDefrostTempCheckBoxIm, 110, 99);
+            // bk_ui->automode_AutoModeDefrostTempCheckBoxIm = lv_image_create(bk_ui->automode);
+            // getImageFullPath("/images/auto_temp_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
+            // lv_image_set_src(bk_ui->automode_AutoModeDefrostTempCheckBoxIm, fullPath);
+            // lv_obj_add_flag(bk_ui->automode_AutoModeDefrostTempCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
+            // lv_obj_set_pos(bk_ui->automode_AutoModeDefrostTempCheckBoxIm, 640, 188);
+            // lv_obj_set_size(bk_ui->automode_AutoModeDefrostTempCheckBoxIm, 110, 99);
 
             // Button: AutoDefrostTimeHourBt
             bk_ui->automode_AutoDefrostTimeHourBt = lv_button_create(bk_ui->automode);
@@ -1020,12 +1020,12 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_style_text_align(bk_ui->automode_AutoDefrostTimeMinTxt, LV_TEXT_ALIGN_CENTER, 0);
 
             // ImageView: AutoModeDefrostTimeCheckBoxIm
-            bk_ui->automode_AutoModeDefrostTimeCheckBoxIm = lv_image_create(bk_ui->automode);
-            getImageFullPath("/images/auto_autotime_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
-            lv_image_set_src(bk_ui->automode_AutoModeDefrostTimeCheckBoxIm, fullPath);
-            lv_obj_add_flag(bk_ui->automode_AutoModeDefrostTimeCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_set_pos(bk_ui->automode_AutoModeDefrostTimeCheckBoxIm, 754, 188);
-            lv_obj_set_size(bk_ui->automode_AutoModeDefrostTimeCheckBoxIm, 242, 99);
+            // bk_ui->automode_AutoModeDefrostTimeCheckBoxIm = lv_image_create(bk_ui->automode);
+            // getImageFullPath("/images/auto_autotime_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
+            // lv_image_set_src(bk_ui->automode_AutoModeDefrostTimeCheckBoxIm, fullPath);
+            // lv_obj_add_flag(bk_ui->automode_AutoModeDefrostTimeCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
+            // lv_obj_set_pos(bk_ui->automode_AutoModeDefrostTimeCheckBoxIm, 754, 188);
+            // lv_obj_set_size(bk_ui->automode_AutoModeDefrostTimeCheckBoxIm, 242, 99);
 
             // ImageView: AutoModeDefrostAutoTime
             bk_ui->automode_AutoModeDefrostAutoTime = lv_image_create(bk_ui->automode);
@@ -1062,12 +1062,12 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_style_text_align(bk_ui->automode_AutoFermentation1TempTxt, LV_TEXT_ALIGN_RIGHT, 0);
 
             // ImageView: AutoModeFermentation1TempCheckBoxIm
-            bk_ui->automode_AutoModeFermentation1TempCheckBoxIm = lv_image_create(bk_ui->automode);
-            getImageFullPath("/images/auto_temp_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
-            lv_image_set_src(bk_ui->automode_AutoModeFermentation1TempCheckBoxIm, fullPath);
-            lv_obj_add_flag(bk_ui->automode_AutoModeFermentation1TempCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_set_pos(bk_ui->automode_AutoModeFermentation1TempCheckBoxIm, 136, 320);
-            lv_obj_set_size(bk_ui->automode_AutoModeFermentation1TempCheckBoxIm, 110, 99);
+            // bk_ui->automode_AutoModeFermentation1TempCheckBoxIm = lv_image_create(bk_ui->automode);
+            // getImageFullPath("/images/auto_temp_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
+            // lv_image_set_src(bk_ui->automode_AutoModeFermentation1TempCheckBoxIm, fullPath);
+            // lv_obj_add_flag(bk_ui->automode_AutoModeFermentation1TempCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
+            // lv_obj_set_pos(bk_ui->automode_AutoModeFermentation1TempCheckBoxIm, 136, 320);
+            // lv_obj_set_size(bk_ui->automode_AutoModeFermentation1TempCheckBoxIm, 110, 99);
 
             // Button: AutoFermentation1HumidityBt
             bk_ui->automode_AutoFermentation1HumidityBt = lv_button_create(bk_ui->automode);
@@ -1134,12 +1134,12 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_style_text_align(bk_ui->automode_AutoFermentation1TimeMinTxt, LV_TEXT_ALIGN_CENTER, 0);
 
             // ImageView: AutoModeFermentation1TimeCheckBoxIm
-            bk_ui->automode_AutoModeFermentation1TimeCheckBoxIm = lv_image_create(bk_ui->automode);
-            getImageFullPath("/images/auto_time_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
-            lv_image_set_src(bk_ui->automode_AutoModeFermentation1TimeCheckBoxIm, fullPath);
-            lv_obj_add_flag(bk_ui->automode_AutoModeFermentation1TimeCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_set_pos(bk_ui->automode_AutoModeFermentation1TimeCheckBoxIm, 344, 320);
-            lv_obj_set_size(bk_ui->automode_AutoModeFermentation1TimeCheckBoxIm, 142, 99);
+            // bk_ui->automode_AutoModeFermentation1TimeCheckBoxIm = lv_image_create(bk_ui->automode);
+            // getImageFullPath("/images/auto_time_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
+            // lv_image_set_src(bk_ui->automode_AutoModeFermentation1TimeCheckBoxIm, fullPath);
+            // lv_obj_add_flag(bk_ui->automode_AutoModeFermentation1TimeCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
+            // lv_obj_set_pos(bk_ui->automode_AutoModeFermentation1TimeCheckBoxIm, 344, 320);
+            // lv_obj_set_size(bk_ui->automode_AutoModeFermentation1TimeCheckBoxIm, 142, 99);
 
             // ImageView: imageview60
             bk_ui->automode_imageview60 = lv_image_create(bk_ui->automode);
@@ -1168,12 +1168,12 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_style_text_align(bk_ui->automode_AutoFermentation2TempTxt, LV_TEXT_ALIGN_RIGHT, 0);
 
             // ImageView: AutoModeFermentation2TempCheckBoxIm
-            bk_ui->automode_AutoModeFermentation2TempCheckBoxIm = lv_image_create(bk_ui->automode);
-            getImageFullPath("/images/auto_temp_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
-            lv_image_set_src(bk_ui->automode_AutoModeFermentation2TempCheckBoxIm, fullPath);
-            lv_obj_add_flag(bk_ui->automode_AutoModeFermentation2TempCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_set_pos(bk_ui->automode_AutoModeFermentation2TempCheckBoxIm, 640, 320);
-            lv_obj_set_size(bk_ui->automode_AutoModeFermentation2TempCheckBoxIm, 110, 99);
+            // bk_ui->automode_AutoModeFermentation2TempCheckBoxIm = lv_image_create(bk_ui->automode);
+            // getImageFullPath("/images/auto_temp_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
+            // lv_image_set_src(bk_ui->automode_AutoModeFermentation2TempCheckBoxIm, fullPath);
+            // lv_obj_add_flag(bk_ui->automode_AutoModeFermentation2TempCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
+            // lv_obj_set_pos(bk_ui->automode_AutoModeFermentation2TempCheckBoxIm, 640, 320);
+            // lv_obj_set_size(bk_ui->automode_AutoModeFermentation2TempCheckBoxIm, 110, 99);
 
             // Button: AutoFermentation2HumidityBt
             bk_ui->automode_AutoFermentation2HumidityBt = lv_button_create(bk_ui->automode);
@@ -1195,12 +1195,12 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_style_text_align(bk_ui->automode_AutoFermentation2HumidityTxt, LV_TEXT_ALIGN_CENTER, 0);
 
             // ImageView: AutoModeFermentation2HumidityCheckBoxIm
-            bk_ui->automode_AutoModeFermentation2HumidityCheckBoxIm = lv_image_create(bk_ui->automode);
-            getImageFullPath("/images/auto_humidity_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
-            lv_image_set_src(bk_ui->automode_AutoModeFermentation2HumidityCheckBoxIm, fullPath);
-            lv_obj_add_flag(bk_ui->automode_AutoModeFermentation2HumidityCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_set_pos(bk_ui->automode_AutoModeFermentation2HumidityCheckBoxIm, 754, 320);
-            lv_obj_set_size(bk_ui->automode_AutoModeFermentation2HumidityCheckBoxIm, 96, 99);
+            // bk_ui->automode_AutoModeFermentation2HumidityCheckBoxIm = lv_image_create(bk_ui->automode);
+            // getImageFullPath("/images/auto_humidity_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
+            // lv_image_set_src(bk_ui->automode_AutoModeFermentation2HumidityCheckBoxIm, fullPath);
+            // lv_obj_add_flag(bk_ui->automode_AutoModeFermentation2HumidityCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
+            // lv_obj_set_pos(bk_ui->automode_AutoModeFermentation2HumidityCheckBoxIm, 754, 320);
+            // lv_obj_set_size(bk_ui->automode_AutoModeFermentation2HumidityCheckBoxIm, 96, 99);
 
             // Button: AutoFermentation2TimeHourBt
             bk_ui->automode_AutoFermentation2TimeHourBt = lv_button_create(bk_ui->automode);
@@ -1241,12 +1241,12 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_style_text_align(bk_ui->automode_AutoFermentation2TimeMinTxt, LV_TEXT_ALIGN_CENTER, 0);
 
             // ImageView: AutoModeFermentation2TimeCheckBoxIm
-            bk_ui->automode_AutoModeFermentation2TimeCheckBoxIm = lv_image_create(bk_ui->automode);
-            getImageFullPath("/images/auto_time_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
-            lv_image_set_src(bk_ui->automode_AutoModeFermentation2TimeCheckBoxIm, fullPath);
-            lv_obj_add_flag(bk_ui->automode_AutoModeFermentation2TimeCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_set_pos(bk_ui->automode_AutoModeFermentation2TimeCheckBoxIm, 854, 320);
-            lv_obj_set_size(bk_ui->automode_AutoModeFermentation2TimeCheckBoxIm, 142, 99);
+            // bk_ui->automode_AutoModeFermentation2TimeCheckBoxIm = lv_image_create(bk_ui->automode);
+            // getImageFullPath("/images/auto_time_checkbox", false, false, ".png", fullPath, sizeof(fullPath));
+            // lv_image_set_src(bk_ui->automode_AutoModeFermentation2TimeCheckBoxIm, fullPath);
+            // lv_obj_add_flag(bk_ui->automode_AutoModeFermentation2TimeCheckBoxIm, LV_OBJ_FLAG_HIDDEN);
+            // lv_obj_set_pos(bk_ui->automode_AutoModeFermentation2TimeCheckBoxIm, 854, 320);
+            // lv_obj_set_size(bk_ui->automode_AutoModeFermentation2TimeCheckBoxIm, 142, 99);
             
             // keypadbaseim + KeyPad: lazy-created in _keypad_on_automode on first use
             bk_ui->automode_keypadbaseim = lv_image_create(bk_ui->automode);
@@ -1434,6 +1434,7 @@ void init_keypad_group(bk_lv_ui_t *bk_ui)
         lv_obj_add_style(bk_ui->automode_KeyPadBt[i], &style_transp, 0);
         lv_obj_set_pos(bk_ui->automode_KeyPadBt[i], x_start + i * x_step, y_start);
         lv_obj_set_size(bk_ui->automode_KeyPadBt[i], 65, 75);
+        lv_obj_remove_flag(bk_ui->automode_KeyPadBt[i], LV_OBJ_FLAG_CLICKABLE);
         lv_obj_add_event_cb(bk_ui->automode_KeyPadBt[i], keypad_touch_event_cb, LV_EVENT_ALL, (void *)(intptr_t)i);
         // printf("/images/keypad%s.png", keypad_names[i]);
 
