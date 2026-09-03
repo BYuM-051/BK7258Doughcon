@@ -12,7 +12,7 @@
 
 #define TAG "[main_cb.c] "
 // #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
-#include "preRenderer.h"
+#include "pageManager.h"
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
 

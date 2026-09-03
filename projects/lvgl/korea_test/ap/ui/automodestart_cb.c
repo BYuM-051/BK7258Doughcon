@@ -14,9 +14,9 @@
 #include "ui_lang.h"
 #include "hardware_hal.h"
 #include "uart_comm.h"
-#include "preRenderer.h"
 
 #define TAG "[automodestart_cb.c] "
+#include "pageManager.h"
 // #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 

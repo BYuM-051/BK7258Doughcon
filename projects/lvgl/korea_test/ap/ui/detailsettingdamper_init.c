@@ -7,11 +7,10 @@
 #include <string.h>
 
 #include "ui_config.h"
-#include "preRenderer.h"
 #include "settings.h"
 
 #define TAG "[detailsettingdamper_init.c] "
-#include "preRenderer.h"
+#include "pageManager.h"
 // #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 static uint32_t currentStep = RENDER_STEP_CREATE_PAGE;

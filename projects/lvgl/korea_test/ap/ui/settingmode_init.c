@@ -7,9 +7,9 @@
 #include <string.h>
 
 #include "ui_config.h"
-#include "preRenderer.h"
 #include "settings.h"
 
+#include "pageManager.h"
 #define TAG "[settingmode_init.c] "
 // #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 

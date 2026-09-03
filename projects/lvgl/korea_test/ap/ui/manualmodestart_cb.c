@@ -16,8 +16,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "preRenderer.h"
 
+#include "pageManager.h"
 #define TAG "[manualmodestart_cb.c] "
 // #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 

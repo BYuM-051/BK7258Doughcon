@@ -6,7 +6,9 @@
 #include <string.h>
 
 #include "ui_config.h"
-#include "preRenderer.h"
+
+#define TAG "[introactivity_init.c] "
+#include "pageManager.h"
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;

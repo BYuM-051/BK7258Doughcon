@@ -7,10 +7,10 @@
 #include <string.h>
 
 #include "ui_config.h"
-#include "preRenderer.h"
 #include "settings.h"
 
 #define TAG "[main_init.c] "
+#include "pageManager.h"
 // #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
@@ -85,12 +85,6 @@ void init_page_main(bk_lv_ui_t * bk_ui)
         destroy_page_main(bk_ui);
     }
 
-    // bk_ui->main = lv_obj_create(NULL);
-    // lv_obj_set_size(bk_ui->main, 1024, 600);
-    // lv_obj_set_scrollbar_mode(bk_ui->main, LV_SCROLLBAR_MODE_OFF);
-    // lv_obj_set_style_bg_color(bk_ui->main, lv_color_hex(0xD5D5D5), 0);
-    // lv_obj_set_style_bg_opa(bk_ui->main, LV_OPA_COVER, 0);
-    // lv_obj_add_event_cb(bk_ui->main, main_load_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
     ui_lang_reset_main_cache();
 
 #if UI_PRENDERING_ENABLE
