@@ -4,22 +4,24 @@
 #include "lvgl.h"
 #include "beken_ui.h"
 #include "preRenderInfo.h"
+#include "ui_config.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern lv_obj_t *preRenderRoot;
-extern lv_obj_t *currentPage;
 extern lv_event_code_t UI_EVENT_PAGE_SHOW_START;
 extern lv_event_code_t UI_EVENT_PAGE_SHOWN;
 extern lv_event_code_t UI_EVENT_PAGE_HIDE_START;
 extern lv_event_code_t UI_EVENT_PAGE_HIDDEN;
 
-extern void ui_screen_event_init(void);
-extern bool ui_screen_event_initialized(void);
-extern void ui_page_change(pageId_t newPageID);
-extern lv_obj_t *ui_get_current_page(void);
+extern void uiPreprocessorInit(void);
+extern bool uiPreprocessorInitialized(void);
+extern bool isPagePreloaded(pageId_t pageID);
+
+extern void uiEnqueuePreloadTargets(pageId_t newPageID);
+extern void uiPreloadPageForce(pageId_t pageID);
+extern void uiResetPreprocessQueue(void);
 
 #ifdef __cplusplus
 }

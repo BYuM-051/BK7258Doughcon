@@ -29,15 +29,14 @@
 #include "lv_vendor.h"
 #include "ui_lang.h"
 
-#include "preRenderer.h"
-#include "preRenderInfo.h"
-
+#include "pageManager.h"
 #define TAG "[beken_ui.c] "
 // #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 bk_lv_ui_t bk_lv_tool_ui = {0};
-lv_obj_t *preRenderRoot = NULL; // renderer root 생명주기를 beken_ui.c에서 관리하도록 변경. preRenderer.c에서는 extern으로 선언만 한다.
+extern lv_obj_t *preRenderRoot;
 
+extern pageId_t getRecoveredPageID(void);
 
 /**
  * @brief Get the configured screen width
@@ -73,205 +72,6 @@ extern void lvgl_vfs_copy_and_remount_psram(void);
 #ifndef HAL_USE_EMULATOR
 static beken_thread_t s_uart_thread  = NULL;
 static beken_thread_t s_flash_thread = NULL;
-
-#if UI_BOOT_WARMUP_ENABLE
-/* 부팅 중 automode만 한 번 렌더시켜, 최초 1회성 렌더 지연(~1초)을 부팅
- * 시간에 미리 치른다 — 사용자가 실제로 처음 들어갈 때는 이미 "두 번째
- * 진입"처럼 빠르게 느껴짐. introactivity는 일반 화면(scr_act)이라
- * lv_scr_load()를 하는 순간 가려지므로, intro.jpg를 lv_layer_top()
- * 오버레이로 하나 더 띄워 그 뒤에서 화면을 순회한다(password 팝업/timebar와
- * 동일한 오버레이 패턴) — 사용자 눈에는 계속 intro 화면이 떠 있는 것처럼
- * 보인다. 마지막에 main으로 전환하고 오버레이를 지우는 것으로 끝난다.
- *
- * 원래는 automode/memorymode/settingmode/settingmodetest 4개를 모두
- * warmup했으나, 4개 화면을 전부 destroy 없이 permanently 살려두는 바람에
- * 상시 PSRAM 점유가 늘어 picker/reset_popup류의 큰 ARGB8888 decode가
- * 실패하는 크래시 빈도가 늘어난 것으로 보여, 실사용 빈도가 가장 높은
- * automode 하나로 줄였다(절충안). memorymode/settingmode/settingmodetest는
- * 기존 화면별 prewarm(공유 캐시, evict 가능)만으로 커버한다. */
-static void _boot_warmup_screens(bk_lv_ui_t *bk_ui)
-{
-#if 1 // warm-up 구현을 생명주기 관리자가 알아서 할 예정임 여기는 그런거 없다.
-    //FIXME : NULL screen에서 Main으로 진입하는 첫 번째라서 확인을 좀 해봐야 할 듯.
-    #define UI_EVENT_BOOT_WARMUP_EVENT UI_EVENT_PAGE_SHOWN
-    uint32_t ts;
-    extern pageId_t currentPageID;
-    extern lv_obj_t *currentScreen;
-    extern preRendererPageState_t preRenderPageState[PAGE_COUNT];
-
-    // init warmup main
-    ts = lv_tick_get();
-    while(true)
-    {
-        rendererFuncStatus_t result = init_page_main_with_step(bk_ui);
-        if(result == RENDERER_FUNC_DONE)
-        {
-            break;
-        }
-        else if(result == RENDERER_FUNC_FAILED)
-        {
-            bk_printf(TAG "[BOOT] init_page_main_with_step failed\n");
-            lv_delay_ms(2000);
-            LV_ASSERT(0);
-        }
-    }
-    bk_printf(TAG "[BOOT] warmup main: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
-
-    // init warmup automode
-    ts = lv_tick_get();
-    while(true)
-    {
-        rendererFuncStatus_t result = init_page_automode_with_step(bk_ui);
-        if(result == RENDERER_FUNC_DONE)
-        {
-            break;
-        }
-        else if(result == RENDERER_FUNC_FAILED)
-        {
-            bk_printf(TAG "[BOOT] init_page_automode_with_step failed\n");
-            lv_delay_ms(2000);
-            LV_ASSERT(0);
-        }
-    }
-    bk_printf(TAG "[BOOT] warmup automode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
-
-    // init warmup manualmode
-    ts = lv_tick_get();
-    while(true)
-    {
-        rendererFuncStatus_t result = init_page_manualmode_with_step(bk_ui);
-        if(result == RENDERER_FUNC_DONE)
-        {
-            break;
-        }
-        else if(result == RENDERER_FUNC_FAILED)
-        {
-            bk_printf(TAG "[BOOT] init_page_manualmode_with_step failed\n");
-            lv_delay_ms(2000);
-            LV_ASSERT(0);
-        }
-    }
-    bk_printf(TAG "[BOOT] warmup manualmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
-
-    // init warmup autodrymode
-    ts = lv_tick_get();
-    while(true)
-    {
-        rendererFuncStatus_t result = init_page_autodrymode_with_step(bk_ui);
-        if(result == RENDERER_FUNC_DONE)
-        {
-            break;
-        }
-        else if(result == RENDERER_FUNC_FAILED)
-        {
-            bk_printf(TAG "[BOOT] init_page_autodrymode_with_step failed\n");
-            lv_delay_ms(2000);
-            LV_ASSERT(0);
-        }
-    }
-    bk_printf(TAG "[BOOT] warmup autodrymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
-    
-    // init warmup memorymode
-    ts = lv_tick_get();
-    while(true)
-    {
-        rendererFuncStatus_t result = init_page_memorymode_with_step(bk_ui);
-        if(result == RENDERER_FUNC_DONE)
-        {
-            break;
-        }
-        else if(result == RENDERER_FUNC_FAILED)
-        {
-            bk_printf(TAG "[BOOT] init_page_memorymode_with_step failed\n");
-            lv_delay_ms(2000);
-            LV_ASSERT(0);
-        }
-    }
-    bk_printf(TAG "[BOOT] warmup memorymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
-    
-    // init warmup settingmode
-    ts = lv_tick_get();
-    while(true)
-    {
-        rendererFuncStatus_t result = init_page_settingmode_with_step(bk_ui);
-        if(result == RENDERER_FUNC_DONE)
-        {
-            break;
-        }
-        else if(result == RENDERER_FUNC_FAILED)
-        {
-            bk_printf(TAG "[BOOT] init_page_settingmode_with_step failed\n");
-            lv_delay_ms(2000);
-            LV_ASSERT(0);
-        }
-    }
-    bk_printf(TAG "[BOOT] warmup settingmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
-
-    bk_printf(TAG "[BOOT] entering main\n");
-    currentPageID = PAGE_MAIN;
-    lv_obj_move_to_index(bk_ui->main, -1);
-    lv_obj_remove_flag(bk_ui->main, LV_OBJ_FLAG_HIDDEN);
-    currentScreen = preRenderRoot;
-    lv_obj_send_event(bk_ui->main, UI_EVENT_PAGE_SHOWN, NULL); // NOTE : 이거 켜면 prewarm이 enable되어서 드디어 진짜로 빨라질 것 같음
-    bk_printf(TAG "[BOOT] warmup main: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
-#else
-    uint32_t t0 = lv_tick_get();
-    uint32_t ts;
-
-    lv_obj_t *cover = lv_obj_create(lv_layer_top());
-    lv_obj_set_size(cover, 1024, 600);
-    lv_obj_set_pos(cover, 0, 0);
-    lv_obj_set_scrollbar_mode(cover, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_style_border_width(cover, 0, 0);
-    lv_obj_set_style_radius(cover, 0, 0);
-    lv_obj_set_style_pad_all(cover, 0, 0);
-    lv_obj_set_style_bg_opa(cover, LV_OPA_TRANSP, 0);
-
-    lv_obj_t *cover_img = lv_image_create(cover);
-    lv_obj_set_pos(cover_img, 0, 0);
-    lv_obj_set_size(cover_img, LV_PCT(100), LV_PCT(100));
-    lv_image_set_src(cover_img, "/images/intro.jpg");
-
-    lv_obj_t *cover_lbl = lv_label_create(cover);
-    lv_label_set_text(cover_lbl, "BOOTING...");
-    lv_obj_set_style_text_color(cover_lbl, lv_color_white(), 0);
-    lv_obj_align(cover_lbl, LV_ALIGN_BOTTOM_MID, 0, -50);
-
-    lv_refr_now(NULL);  /* cover가 실제로 화면에 그려짐을 보장한 뒤 아래 화면을 순회 */
-
-    ts = lv_tick_get();
-    init_page_automode(bk_ui);
-    lv_obj_move_to_index(bk_ui->automode, -1);
-    // lv_scr_load(bk_ui->automode);
-    // lv_obj_add_flag(bk_ui->automode, LV_OBJ_FLAG_HIDDEN); // hidden으로 하면 실제로 render가 안됨. 이거 이런식으로 하는게 아니라 screen을 하나 두고 child만 계속 바꿔끼는 식으로 해야겠는데?
-    lv_refr_now(NULL);
-    bk_printf(TAG "[BOOT] warmup automode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
-
-    // NOTE : 이부분은 내가 한거 -BYuM 근데 어차피 얘 호출 안 할거임. preWarm 생명주기는 다른애가 관리할 예정
-    // ts = lv_tick_get();
-    // init_page_manualmode(bk_ui);
-    // lv_obj_move_to_index(bk_ui->manualmode, -1);
-    // lv_refr_now(NULL);
-    // bk_printf(TAG "[BOOT] warmup manualmode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
-
-    // ts = lv_tick_get();
-    // init_page_autodrymode(bk_ui);
-    // lv_obj_move_to_index(bk_ui->autodrymode, -1);
-    // lv_refr_now(NULL);
-    // bk_printf(TAG "[BOOT] warmup autodrymode: %lu ms\n", (unsigned long)lv_tick_elaps(ts));
-
-    /* main으로 최종 전환 — automode 오브젝트는 destroy하지 않고 그대로 둠:
-     * 실제 진입 시 재생성 없이 재사용된다. */
-    lv_obj_move_to_index(bk_ui->main, -1);
-    lv_scr_load(preRenderRoot);
-    lv_refr_now(NULL);
-    lv_obj_del(cover);
-    lv_refr_now(NULL);
-
-    bk_printf(TAG "[BOOT] warmup total: %lu ms\n", (unsigned long)lv_tick_elaps(t0));
-#endif /* 1 // warm-up 구현을 생명주기 관리자가 알아서 할 예정임 여기는 그런거 없다. */
-}
-#endif /* UI_BOOT_WARMUP_ENABLE */
 
 static void _uart_comm_task(beken_thread_arg_t arg)
 {
@@ -322,16 +122,9 @@ static void _uart_comm_task(beken_thread_arg_t arg)
     /* Phase 3: UI 초기화 (PSRAM VFS 기반) */
     lv_vendor_disp_lock();
     _boot_t = lv_tick_get();
-    bk_printf(TAG "[BOOT] ui_screen_event_init() start\n");
-    ui_screen_event_init();
-    bk_printf(TAG "[BOOT] ui_screen_event_init: %lu ms\n", lv_tick_elaps(_boot_t));
-
-    preRenderRoot = lv_obj_create(NULL);
-    lv_obj_set_scrollbar_mode(preRenderRoot, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_style_border_width(preRenderRoot, 0, 0);
-    lv_obj_set_style_radius(preRenderRoot, 0, 0);
-    lv_obj_set_style_pad_all(preRenderRoot, 0, 0);
-    lv_obj_set_style_bg_opa(preRenderRoot, LV_OPA_TRANSP, 0); // 배경 투명
+    bk_printf(TAG "[BOOT] pageManagerInit() start\n");
+    pageManagerInit();
+    bk_printf(TAG "[BOOT] pageManagerInit: %lu ms\n", lv_tick_elaps(_boot_t));
 
     main_activity_on_create();
     bk_printf(TAG "[BOOT] main_activity_on_create: %lu ms\n", lv_tick_elaps(_boot_t));
@@ -341,22 +134,18 @@ static void _uart_comm_task(beken_thread_arg_t arg)
     ui_lang_apply_timebar(&bk_lv_tool_ui);
     bk_printf(TAG "[BOOT] init_page_timebar: %lu ms\n", lv_tick_elaps(_boot_t));
 
-    if (!g_device_state.black_out_checking) {
-#if UI_BOOT_WARMUP_ENABLE
-        /* introactivity("BOOTING...")가 아직 떠 있는 동안 백그라운드처럼
-         * automode/memorymode/settingmode를 순회 warmup한 뒤 main으로 전환.
-         * _boot_warmup_screens()가 마지막에 lv_scr_load(main)까지 수행한다. */
-        _boot_warmup_screens(&bk_lv_tool_ui);
-        lv_scr_load(preRenderRoot);
-        lv_refr_now(NULL);
-#else
-        lv_scr_load(bk_lv_tool_ui.main);
-#endif
+    if (!g_device_state.black_out_checking) 
+    {
+        ui_page_init(PAGE_MAIN);
         bk_printf(TAG "[BOOT] main screen loaded\n");
-    } else {
-        // NOTE : blackout recovery screen 확인해야함
+    } 
+    else 
+    {
+        ui_page_init(getRecoveredPageID());
         bk_printf(TAG "[BOOT] blackout recovery screen active\n");
     }
+    lv_scr_load(preRenderRoot);
+    lv_refr_now(NULL);
     destroy_page_introactivity(&bk_lv_tool_ui);
     lv_vendor_disp_unlock();
 

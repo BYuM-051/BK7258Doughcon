@@ -1,67 +1,29 @@
 #include "lvgl.h"
 #include <stdio.h>
+#include <string.h>
 #include "preRenderer.h"
-#include "preRenderInfo.h"
-#include "ui_config.h"
 #include "queue.h"
 #include "FreeRTOS.h"
+#include "settings.h"
 
 #define TAG "[preRenderer.c] "
 // #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
-lv_obj_t *currentPage = NULL;
-lv_obj_t *currentScreen = NULL;
-pageId_t currentPageID = PAGE_NONE; // 첫 init을 main으로하면 uiChange에서 return맞고 assert됨
-
-#if !UI_PRENDERING_ENABLE
-lv_event_code_t UI_EVENT_PAGE_SHOW_START = LV_EVENT_SCREEN_LOAD_START;
-lv_event_code_t UI_EVENT_PAGE_SHOWN = LV_EVENT_SCREEN_LOADED;
-lv_event_code_t UI_EVENT_PAGE_HIDE_START = LV_EVENT_SCREEN_UNLOAD_START;
-lv_event_code_t UI_EVENT_PAGE_HIDDEN = LV_EVENT_SCREEN_UNLOADED;
-#else
-lv_event_code_t UI_EVENT_PAGE_SHOW_START;
-lv_event_code_t UI_EVENT_PAGE_SHOWN;
-lv_event_code_t UI_EVENT_PAGE_HIDE_START;
-lv_event_code_t UI_EVENT_PAGE_HIDDEN;
 
 #include "lv_conf.h"
-static void uiPagePreRenderPop(pageId_t pageId);
-static void uiPagePreRenderRegister(pageId_t pageId);
-static void uiPagePreRenderTask(lv_timer_t *timer);
 
-static pageId_t currentPreRenderPage = PAGE_NONE;
+static void uiPagePreloadTask(lv_timer_t *timer);
 
 static QueueHandle_t preRendererQueue = NULL;
 static lv_timer_t* preRendererTimer = NULL;
 
-#endif
-
 static bool uiScreenEventInitialized = false;
 
-void ui_screen_event_init(void)
+void uiPreprocessorInit(void)
 {
-    if(uiScreenEventInitialized)
-    {
-        return;
-    }
-    uiScreenEventInitialized = true;
-
-#if UI_PRENDERING_ENABLE
-    UI_EVENT_PAGE_SHOW_START = lv_event_register_id();
-    UI_EVENT_PAGE_SHOWN = lv_event_register_id();
-    UI_EVENT_PAGE_HIDE_START = lv_event_register_id();
-    UI_EVENT_PAGE_HIDDEN = lv_event_register_id();
-#endif
-
-    if(preRenderRoot == NULL)
-    {
-        preRenderRoot = lv_obj_create(NULL);
-        lv_obj_remove_style_all(preRenderRoot);
-        lv_obj_set_size(preRenderRoot, 1024, 600);
-        lv_obj_set_scrollbar_mode(preRenderRoot, LV_SCROLLBAR_MODE_OFF);
-    }
+    if(uiPreprocessorInitialized()) {return;}
 
     if(init_shared_image_asset() != RENDERER_FUNC_DONE)
     {
@@ -70,79 +32,36 @@ void ui_screen_event_init(void)
         LV_ASSERT(0);
     }
 
+    preRendererQueue = xQueueCreate(16, sizeof(pageId_t));
     if(preRendererQueue == NULL)
     {
-        preRendererQueue = xQueueCreate(16, sizeof(pageId_t));
-        if(preRendererQueue == NULL)
-        {
-            bk_printf(TAG "[SCREEN] Failed to create preRendererQueue\n");
-            lv_delay_ms(2000);
-            LV_ASSERT(0);
-        }
+        bk_printf(TAG "[SCREEN] Failed to create preRendererQueue\n");
+        lv_delay_ms(2000);
+        LV_ASSERT(0);
     }
 
+    preRendererTimer = lv_timer_create(uiPagePreloadTask, LV_INDEV_REFR_PERIOD, NULL);
     if(preRendererTimer == NULL)
     {
-        preRendererTimer = lv_timer_create(uiPagePreRenderTask, LV_INDEV_REFR_PERIOD, NULL);
-        if(preRendererTimer == NULL)
-        {
-            bk_printf(TAG "[SCREEN] Failed to create preRendererTimer\n");
-            lv_delay_ms(2000);
-            LV_ASSERT(0);
-        }
+        bk_printf(TAG "[SCREEN] Failed to create preRendererTimer\n");
+        lv_delay_ms(2000);
+        LV_ASSERT(0);
     }
+    uiScreenEventInitialized = true;
 }
 
-bool ui_screen_event_initialized(void)
+bool uiPreprocessorInitialized(void)
 {
     return uiScreenEventInitialized;
 }
 
-void uiPagePreRenderTask(lv_timer_t *timer)
+void uiEnqueuePreloadTargets(pageId_t newPageID)
 {
-    pageId_t pageId;
-    if(preRendererQueue == NULL)
+    for(uint32_t i = 0 ; i < preRenderPageConfig[newPageID].preRenderTargetPageCount ; i++)
     {
-        goto fatal;
+        pageId_t targetPageID = preRenderPageConfig[newPageID].preRenderTargetPages[i];
+        xQueueSendToBack(preRendererQueue, &targetPageID, 0);
     }
-    if(xQueuePeek(preRendererQueue, &pageId, 0) == pdPASS)
-    {
-        if(pageId < PAGE_MAIN || pageId >= PAGE_COUNT ||
-           preRenderPageState[pageId].config == NULL ||
-           preRenderPageState[pageId].config->init_func_with_step == NULL)
-        {
-            bk_printf(TAG "[SCREEN] Invalid pre-render page or init function: %d\n", pageId);
-            goto fatal;
-        }
-
-        rendererFuncStatus_t result =
-            preRenderPageState[pageId].config->init_func_with_step(&bk_lv_tool_ui);
-        if(result == RENDERER_FUNC_NOT_DONE)
-        {
-            currentPreRenderPage = pageId;
-            bk_printf(TAG "[SCREEN] Pre-rendering page %d is not finished yet\n", pageId);
-        }
-        else if(result == RENDERER_FUNC_FAILED)
-        {
-            bk_printf(TAG "[SCREEN] Pre-rendering page %d failed\n", pageId);
-            goto fatal;
-        }
-        else
-        {
-            xQueueReceive(preRendererQueue, &pageId, 0);
-            currentPreRenderPage = PAGE_NONE;
-        }
-    }
-
-    lv_timer_reset(timer); // yeild처럼 쓰려면 이러면 됨. period만큼 무조건 쉰다.
-    
-    return;
-
-fatal:
-    bk_printf(TAG "[SCREEN] Fatal error in uiPagePreRenderTask\n");
-    lv_delay_ms(2000);
-    LV_ASSERT(0);
-    return;
 }
 
 // screen 변경에 따른 생명주기 관리 함수
@@ -320,199 +239,7 @@ void ui_page_change(pageId_t newPageID)
 
     bk_printf(TAG "[SCREEN] ui_page_change() completed. [elapsed: %lu]\n", (unsigned long)lv_tick_elaps(startTick));
 }
-#else
-inline bool isPageIdValid(pageId_t pageId)
-{
-    return (pageId >= 0 && pageId < PAGE_COUNT);
-}
 
-void ui_page_change(pageId_t newPageID)
-{
-    bk_printf(TAG "[SCREEN] ui_page_change called Tick : %d\n", (unsigned long)lv_tick_get());
-
-    if(!uiScreenEventInitialized)
-    {
-        bk_printf(TAG "[SCREEN] ui_page_change() called before ui_screen_event_init()\n");
-        return;
-    }
-    if(!isPageIdValid(newPageID))
-    {
-        bk_printf(TAG "[SCREEN] Invalid newPageID: %d\n", newPageID);
-        goto fatal;
-    }
-    if(!isPageIdValid(currentPageID))
-    {
-        bk_printf(TAG "[SCREEN] Invalid currentPageID: %d\n", currentPageID);
-        goto fatal;
-    }
-
-    pageId_t oldPageID = currentPageID;
-    lv_obj_t* oldPage = *(preRenderPageState[oldPageID].page);
-    lv_obj_t* *newPage = preRenderPageState[newPageID].page; // lv_obj_t*를 가리키는 포인터
-
-    // page change logic start =======================================================================
-    bk_printf(TAG "[SCREEN] page change logic start Tick : %d\n", (unsigned long)lv_tick_get());
-
-    // 걍 다 비워.
-    pageId_t queueIndex;
-    xQueueReset(preRendererQueue);
-
-    // check if newPageID is already rendered and if not, call its init function
-    if(preRenderPageState[newPageID].isRendered)
-    {
-        bk_printf(TAG "[SCREEN] newPageID %d is already rendered, skipping init\n", newPageID);
-    }
-    else
-    {
-        bk_printf(TAG "[SCREEN] newPageID %d is not rendered, calling init function Tick = %d\n", newPageID, (unsigned long)lv_tick_get());
-        pageLifecycleFuncWithStep_t initFunc = getPageInitFunc(newPageID);
-        if(initFunc != NULL)
-        {
-            bk_printf(TAG "[SCREEN] Initializing newPageID %d\n", newPageID);
-            while(true)
-            {
-                rendererFuncStatus_t result = initFunc(&bk_lv_tool_ui);
-                if(result == RENDERER_FUNC_DONE)
-                {
-                    break;
-                }
-                else if(result == RENDERER_FUNC_FAILED)
-                {
-                    bk_printf(TAG "[BOOT] initFunc failed\n");
-                    lv_delay_ms(2000);
-                    LV_ASSERT(0);
-                }
-            }
-        }
-        else
-        {
-            bk_printf(TAG "[SCREEN] No init function for newPageID %d\n", newPageID);
-            goto fatal;
-        }
-        bk_printf(TAG "[SCREEN] newPageID %d initialized successfully Tick = %d\n", newPageID, (unsigned long)lv_tick_get());
-    }
-    // FIXME : popup 처리하는 부분인데, 로직 괜찮은지 모르겠음. 좀 더 봐야돼.
-    if(currentScreen != preRenderRoot) 
-    {
-        bk_printf(TAG "[SCREEN] currentScreen is not preRenderRoot, switching to preRenderRoot\n");
-        lv_obj_t *oldScreen = currentScreen;
-        lv_scr_load(preRenderRoot);
-        currentScreen = preRenderRoot;
-        lv_refr_now(NULL);
-        lv_obj_del(oldScreen);
-    }
-    // layer change and hide old page to minimize latency
-    else 
-    {
-        bk_printf(TAG "[SCREEN] before hide start Tick : %d\n", (unsigned long)lv_tick_get());
-        lv_obj_send_event(oldPage, UI_EVENT_PAGE_HIDE_START, NULL);
-        if(oldPageID != PAGE_NONE && oldPageID != newPageID)
-        {
-            for(int i = 0 ; i < PAGE_COUNT ; i++)
-            {
-                lv_obj_t *page = *(preRenderPageState[i].page);
-                if(page == NULL || !lv_obj_is_valid(page) || i == newPageID)
-                {
-                    // bk_printf(TAG "[SCREEN] Skipping hide for pageId: %d\n", i);
-                    continue;
-                }
-                lv_obj_add_flag(page, LV_OBJ_FLAG_HIDDEN);
-                bk_printf
-                (
-                    TAG "[PTR] main=%p auto=%p manual=%p autodry=%p root=%p\n",
-                    bk_lv_tool_ui.main,
-                    bk_lv_tool_ui.automode,
-                    bk_lv_tool_ui.manualmode,
-                    bk_lv_tool_ui.autodrymode,
-                    preRenderRoot
-                );
-            }
-        }
-        else
-        {
-            bk_printf(TAG "[SCREEN] No old page to hide or same as new page\n");
-            goto fatal;
-        }
-        bk_printf(TAG "[SCREEN] before show start Tick : %d\n", (unsigned long)lv_tick_get());
-        lv_obj_send_event(*newPage, UI_EVENT_PAGE_SHOW_START, NULL);
-        if(newPageID != PAGE_NONE)
-        {
-            bk_printf(TAG "[SCREEN] Showing newPageID %d\n", newPageID);
-            lv_image_cache_dump();
-            lv_obj_remove_flag(*newPage, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_move_to_index(*newPage, -1);
-            lv_refr_now(NULL);
-            bk_printf(TAG "[SCREEN] after show Tick : %d\n", (unsigned long)lv_tick_get());
-            lv_image_cache_dump();
-        }
-        else
-        {
-            bk_printf(TAG "[SCREEN] newPageID is PAGE_NONE\n");
-            goto fatal;
-        }
-        lv_obj_send_event(oldPage, UI_EVENT_PAGE_HIDDEN, NULL);
-        lv_obj_send_event(*newPage, UI_EVENT_PAGE_SHOWN, NULL);
-        bk_printf(TAG "[SCREEN] every event processed Tick : %d\n", (unsigned long)lv_tick_get());
-    }
-    // pageState 순회하면서 newPageID와 그 preRenderTargets를 제외한 나머지 페이지들 deinit
-    for(int i = PAGE_MAIN ; i < PAGE_COUNT ; i++)
-    {
-        bool isPreRenderTarget = false;
-        if(i == newPageID)
-        {
-            continue;
-        }
-        for(int j = 0 ; j < preRenderPageConfig[newPageID].preRenderTargetPageCount ; j++)
-        {
-
-            if(preRenderPageConfig[newPageID].preRenderTargetPages[j] == i)
-            {
-                isPreRenderTarget = true;
-            }
-        }
-        if(isPreRenderTarget)
-        {
-            continue;
-        }
-
-        if(preRenderPageState[i].isRendered)
-        {
-            pageLifecycleFunc_t deinitFunc = preRenderPageConfig[i].deinit_func;
-            if(deinitFunc != NULL)
-            {
-                bk_printf(TAG "[SCREEN] Deinitializing pageId: %d\n", i);
-                deinitFunc(&bk_lv_tool_ui);
-            }
-        }
-    }
-
-    // enqueing preRender targets for newPageID ======================================================
-    bk_printf(TAG "[SCREEN] Start enqueuing preRender targets Tick : %d\n", (unsigned long)lv_tick_get());
-    for(uint32_t i = 0 ; i < preRenderPageConfig[newPageID].preRenderTargetPageCount ; i++)
-    {
-        pageId_t targetPageID = preRenderPageConfig[newPageID].preRenderTargetPages[i];
-        xQueueSendToBack(preRendererQueue, &targetPageID, 0);
-    }
-    // page change logic end =======================================================================
-
-    // update currentPageID
-    currentPageID = newPageID;
-    currentPage = *newPage;
-    bk_printf(TAG "[SCREEN] ui_page_change completed Tick : %d\n", (unsigned long)lv_tick_get());
-    return;
-    // NOTE : fatal error handling marker =================================================================
-    fatal :
-    lv_delay_ms(2000);
-    LV_ASSERT(0);
-}
-
-void ui_screen_change(lv_obj_t *newScreen)
-{
-    return;
-}
-
-#endif /* USE_OLD_PAGE_CHANGE_BEFORE_REFACTOR */
-#if USE_OLD_PAGE_CHANGE_BEFORE_REFACTOR
 static void uiPagePreRenderPop(pageId_t oldPageID)
 {
     bk_printf(TAG "[SCREEN] Flushing pre-rendered pages\n");
@@ -574,13 +301,144 @@ static void uiPagePreRenderRegister(pageId_t newPageID)
     
     return;
 }
-#else
-
-
-
 #endif /* USE_OLD_PAGE_CHANGE_BEFORE_REFACTOR */
 
-lv_obj_t *ui_get_current_page(void)
+static void uiPagePreloadTask(lv_timer_t *timer)
 {
-    return currentPage;
+    pageId_t pageId;
+    if(preRendererQueue == NULL)
+    {
+        goto fatal;
+    }
+    if(xQueuePeek(preRendererQueue, &pageId, 0) == pdPASS)
+    {
+        if((pageId < PAGE_MAIN || pageId >= PAGE_COUNT) || 
+            (preRenderPageState[pageId].config == NULL || preRenderPageState[pageId].config->init_func_with_step == NULL))
+        {
+            bk_printf(TAG "[SCREEN] Invalid pre-loading page function: %d\n", pageId);
+            goto fatal;
+        }
+
+        rendererFuncStatus_t result =
+            preRenderPageState[pageId].config->init_func_with_step(&bk_lv_tool_ui);
+        if(result == RENDERER_FUNC_NOT_DONE)
+        {
+            bk_printf(TAG "[SCREEN] Pre-loading page %d is not finished yet\n", pageId);
+        }
+        else if(result == RENDERER_FUNC_FAILED)
+        {
+            bk_printf(TAG "[SCREEN] Pre-loading page %d failed\n", pageId);
+            goto fatal;
+        }
+        else
+        {
+            xQueueReceive(preRendererQueue, &pageId, 0);
+        }
+    }
+
+    lv_timer_reset(timer); // yeild처럼 쓰려면 이러면 됨. period만큼 무조건 쉰다.
+    return;
+
+fatal:
+    bk_printf(TAG "[SCREEN] Fatal error in uiPagePreloadTask\n");
+    lv_delay_ms(2000);
+    LV_ASSERT(0);
+    return;
+}
+
+bool isPagePreloaded(pageId_t pageID)
+{
+    return preRenderPageState[pageID].isRendered;
+}
+
+void uiPreloadPageForce(pageId_t pageID)
+{
+    pageLifecycleFuncWithStep_t initFunc;
+    initFunc = getPageInitFunc(pageID);
+    if(initFunc == NULL)
+    {
+        bk_printf(TAG "[SCREEN] Preloading pageId: %d is NULL\n", pageID);
+        goto fatal;
+    }
+    while(true)
+    {
+        rendererFuncStatus_t ret = initFunc(&bk_lv_tool_ui);
+        bk_printf(TAG "[SCREEN] Preloading pageId: %d\n", pageID);
+        if(ret == RENDERER_FUNC_DONE)
+        {
+            break;
+        }
+        else if(ret == RENDERER_FUNC_FAILED)
+        {
+            bk_printf(TAG "[SCREEN] Preloading pageId: %d encountered an error\n", pageID);
+            goto fatal;
+        }
+    }
+    bk_printf(TAG "[SCREEN] Preloading pageId: %d completed\n", pageID);
+    return;
+    
+fatal:
+    lv_delay_ms(2000);
+    LV_ASSERT(0);
+    return;
+}
+
+void uiResetPreprocessQueue(void)
+{
+    xQueueReset(preRendererQueue);
+}
+
+rendererFuncStatus_t init_shared_image_asset()
+{
+    for(int i = 0 ; i < SHARED_IMAGE_COUNT ; i++)
+    {
+        if(i == SHARED_IMAGE_NONE)
+        {
+            continue;
+        }
+        sharedImageAssetState[i].imageInfo = &sharedImageAssetInfo[i];
+        sharedImageAssetState[i].imageBuffer = NULL;
+    }
+    for(int i = 0 ; i < SHARED_IMAGE_COUNT ; i++)
+    {
+        if(i == SHARED_IMAGE_NONE)
+        {
+            continue;
+        }
+        bool hasLanguageVariant = sharedImageAssetInfo[i].hasLanguageVariant;
+        bool hasDegreeVariant = sharedImageAssetInfo[i].hasDegreeVariant;
+        const char *extension = sharedImageAssetInfo[i].fileExtension != NULL ?
+                                sharedImageAssetInfo[i].fileExtension : ".png";
+        const char *degreeSuffix = hasDegreeVariant &&
+                                   strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
+        char variantFilePath[128];
+        lv_draw_buf_t *imageBuffer;
+        if(hasLanguageVariant)
+        {
+            const char *languageSuffix = settings_get_int("LANGUAGE") == 1 ? "_china" :
+                                         settings_get_int("LANGUAGE") == 2 ? "_english" : "";
+            snprintf(variantFilePath, sizeof(variantFilePath), "%s%s%s%s",
+                     sharedImageAssetInfo[i].imagePath, degreeSuffix, languageSuffix, extension);
+            bk_printf(TAG "[SHARED_IMAGE] init_shared_image_asset: Loading image for assetId %d with language variant: [%s]\n", i, variantFilePath);
+        }
+        else
+        {
+            snprintf(variantFilePath, sizeof(variantFilePath), "%s%s%s",
+                     sharedImageAssetInfo[i].imagePath, degreeSuffix, extension);
+            bk_printf(TAG "[SHARED_IMAGE] init_shared_image_asset: Loading image for assetId %d without language variant: [%s]\n", i, variantFilePath);
+        }
+
+        imageBuffer = lv_image_decoder_prewarm_to_buffer(variantFilePath);
+        if(!imageBuffer)
+        {
+            bk_printf(TAG "[SHARED_IMAGE] init_shared_image_asset: Failed to load image for assetId %d from path: %s\n", i, variantFilePath);
+            goto failed;
+        }
+        sharedImageAssetState[i].imageBuffer = imageBuffer;
+        bk_printf(TAG "[SHARED_IMAGE] init_shared_image_asset: Successfully loaded image for assetId %d from path: %s\n", i, variantFilePath);
+    }
+    return RENDERER_FUNC_DONE;
+
+    failed:
+    return RENDERER_FUNC_FAILED;
 }

@@ -2,9 +2,15 @@
 #define __PRE_RENDER_INFO_H__
 
 #include <stdatomic.h>
+#include "beken_ui.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+extern lv_event_code_t UI_EVENT_PAGE_SHOW_START;
+extern lv_event_code_t UI_EVENT_PAGE_SHOWN;
+extern lv_event_code_t UI_EVENT_PAGE_HIDE_START;
+extern lv_event_code_t UI_EVENT_PAGE_HIDDEN;
 
 typedef enum
 {
@@ -75,6 +81,8 @@ typedef struct
     const bool hasDegreeVariant;
     const char *fileExtension;
 } preRenderImageInfo_t;
+extern const preRenderImageInfo_t sharedImageAssetInfo[SHARED_IMAGE_COUNT];
+
 typedef struct
 {
     const preRenderImageInfo_t *imageInfo;
@@ -184,6 +192,8 @@ pageLifecycleFunc_t getPageDeinitFunc(pageId_t pageId);
 
 extern rendererFuncStatus_t init_shared_image_asset();
 extern rendererFuncStatus_t set_shared_image_asset(lv_obj_t *imageObj, sharedImageAssetId_t assetId);
+
+extern bool isPageIdValid(pageId_t pageId);
 
 #ifdef __cplusplus
 }

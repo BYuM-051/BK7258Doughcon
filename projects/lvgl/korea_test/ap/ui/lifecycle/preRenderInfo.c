@@ -9,6 +9,18 @@
 
 #define ARRAY_COUNT(array) (sizeof(array) / sizeof((array)[0]))
 
+#if !UI_PRENDERING_ENABLE
+lv_event_code_t UI_EVENT_PAGE_SHOW_START = LV_EVENT_SCREEN_LOAD_START;
+lv_event_code_t UI_EVENT_PAGE_SHOWN = LV_EVENT_SCREEN_LOADED;
+lv_event_code_t UI_EVENT_PAGE_HIDE_START = LV_EVENT_SCREEN_UNLOAD_START;
+lv_event_code_t UI_EVENT_PAGE_HIDDEN = LV_EVENT_SCREEN_UNLOADED;
+#else
+lv_event_code_t UI_EVENT_PAGE_SHOW_START;
+lv_event_code_t UI_EVENT_PAGE_SHOWN;
+lv_event_code_t UI_EVENT_PAGE_HIDE_START;
+lv_event_code_t UI_EVENT_PAGE_HIDDEN;
+#endif /* !UI_PRENDERING_ENABLE */
+
 const preRenderImageInfo_t sharedImageAssetInfo[SHARED_IMAGE_COUNT] =
 {
     [SHARED_IMAGE_ASSET_BG_DOUGH] =
@@ -776,7 +788,7 @@ pageLifecycleFuncWithStep_t getPageInitFunc(pageId_t pageId)
     bk_printf(TAG "[SCREEN] getPageInitFunc(%d)\n", pageId);
     if(pageId >= 0 && pageId < PAGE_COUNT)
     {
-        bk_printf(TAG "[SCREEN] getPageInitFunc was %d for pageId %d\n", preRenderPageConfig[pageId].init_func != NULL, pageId);
+        bk_printf(TAG "[SCREEN] getPageInitFunc was %p for pageId %d\n", preRenderPageConfig[pageId].init_func_with_step, pageId);
         return preRenderPageConfig[pageId].init_func_with_step;
     }
     return NULL;
@@ -787,65 +799,10 @@ pageLifecycleFunc_t getPageDeinitFunc(pageId_t pageId)
     bk_printf(TAG "[SCREEN] getPageDeinitFunc(%d)\n", pageId);
     if(pageId >= 0 && pageId < PAGE_COUNT)
     {
-        bk_printf(TAG "[SCREEN] getPageDeinitFunc was %d for pageId %d\n", preRenderPageConfig[pageId].deinit_func != NULL, pageId);
+        bk_printf(TAG "[SCREEN] getPageDeinitFunc was %p for pageId %d\n", preRenderPageConfig[pageId].deinit_func, pageId);
         return preRenderPageConfig[pageId].deinit_func;
     }
     return NULL;
-}
-
-rendererFuncStatus_t init_shared_image_asset()
-{
-    for(int i = 0 ; i < SHARED_IMAGE_COUNT ; i++)
-    {
-        if(i == SHARED_IMAGE_NONE)
-        {
-            continue;
-        }
-        sharedImageAssetState[i].imageInfo = &sharedImageAssetInfo[i];
-        sharedImageAssetState[i].imageBuffer = NULL;
-    }
-    for(int i = 0 ; i < SHARED_IMAGE_COUNT ; i++)
-    {
-        if(i == SHARED_IMAGE_NONE)
-        {
-            continue;
-        }
-        bool hasLanguageVariant = sharedImageAssetInfo[i].hasLanguageVariant;
-        bool hasDegreeVariant = sharedImageAssetInfo[i].hasDegreeVariant;
-        const char *extension = sharedImageAssetInfo[i].fileExtension != NULL ?
-                                sharedImageAssetInfo[i].fileExtension : ".png";
-        const char *degreeSuffix = hasDegreeVariant &&
-                                   strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
-        char variantFilePath[128];
-        lv_draw_buf_t *imageBuffer;
-        if(hasLanguageVariant)
-        {
-            const char *languageSuffix = settings_get_int("LANGUAGE") == 1 ? "_china" :
-                                         settings_get_int("LANGUAGE") == 2 ? "_english" : "";
-            snprintf(variantFilePath, sizeof(variantFilePath), "%s%s%s%s",
-                     sharedImageAssetInfo[i].imagePath, degreeSuffix, languageSuffix, extension);
-            bk_printf(TAG "[SHARED_IMAGE] init_shared_image_asset: Loading image for assetId %d with language variant: [%s]\n", i, variantFilePath);
-        }
-        else
-        {
-            snprintf(variantFilePath, sizeof(variantFilePath), "%s%s%s",
-                     sharedImageAssetInfo[i].imagePath, degreeSuffix, extension);
-            bk_printf(TAG "[SHARED_IMAGE] init_shared_image_asset: Loading image for assetId %d without language variant: [%s]\n", i, variantFilePath);
-        }
-
-        imageBuffer = lv_image_decoder_prewarm_to_buffer(variantFilePath);
-        if(!imageBuffer)
-        {
-            bk_printf(TAG "[SHARED_IMAGE] init_shared_image_asset: Failed to load image for assetId %d from path: %s\n", i, variantFilePath);
-            goto failed;
-        }
-        sharedImageAssetState[i].imageBuffer = imageBuffer;
-        bk_printf(TAG "[SHARED_IMAGE] init_shared_image_asset: Successfully loaded image for assetId %d from path: %s\n", i, variantFilePath);
-    }
-    return RENDERER_FUNC_DONE;
-
-    failed:
-    return RENDERER_FUNC_FAILED;
 }
 
 rendererFuncStatus_t set_shared_image_asset(lv_obj_t *obj, sharedImageAssetId_t assetId)
@@ -886,4 +843,9 @@ rendererFuncStatus_t refresh_shared_image_asset()
         }
     }
     return RENDERER_FUNC_DONE;
+}
+
+inline bool isPageIdValid(pageId_t pageId)
+{
+    return (pageId >= 0 && pageId < PAGE_COUNT);
 }
