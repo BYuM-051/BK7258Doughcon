@@ -152,8 +152,8 @@ static void _maxmin_mms(bk_lv_ui_t *bk_ui)
     lv_label_set_text(bk_ui->manualmodestart_manual_defrost_temp_txt, _buf);
 
     _v = atoi(lv_label_get_text(bk_ui->manualmodestart_manual_fermentation_temp_txt));
-    if (is_f) { if (_v < 59) _v = 59; if (_v > 104) _v = 104; }   /* F: 59~104 */
-    else       { if (_v < 15) _v = 15; if (_v > 40)  _v = 40;  }   /* C: 15~40 */
+    if (is_f) { if (_v < 41) _v = 41; if (_v > 104) _v = 104; }   /* F: 41~104 */
+    else       { if (_v < 5) _v = 5; if (_v > 40)  _v = 40;  }   /* C: 5~40 */
     snprintf(_buf, sizeof(_buf), "%d", _v);
     lv_label_set_text(bk_ui->manualmodestart_manual_fermentation_temp_txt, _buf);
 
