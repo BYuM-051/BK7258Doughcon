@@ -10,6 +10,7 @@
 
 | 파일 | 함수 | 혼재 내용 |
 |---|---|---|
+| manualmodestart_cb.c | `manualmodestart_load_start_event_cb` | `_img_ensure_src()` 이미지 세팅, `_keypad_off_manualmodestart()`, 배경색 스타일 설정 |
 | autodrymode_cb.c | `autodrymode_load_start_event_cb` | `_create_run_arc_adm()` arc 레이어 생성, `_img_ensure_src()` 이미지 src 세팅, `lv_obj_move_background()` 재배치 |
 | automodeend_cb.c | `automodeend_load_start_event_cb` | `lv_timer_create()` 타이머 생성, `_img_set_src_timed()` 배경 이미지 세팅, 언어별 위치 조정 |
 | detailsettingdamper_cb.c | `detailsettingdamper_load_start_event_cb` | `_build_img_arrays_if_changed()` 이미지 배열 빌드 |
@@ -17,7 +18,6 @@
 | detailsettinghumidity_cb.c | `detailsettinghumidity_load_start_event_cb` | `_build_img_arrays_if_changed()` 이미지 배열 빌드 |
 | detailsettingtemp_cb.c | `detailsettingtemp_load_start_event_cb` | `_build_img_arrays_if_changed()`, `s_page = 0` 상태 초기화 |
 | detailsettingtime_cb.c | `detailsettingtime_load_start_event_cb` | `_build_img_arrays_if_changed()`, `_hide_all_rollers()` 롤러 초기화 |
-| manualmodestart_cb.c | `manualmodestart_load_start_event_cb` | `_img_ensure_src()` 이미지 세팅, `_keypad_off_manualmodestart()`, 배경색 스타일 설정 |
 | settingmodetest_cb.c | `settingmodetest_load_start_event_cb` | `settingmodetest_apply_bg()` 캔버스 설정, `memset()` 상태 배열 초기화 |
 | settingmodetime_cb.c | `settingmodetime_load_start_event_cb` | `_init_input_from_rtc()` 입력 필드 초기화, `_reset_all_field_colors()` 색상 초기화 |
 
