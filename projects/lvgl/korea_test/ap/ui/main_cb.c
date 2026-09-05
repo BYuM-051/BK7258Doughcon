@@ -184,6 +184,7 @@ void main_automode_event_cb(lv_event_t *e)
     static uint32_t last_click_time = 0;
     bk_printf(TAG "[TOUCH] PRESSED t=%lu\n", (unsigned long)lv_tick_get());
     lv_event_code_t code = lv_event_get_code(e);
+    bk_printf(TAG "[SCREEN] main_automode_event_cb code=%d\n", code);
 
     if(state->lock || state->hard_lock)
     {return;}
@@ -211,6 +212,7 @@ void main_manualmode_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
 
 #if UI_PRENDERING_ENABLE
+    bk_printf(TAG "[SCREEN] ── main→manualmode ────────────────\n");
     ui_page_change(PAGE_MANUALMODE);
     hal_buzzer_beep();
 #else
@@ -250,6 +252,7 @@ void main_memorymode_event_cb(lv_event_t *e)
      * 삭제 버튼 표시 로직(memorymode_load_event_cb)이 잘못 판단하므로 초기화 */
     state->memory_mode_check = MEMORY_MODE_NONE;
 #if UI_PRENDERING_ENABLE
+    bk_printf(TAG "[SCREEN] ── main→memorymode ────────────────\n");    
     ui_page_change(PAGE_MEMORYMODE);
     hal_buzzer_beep();
 #else
@@ -280,6 +283,7 @@ void main_settingmode_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
 
 #if UI_PRENDERING_ENABLE
+    bk_printf(TAG "[SCREEN] ── main→settingmode ────────────────\n");
     ui_page_change(PAGE_SETTINGMODE);
     hal_buzzer_beep();
 #else
