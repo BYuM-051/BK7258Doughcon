@@ -207,14 +207,52 @@ static const preRenderImageInfo_t SettingmodetimePreRenderImages[] =
 };
 static const preRenderImageInfo_t SettingmodelanguagePreRenderImages[] =
 {
-    { "/images/language_english_on", false, false, ".png" },
-    { "/images/language_english_off", false, false, ".png" },
-    { "/images/language_korean_on", false, false, ".png" },
-    { "/images/language_korean_off", false, false, ".png" },
-    { "/images/language_china_on", false, false, ".png" },
-    { "/images/language_title", true, false, ".png" },
-    { "/images/language_china_off", false, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" }
+    { "/images/timebar_timebar_english", false, false, ".png" },          // 7.60 KB
+    { "/images/timebar_timebar_china", false, false, ".png" },            // 7.26 KB
+    { "/images/timebar_timebar", false, false, ".png" },                  // 6.58 KB
+
+    { "/images/language_title_english", false, false, ".png" },           // 2.37 KB
+    { "/images/language_english_on", false, false, ".png" },              // 2.14 KB
+    { "/images/language_english_off", false, false, ".png" },             // 2.05 KB
+    { "/images/language_korean_on", false, false, ".png" },               // 1.89 KB
+    { "/images/language_korean_off", false, false, ".png" },              // 1.80 KB
+    { "/images/language_china_on", false, false, ".png" },                // 1.73 KB
+    { "/images/language_title", false, false, ".png" },                   // 1.66 KB
+    { "/images/language_china_off", false, false, ".png" },               // 1.65 KB
+    { "/images/language_title_china", false, false, ".png" },             // 1.61 KB
+
+    { "/images/exit_bt_china", false, false, ".png" },                    // 1.20 KB
+    { "/images/exit_bt", false, false, ".png" },                          // 1.16 KB
+    { "/images/exit_bt_english", false, false, ".png" },                  // 1.10 KB
+
+    { "/images/timebar_humidityheater_on_china", false, false, ".png" },  // 1.09 KB
+    { "/images/timebar_humidityheater_on_english", false, false, ".png" },// 1.05 KB
+
+    { "/images/timebar_fireheater_on_china", false, false, ".png" },      // 1023 B
+    { "/images/timebar_humidityheater_on", false, false, ".png" },        // 994 B
+    { "/images/timebar_watevalve_on_english", false, false, ".png" },     // 969 B
+    { "/images/timebar_defrostheater_on_china", false, false, ".png" },   // 963 B
+    { "/images/timebar_defrostheater_on_english", false, false, ".png" }, // 935 B
+    { "/images/timebar_fireheater_on", false, false, ".png" },            // 928 B
+    { "/images/timebar_roomfan_on_china", false, false, ".png" },         // 905 B
+    { "/images/timebar_defrostheater_on", false, false, ".png" },         // 873 B
+    { "/images/timebar_fireheater_on_english", false, false, ".png" },    // 867 B
+    { "/images/timebar_comp_on_china", false, false, ".png" },            // 825 B
+    { "/images/timebar_roomfan_on_english", false, false, ".png" },       // 814 B
+    { "/images/timebar_damper_on_china", false, false, ".png" },          // 807 B
+    { "/images/timebar_damper_on_english", false, false, ".png" },        // 781 B
+    { "/images/timebar_watevalve_on_china", false, false, ".png" },       // 777 B
+    { "/images/timebar_comp_on", false, false, ".png" },                  // 773 B
+    { "/images/timebar_comp_on_english", false, false, ".png" },          // 772 B
+    { "/images/timebar_roomfan_on", false, false, ".png" },               // 716 B
+    { "/images/timebar_watevalve_on", false, false, ".png" },             // 699 B
+    { "/images/timebar_volume_off", false, false, ".png" },               // 684 B
+    { "/images/timebar_damper_on", false, false, ".png" },                // 658 B
+    { "/images/timebar_volume_on", false, false, ".png" },                 // 637 B
+    { "/images/timebar_error_on_english", false, false, ".png" },
+    { "/images/timebar_error_on_china", false, false, ".png" },
+    { "/images/timebar_error_on", false, false, ".png" },
+    { "/images/a/a", false, false, ".png" }
 };
 static const preRenderImageInfo_t SettingmodemanualPreRenderImages[] =
 {

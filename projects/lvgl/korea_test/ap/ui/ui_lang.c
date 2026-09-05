@@ -429,24 +429,24 @@ void ui_lang_apply_settingmodetime(bk_lv_ui_t *bk_ui)
 }
 
 /* ── settingmodelanguage ─────────────────────────────────────────────── */
-static int s_last_key_settingmodelanguage = -1;
+// static int s_last_key_settingmodelanguage = -1;
 
-void ui_lang_reset_settingmodelanguage_cache(void)
-{
-    s_last_key_settingmodelanguage = -1;
-}
+// void ui_lang_reset_settingmodelanguage_cache(void)
+// {
+//     s_last_key_settingmodelanguage = -1;
+// }
 
-void ui_lang_apply_settingmodelanguage(bk_lv_ui_t *bk_ui)
-{
-    int lang, is_f;
-    _get_state(&lang, &is_f);
-    int _key_settingmodelanguage = lang * 10 + is_f;
-    if (_key_settingmodelanguage == s_last_key_settingmodelanguage) return;
-    s_last_key_settingmodelanguage = _key_settingmodelanguage;
-    _L(bk_ui->settingmodelanguage_title,  "/images/language_title", ".png");
-    _L(bk_ui->settingmodelanguage_exitim, "/images/exit_bt",        ".png");
-    /* koreanim/chinaim/englishim: fixed language-selector icons, no lang variants */
-}
+// void ui_lang_apply_settingmodelanguage(bk_lv_ui_t *bk_ui)
+// {
+//     int lang, is_f;
+//     _get_state(&lang, &is_f);
+//     int _key_settingmodelanguage = lang * 10 + is_f;
+//     if (_key_settingmodelanguage == s_last_key_settingmodelanguage) return;
+//     s_last_key_settingmodelanguage = _key_settingmodelanguage;
+//     _L(bk_ui->settingmodelanguage_title,  "/images/language_title", ".png");
+//     _L(bk_ui->settingmodelanguage_exitim, "/images/exit_bt",        ".png");
+//     /* koreanim/chinaim/englishim: fixed language-selector icons, no lang variants */
+// }
 
 /* ── settingmoderecord ───────────────────────────────────────────────── */
 static int s_last_key_settingmoderecord = -1;
@@ -633,35 +633,35 @@ void ui_lang_apply_detailsettingdamper(bk_lv_ui_t *bk_ui)
 }
 
 /* ── timebar ────────────────────────────────────────────────────────── */
-static int s_last_key_timebar = -1;
+// static int s_last_key_timebar = -1;
 
-void ui_lang_reset_timebar_cache(void)
-{
-    s_last_key_timebar = -1;
-}
+// void ui_lang_reset_timebar_cache(void)
+// {
+//     s_last_key_timebar = -1;
+// }
 
-void ui_lang_apply_timebar(bk_lv_ui_t *bk_ui)
-{
-    int lang, is_f;
-    _get_state(&lang, &is_f);
-    int _key_timebar = lang * 10 + is_f;
-    if (_key_timebar == s_last_key_timebar) return;
-    s_last_key_timebar = _key_timebar;
-    _L(bk_ui->timebar_timebar_bg,         "/images/timebar_timebar",           ".png");
-    _L(bk_ui->timebar_comp_checkim,       "/images/timebar_comp_on",           ".png");
-    _L(bk_ui->timebar_watervalve_checkim, "/images/timebar_watevalve_on",      ".png");
-    _L(bk_ui->timebar_roomfan_checkim,    "/images/timebar_roomfan_on",        ".png");
-    _L(bk_ui->timebar_damper_checkim,     "/images/timebar_damper_on",         ".png");
-    _L(bk_ui->timebar_humid_checkim,      "/images/timebar_humidityheater_on", ".png");
-    _L(bk_ui->timebar_heat_checkim,       "/images/timebar_fireheater_on",     ".png");
-    _L(bk_ui->timebar_defrost_checkim,    "/images/timebar_defrostheater_on",  ".png");
-    /* timebar_error_on_english.png 없음 → 영어만 기본(한국어) 이미지로 폴백.
-     * 이전엔 이 이유로 중국어까지 통째로 스킵해서 중국어 모드에서도 기본
-     * 이미지가 나오는 버그가 있었음 — 중국어는 정상 적용. */
-    _img_set_src_timed(bk_ui->timebar_timebar_error_checkim,
-                        (lang == 1) ? "/images/timebar_error_on_china.png"
-                                    : "/images/timebar_error_on.png");
-}
+// void ui_lang_apply_timebar(bk_lv_ui_t *bk_ui)
+// {
+//     int lang, is_f;
+//     _get_state(&lang, &is_f);
+//     int _key_timebar = lang * 10 + is_f;
+//     if (_key_timebar == s_last_key_timebar) return;
+//     s_last_key_timebar = _key_timebar;
+//     _L(bk_ui->timebar_timebar_bg,         "/images/timebar_timebar",           ".png");
+//     _L(bk_ui->timebar_comp_checkim,       "/images/timebar_comp_on",           ".png");
+//     _L(bk_ui->timebar_watervalve_checkim, "/images/timebar_watevalve_on",      ".png");
+//     _L(bk_ui->timebar_roomfan_checkim,    "/images/timebar_roomfan_on",        ".png");
+//     _L(bk_ui->timebar_damper_checkim,     "/images/timebar_damper_on",         ".png");
+//     _L(bk_ui->timebar_humid_checkim,      "/images/timebar_humidityheater_on", ".png");
+//     _L(bk_ui->timebar_heat_checkim,       "/images/timebar_fireheater_on",     ".png");
+//     _L(bk_ui->timebar_defrost_checkim,    "/images/timebar_defrostheater_on",  ".png");
+//     /* timebar_error_on_english.png 없음 → 영어만 기본(한국어) 이미지로 폴백.
+//      * 이전엔 이 이유로 중국어까지 통째로 스킵해서 중국어 모드에서도 기본
+//      * 이미지가 나오는 버그가 있었음 — 중국어는 정상 적용. */
+//     _img_set_src_timed(bk_ui->timebar_timebar_error_checkim,
+//                         (lang == 1) ? "/images/timebar_error_on_china.png"
+//                                     : "/images/timebar_error_on.png");
+// }
 
 /* ── main ───────────────────────────────────────────────────────────── */
 // static int s_last_key_main = -1;
@@ -893,7 +893,7 @@ void ui_lang_apply_all(bk_lv_ui_t *bk_ui)
 #define _A(screen, fn) \
     do { if (bk_ui->screen && lv_obj_is_valid(bk_ui->screen)) fn(bk_ui); } while(0)
 
-    _A(timebar,                  ui_lang_apply_timebar);
+    // _A(timebar,                  ui_lang_apply_timebar);
     // _A(main,                     ui_lang_apply_main);
     _A(manualmode,               ui_lang_apply_manualmode);
     _A(manualmodestart,          ui_lang_apply_manualmodestart);
@@ -907,7 +907,7 @@ void ui_lang_apply_all(bk_lv_ui_t *bk_ui)
     _A(settingmodedefrost,       ui_lang_apply_settingmodedefrost);
     _A(settingmodemanual,        ui_lang_apply_settingmodemanual);
     _A(settingmodetime,          ui_lang_apply_settingmodetime);
-    _A(settingmodelanguage,      ui_lang_apply_settingmodelanguage);
+    // _A(settingmodelanguage,      ui_lang_apply_settingmodelanguage);
     _A(settingmoderecord,        ui_lang_apply_settingmoderecord);
     _A(settingmodetest,          ui_lang_apply_settingmodetest);
     _A(settingmodedegree,        ui_lang_apply_settingmodedegree);
@@ -939,63 +939,18 @@ extern void automode_ams_prewarm_reset(void);
 extern void automode_mm_prewarm_cancel(void);
 extern void automodestart_lang_invalidate(bk_lv_ui_t *bk_ui);
 
+// TODO : preProcessor로 옮기고 이 파일을 없애기.
 void ui_lang_invalidate_cached_screens(bk_lv_ui_t *bk_ui)
 {
-#if UI_PRENDERING_ENABLE
     lv_obj_t *current_page = ui_get_current_page();
     lv_obj_t *active = current_page;
-#else
-    lv_obj_t *active = lv_scr_act();
-#endif /* UI_PRENDERING_ENABLE */
-    /* lv_obj_del은 SCREEN_UNLOAD_START를 우회하므로 prewarm 타이머와
-     * automodestart 내부 타이머를 여기서 명시적으로 취소 */
-    automode_ams_prewarm_reset();
-    automode_mm_prewarm_cancel();
-    if (bk_ui->automodestart && lv_obj_is_valid(bk_ui->automodestart) &&
-        (lv_obj_t *)bk_ui->automodestart != active)
-        automodestart_lang_invalidate(bk_ui);
+    automodestart_lang_invalidate(bk_ui); // TODO : 이거 없앨거임.
 
-    /* timebar lives on lv_layer_top(), not a screen — update in-place */
-    if (bk_ui->timebar && lv_obj_is_valid(bk_ui->timebar))
-        ui_lang_apply_timebar(bk_ui);
-
-/* Destroy a cached screen only when it is not the currently displayed one.
- * destroy_page_* sets bk_ui->field to NULL, so init_page_* is forced on next visit. */
-#define _D(screen, fn) \
-    do { \
-        if (bk_ui->screen && lv_obj_is_valid(bk_ui->screen) && \
-            (lv_obj_t *)bk_ui->screen != active) \
-            fn(bk_ui); \
-    } while(0)
-
-    _D(main,                     destroy_page_main);
-    _D(manualmode,               destroy_page_manualmode);
-    _D(manualmodestart,          destroy_page_manualmodestart);
-    _D(automode,                 destroy_page_automode);
-    _D(automodestart,            destroy_page_automodestart);
-    _D(automodeend,              destroy_page_automodeend);
-    _D(autodrymode,              destroy_page_autodrymode);
-    _D(memorymode,               destroy_page_memorymode);
-    _D(settingmode,              destroy_page_settingmode);
-    _D(settingmodedetailsetting, destroy_page_settingmodedetailsetting);
-    _D(settingmodedefrost,       destroy_page_settingmodedefrost);
-    _D(settingmodemanual,        destroy_page_settingmodemanual);
-    _D(settingmodetime,          destroy_page_settingmodetime);
-    _D(settingmodelanguage,      destroy_page_settingmodelanguage);
-    _D(settingmoderecord,        destroy_page_settingmoderecord);
-    _D(settingmodetest,          destroy_page_settingmodetest);
-    _D(settingmodedegree,        destroy_page_settingmodedegree);
-    _D(detailsettingtemp,        destroy_page_detailsettingtemp);
-    _D(detailsettinghumidity,    destroy_page_detailsettinghumidity);
-    _D(detailsettingdefrost,     destroy_page_detailsettingdefrost);
-    _D(detailsettingtime,        destroy_page_detailsettingtime);
-    _D(detailsettingdamper,      destroy_page_detailsettingdamper);
-    _D(popupcaution,             destroy_page_popupcaution);
-    _D(popupreset,               destroy_page_popupreset);
-    _D(popupdelete,              destroy_page_popupdelete);
-    _D(popupconnectionerror,     destroy_page_popupconnectionerror);
-    _D(popuperror,               destroy_page_popuperror);
-    _D(popuppassword,            destroy_page_popuppassword);
-
-#undef _D
+    uiResetPreprocessQueue();
+    uiResetPreprocessedPages(PAGE_SETTINGMODELANGUAGE);
+    lv_image_cache_drop(NULL);
+    for(int i = 0 ; i < preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderTargetPageCount ; i++)
+    {
+        uiEnqueuePreloadTargets(preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderTargetPages[i]);
+    }
 }

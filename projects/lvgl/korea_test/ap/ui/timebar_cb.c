@@ -111,5 +111,4 @@ void timebar_load_event_cb(lv_event_t *e)
 {
     if (lv_event_get_code(e) != LV_EVENT_SCREEN_LOAD_START) return;
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    ui_lang_apply_timebar(bk_ui);
 }
