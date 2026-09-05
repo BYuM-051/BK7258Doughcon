@@ -422,13 +422,26 @@ lv_result_t lv_image_decoder_prewarm(const void *src)
 {
     lv_image_decoder_dsc_t dsc = {0};
 
+    uint32_t t = lv_tick_get();
+
     lv_result_t res = lv_image_decoder_open(&dsc, src, NULL);
+
+    bk_printf("[PREWARM_TIMING] open=%lu ms src=%s\n",
+              (unsigned long)lv_tick_elaps(t),
+              (const char *)src);
+
     if(res != LV_RESULT_OK)
     {
         return res;
     }
 
+    t = lv_tick_get();
+
     lv_image_decoder_close(&dsc);
+
+    bk_printf("[PREWARM_TIMING] close=%lu ms src=%s\n",
+              (unsigned long)lv_tick_elaps(t),
+              (const char *)src);
 
     return LV_RESULT_OK;
 }

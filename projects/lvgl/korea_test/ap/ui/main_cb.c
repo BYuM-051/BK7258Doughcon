@@ -76,37 +76,37 @@ static int         s_sm_prewarm_idx   = 0;
 
 static void _sm_prewarm_tick(lv_timer_t *t)
 {
-    if (s_sm_prewarm_idx >= _SM_IMG_COUNT || !s_sm_prewarm_dummy) {
-        lv_timer_delete(t); s_sm_prewarm_timer = NULL;
-        if (s_sm_prewarm_dummy) { lv_obj_del(s_sm_prewarm_dummy); s_sm_prewarm_dummy = NULL; }
-        bk_printf(TAG "[PERF] settingmode prewarm done (%d imgs)\n", _SM_IMG_COUNT);
-        return;
-    }
-    int lang = settings_get_int("LANGUAGE");
-    const char *lsuf = (lang == 1) ? "_china" : (lang == 2) ? "_english" : "";
-    char path[128];
-    snprintf(path, sizeof(path), "%s%s%s", s_sm_bases[s_sm_prewarm_idx], lsuf, _SM_IMG_EXT);
-    _img_set_src_timed(s_sm_prewarm_dummy, path);
-    s_sm_prewarm_idx++;
+    // if (s_sm_prewarm_idx >= _SM_IMG_COUNT || !s_sm_prewarm_dummy) {
+    //     lv_timer_delete(t); s_sm_prewarm_timer = NULL;
+    //     if (s_sm_prewarm_dummy) { lv_obj_del(s_sm_prewarm_dummy); s_sm_prewarm_dummy = NULL; }
+    //     bk_printf(TAG "[PERF] settingmode prewarm done (%d imgs)\n", _SM_IMG_COUNT);
+    //     return;
+    // }
+    // int lang = settings_get_int("LANGUAGE");
+    // const char *lsuf = (lang == 1) ? "_china" : (lang == 2) ? "_english" : "";
+    // char path[128];
+    // snprintf(path, sizeof(path), "%s%s%s", s_sm_bases[s_sm_prewarm_idx], lsuf, _SM_IMG_EXT);
+    // _img_set_src_timed(s_sm_prewarm_dummy, path);
+    // s_sm_prewarm_idx++;
 }
 
 static void _sm_prewarm_start(void)
 {
-#if !UI_PREWARM_ENABLE
-    return;
-#endif
-    if (s_sm_prewarm_timer) return;   /* already running or done */
-    if (s_sm_prewarm_idx >= _SM_IMG_COUNT) return;  /* already done */
-    s_sm_prewarm_dummy = lv_image_create(lv_layer_top());
-    lv_obj_add_flag(s_sm_prewarm_dummy, LV_OBJ_FLAG_HIDDEN);
-    s_sm_prewarm_timer = lv_timer_create(_sm_prewarm_tick, 10, NULL);
+// #if !UI_PREWARM_ENABLE
+//     return;
+// #endif
+//     if (s_sm_prewarm_timer) return;   /* already running or done */
+//     if (s_sm_prewarm_idx >= _SM_IMG_COUNT) return;  /* already done */
+//     s_sm_prewarm_dummy = lv_image_create(lv_layer_top());
+//     lv_obj_add_flag(s_sm_prewarm_dummy, LV_OBJ_FLAG_HIDDEN);
+//     s_sm_prewarm_timer = lv_timer_create(_sm_prewarm_tick, 10, NULL);
 }
 
 void main_settingmode_prewarm_reset(void)
 {
-    if (s_sm_prewarm_timer) { lv_timer_delete(s_sm_prewarm_timer); s_sm_prewarm_timer = NULL; }
-    if (s_sm_prewarm_dummy) { lv_obj_del(s_sm_prewarm_dummy); s_sm_prewarm_dummy = NULL; }
-    s_sm_prewarm_idx = 0;
+    // if (s_sm_prewarm_timer) { lv_timer_delete(s_sm_prewarm_timer); s_sm_prewarm_timer = NULL; }
+    // if (s_sm_prewarm_dummy) { lv_obj_del(s_sm_prewarm_dummy); s_sm_prewarm_dummy = NULL; }
+    // s_sm_prewarm_idx = 0;
 }
 
 /* Automode(자동운전 설정 화면) image prewarm — loads image(s) one per tick
@@ -134,37 +134,37 @@ static int         s_am_prewarm_idx   = 0;
 
 static void _am_prewarm_tick(lv_timer_t *t)
 {
-    if (s_am_prewarm_idx >= _AM_IMG_COUNT || !s_am_prewarm_dummy) {
-        lv_timer_delete(t); s_am_prewarm_timer = NULL;
-        if (s_am_prewarm_dummy) { lv_obj_del(s_am_prewarm_dummy); s_am_prewarm_dummy = NULL; }
-        bk_printf(TAG "[PERF] automode prewarm done (%d imgs)\n", _AM_IMG_COUNT);
-        return;
-    }
-    int lang = settings_get_int("LANGUAGE");
-    const char *lsuf = (lang == 1) ? "_china" : (lang == 2) ? "_english" : "";
-    char path[128];
-    snprintf(path, sizeof(path), "%s%s.png", s_am_bases[s_am_prewarm_idx], lsuf);
-    _img_set_src_timed(s_am_prewarm_dummy, path);
-    s_am_prewarm_idx++;
+    // if (s_am_prewarm_idx >= _AM_IMG_COUNT || !s_am_prewarm_dummy) {
+    //     lv_timer_delete(t); s_am_prewarm_timer = NULL;
+    //     if (s_am_prewarm_dummy) { lv_obj_del(s_am_prewarm_dummy); s_am_prewarm_dummy = NULL; }
+    //     bk_printf(TAG "[PERF] automode prewarm done (%d imgs)\n", _AM_IMG_COUNT);
+    //     return;
+    // }
+    // int lang = settings_get_int("LANGUAGE");
+    // const char *lsuf = (lang == 1) ? "_china" : (lang == 2) ? "_english" : "";
+    // char path[128];
+    // snprintf(path, sizeof(path), "%s%s.png", s_am_bases[s_am_prewarm_idx], lsuf);
+    // _img_set_src_timed(s_am_prewarm_dummy, path);
+    // s_am_prewarm_idx++;
 }
 
 static void _am_prewarm_start(void)
 {
-#if !UI_PREWARM_ENABLE
-    return;
-#endif
-    if (s_am_prewarm_timer) return;   /* already running or done */
-    if (s_am_prewarm_idx >= _AM_IMG_COUNT) return;  /* already done */
-    s_am_prewarm_dummy = lv_image_create(lv_layer_top());
-    lv_obj_add_flag(s_am_prewarm_dummy, LV_OBJ_FLAG_HIDDEN);
-    s_am_prewarm_timer = lv_timer_create(_am_prewarm_tick, 10, NULL);
+// #if !UI_PREWARM_ENABLE
+//     return;
+// #endif
+//     if (s_am_prewarm_timer) return;   /* already running or done */
+//     if (s_am_prewarm_idx >= _AM_IMG_COUNT) return;  /* already done */
+//     s_am_prewarm_dummy = lv_image_create(lv_layer_top());
+//     lv_obj_add_flag(s_am_prewarm_dummy, LV_OBJ_FLAG_HIDDEN);
+//     s_am_prewarm_timer = lv_timer_create(_am_prewarm_tick, 10, NULL);
 }
 
 void main_automode_prewarm_reset(void)
 {
-    if (s_am_prewarm_timer) { lv_timer_delete(s_am_prewarm_timer); s_am_prewarm_timer = NULL; }
-    if (s_am_prewarm_dummy) { lv_obj_del(s_am_prewarm_dummy); s_am_prewarm_dummy = NULL; }
-    s_am_prewarm_idx = 0;
+    // if (s_am_prewarm_timer) { lv_timer_delete(s_am_prewarm_timer); s_am_prewarm_timer = NULL; }
+    // if (s_am_prewarm_dummy) { lv_obj_del(s_am_prewarm_dummy); s_am_prewarm_dummy = NULL; }
+    // s_am_prewarm_idx = 0;
 }
 
 void main_automode_event_cb(lv_event_t *e);

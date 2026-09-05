@@ -41,64 +41,64 @@ static int         s_ams_pw_count = 0;
 
 static void _ams_pw_tick(lv_timer_t *t)
 {
-    if (s_ams_pw_idx >= s_ams_pw_count || !s_ams_pw_dummy) {
-        lv_timer_delete(t); s_ams_pw_timer = NULL;
-        if (s_ams_pw_dummy) { lv_obj_del(s_ams_pw_dummy); s_ams_pw_dummy = NULL; }
-        bk_printf(TAG "[PERF] automodestart prewarm done (%d imgs)\n", s_ams_pw_count);
-        return;
-    }
-    _img_set_src_timed(s_ams_pw_dummy, s_ams_pw_paths[s_ams_pw_idx]);
-    s_ams_pw_idx++;
+    // if (s_ams_pw_idx >= s_ams_pw_count || !s_ams_pw_dummy) {
+    //     lv_timer_delete(t); s_ams_pw_timer = NULL;
+    //     if (s_ams_pw_dummy) { lv_obj_del(s_ams_pw_dummy); s_ams_pw_dummy = NULL; }
+    //     bk_printf(TAG "[PERF] automodestart prewarm done (%d imgs)\n", s_ams_pw_count);
+    //     return;
+    // }
+    // _img_set_src_timed(s_ams_pw_dummy, s_ams_pw_paths[s_ams_pw_idx]);
+    // s_ams_pw_idx++;
 }
 
 static void _ams_pw_start(void)
 {
-#if !UI_PREWARM_ENABLE
-    return;
-#endif
-    if (s_ams_pw_timer) return;
-    if (s_ams_pw_idx >= s_ams_pw_count && s_ams_pw_count > 0) return;
+// #if !UI_PREWARM_ENABLE
+//     return;
+// #endif
+//     if (s_ams_pw_timer) return;
+//     if (s_ams_pw_idx >= s_ams_pw_count && s_ams_pw_count > 0) return;
 
-    int lang = settings_get_int("LANGUAGE");
-    int is_f = (strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0) ? 1 : 0;
-    const char *fsuf = is_f    ? "_f"       : "";
-    const char *lsuf = (lang == 1) ? "_china" : (lang == 2) ? "_english" : "";
+//     int lang = settings_get_int("LANGUAGE");
+//     int is_f = (strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0) ? 1 : 0;
+//     const char *fsuf = is_f    ? "_f"       : "";
+//     const char *lsuf = (lang == 1) ? "_china" : (lang == 2) ? "_english" : "";
 
-    s_ams_pw_count = 0;
-    /* background JPEG — largest, must be first */
-    snprintf(s_ams_pw_paths[s_ams_pw_count++], 128,
-             "/images/auto_mode_start_bgi%s%s.jpg", fsuf, lsuf);
-    /* GIF animation frames (lazy-created on first visit) */
-    snprintf(s_ams_pw_paths[s_ams_pw_count++], 128, "/images/defrost_gif.png");
-    snprintf(s_ams_pw_paths[s_ams_pw_count++], 128, "/images/fermentation1_gif.png");
-    snprintf(s_ams_pw_paths[s_ams_pw_count++], 128, "/images/fermentation2_gif.png");
-    /* UI buttons */
-    snprintf(s_ams_pw_paths[s_ams_pw_count++], 128, "/images/stop_bt%s.png", lsuf);
-    snprintf(s_ams_pw_paths[s_ams_pw_count++], 128, "/images/blackout%s.png", lsuf);
-    /* tempbox variants — 파일명: tempbox[_f]_zero[_lang].png */
-    snprintf(s_ams_pw_paths[s_ams_pw_count++], 128,
-             "/images/tempbox%s_zero%s.png", fsuf, lsuf);
+//     s_ams_pw_count = 0;
+//     /* background JPEG — largest, must be first */
+//     snprintf(s_ams_pw_paths[s_ams_pw_count++], 128,
+//              "/images/auto_mode_start_bgi%s%s.jpg", fsuf, lsuf);
+//     /* GIF animation frames (lazy-created on first visit) */
+//     snprintf(s_ams_pw_paths[s_ams_pw_count++], 128, "/images/defrost_gif.png");
+//     snprintf(s_ams_pw_paths[s_ams_pw_count++], 128, "/images/fermentation1_gif.png");
+//     snprintf(s_ams_pw_paths[s_ams_pw_count++], 128, "/images/fermentation2_gif.png");
+//     /* UI buttons */
+//     snprintf(s_ams_pw_paths[s_ams_pw_count++], 128, "/images/stop_bt%s.png", lsuf);
+//     snprintf(s_ams_pw_paths[s_ams_pw_count++], 128, "/images/blackout%s.png", lsuf);
+//     /* tempbox variants — 파일명: tempbox[_f]_zero[_lang].png */
+//     snprintf(s_ams_pw_paths[s_ams_pw_count++], 128,
+//              "/images/tempbox%s_zero%s.png", fsuf, lsuf);
 
-    s_ams_pw_idx   = 0;
-    s_ams_pw_dummy = lv_image_create(lv_layer_top());
-    lv_obj_add_flag(s_ams_pw_dummy, LV_OBJ_FLAG_HIDDEN);
-    s_ams_pw_timer = lv_timer_create(_ams_pw_tick, 10, NULL);
+//     s_ams_pw_idx   = 0;
+//     s_ams_pw_dummy = lv_image_create(lv_layer_top());
+//     lv_obj_add_flag(s_ams_pw_dummy, LV_OBJ_FLAG_HIDDEN);
+//     s_ams_pw_timer = lv_timer_create(_ams_pw_tick, 10, NULL);
 }
 
 static void _ams_pw_cancel(void)
 {
-    /* Stop only — keep s_ams_pw_idx/s_ams_pw_count so a mere navigate-away
-     * doesn't force the whole sequence to redecode from scratch next visit.
-     * Actual restart-from-scratch only happens via automode_ams_prewarm_reset(). */
-    if (s_ams_pw_timer) { lv_timer_delete(s_ams_pw_timer); s_ams_pw_timer = NULL; }
-    if (s_ams_pw_dummy) { lv_obj_del(s_ams_pw_dummy);      s_ams_pw_dummy = NULL; }
+    // /* Stop only — keep s_ams_pw_idx/s_ams_pw_count so a mere navigate-away
+    //  * doesn't force the whole sequence to redecode from scratch next visit.
+    //  * Actual restart-from-scratch only happens via automode_ams_prewarm_reset(). */
+    // if (s_ams_pw_timer) { lv_timer_delete(s_ams_pw_timer); s_ams_pw_timer = NULL; }
+    // if (s_ams_pw_dummy) { lv_obj_del(s_ams_pw_dummy);      s_ams_pw_dummy = NULL; }
 }
 
 void automode_ams_prewarm_reset(void)
 {
-    _ams_pw_cancel();
-    s_ams_pw_idx   = 0;
-    s_ams_pw_count = 0;
+    // _ams_pw_cancel();
+    // s_ams_pw_idx   = 0;
+    // s_ams_pw_count = 0;
 }
 
 /* ── memorymode background prewarm ─────────────────────────────────
@@ -125,34 +125,34 @@ static int         s_mm_pw_idx   = 0;
 
 static void _mm_pw_tick(lv_timer_t *t)
 {
-    if (s_mm_pw_idx >= _MM_PW_MAX || !s_mm_pw_dummy) {
-        lv_timer_delete(t); s_mm_pw_timer = NULL;
-        if (s_mm_pw_dummy) { lv_obj_del(s_mm_pw_dummy); s_mm_pw_dummy = NULL; }
-        bk_printf(TAG "[PERF] memorymode prewarm done (%d imgs)\n", _MM_PW_MAX);
-        return;
-    }
-    _img_set_src_timed(s_mm_pw_dummy, s_mm_pw_paths[s_mm_pw_idx]);
-    s_mm_pw_idx++;
+    // if (s_mm_pw_idx >= _MM_PW_MAX || !s_mm_pw_dummy) {
+    //     lv_timer_delete(t); s_mm_pw_timer = NULL;
+    //     if (s_mm_pw_dummy) { lv_obj_del(s_mm_pw_dummy); s_mm_pw_dummy = NULL; }
+    //     bk_printf(TAG "[PERF] memorymode prewarm done (%d imgs)\n", _MM_PW_MAX);
+    //     return;
+    // }
+    // _img_set_src_timed(s_mm_pw_dummy, s_mm_pw_paths[s_mm_pw_idx]);
+    // s_mm_pw_idx++;
 }
 
 void automode_mm_prewarm_start(void)
 {
-#if !UI_PREWARM_ENABLE
-    return;
-#endif
-    if (s_mm_pw_timer) return;
-    if (s_mm_pw_idx >= _MM_PW_MAX) return;
-    s_mm_pw_dummy = lv_image_create(lv_layer_top());
-    lv_obj_add_flag(s_mm_pw_dummy, LV_OBJ_FLAG_HIDDEN);
-    s_mm_pw_timer = lv_timer_create(_mm_pw_tick, 10, NULL);
+// #if !UI_PREWARM_ENABLE
+//     return;
+// #endif
+//     if (s_mm_pw_timer) return;
+//     if (s_mm_pw_idx >= _MM_PW_MAX) return;
+//     s_mm_pw_dummy = lv_image_create(lv_layer_top());
+//     lv_obj_add_flag(s_mm_pw_dummy, LV_OBJ_FLAG_HIDDEN);
+//     s_mm_pw_timer = lv_timer_create(_mm_pw_tick, 10, NULL);
 }
 
 void automode_mm_prewarm_cancel(void)
 {
-    /* Stop only — keep s_mm_pw_idx so revisiting automode/main doesn't
-     * force the 12-image memorymode prewarm to restart from scratch. */
-    if (s_mm_pw_timer) { lv_timer_delete(s_mm_pw_timer); s_mm_pw_timer = NULL; }
-    if (s_mm_pw_dummy) { lv_obj_del(s_mm_pw_dummy);      s_mm_pw_dummy = NULL; }
+    // /* Stop only — keep s_mm_pw_idx so revisiting automode/main doesn't
+    //  * force the 12-image memorymode prewarm to restart from scratch. */
+    // if (s_mm_pw_timer) { lv_timer_delete(s_mm_pw_timer); s_mm_pw_timer = NULL; }
+    // if (s_mm_pw_dummy) { lv_obj_del(s_mm_pw_dummy);      s_mm_pw_dummy = NULL; }
 }
 static uint32_t s_last_click_backbt   = 0;
 static uint32_t s_last_click_hide_am  = 0;
@@ -188,7 +188,6 @@ void automode_AutoFermentation2TimeHourBt_event_cb(lv_event_t *e);
 void automode_AutoFermentation2TimeMinBt_event_cb(lv_event_t *e);
 void keypad_touch_event_cb(lv_event_t *e);
 void automode_keypadhide_event_cb(lv_event_t *e);
-void automode_load_event_cb(lv_event_t *e);
 bool spare = false;
 bool testcontrol = false;
 // int  s_tci_automode = 0;
