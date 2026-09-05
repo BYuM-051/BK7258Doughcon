@@ -13,10 +13,10 @@ extern "C" {
 
 // void ui_lang_apply_manualmode(bk_lv_ui_t *bk_ui);
 // void ui_lang_reset_manualmode_cache(void);
-void ui_lang_apply_manualmodestart(bk_lv_ui_t *bk_ui);
+// void ui_lang_apply_manualmodestart(bk_lv_ui_t *bk_ui);
 /* manualmodestart 화면 오브젝트가 destroy+재생성될 때 init_page_manualmodestart()에서
  * 호출 — 캐시가 "이미 적용됨"으로 착각해 새 빈 이미지를 안 채우는 것을 방지. */
-void ui_lang_reset_manualmodestart_cache(void);
+// void ui_lang_reset_manualmodestart_cache(void);
 // void ui_lang_apply_automode(bk_lv_ui_t *bk_ui);
 /* automode 화면 오브젝트가 destroy+재생성될 때 init_page_automode()에서 호출 —
  * 캐시가 "이미 적용됨"으로 착각해 새로 생성된 빈 이미지를 안 채우는 것을 방지. */

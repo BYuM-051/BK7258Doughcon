@@ -81,33 +81,7 @@ static lv_obj_t *_get_target_label_mms(bk_lv_ui_t *bk_ui)
     }
 }
 
-static lv_obj_t *_make_underbar_mms(lv_obj_t *parent, lv_color_t color,
-                                     int x, int y, int w, int h)
-{
-    lv_obj_t *obj = lv_obj_create(parent);
-    lv_obj_set_pos(obj, x, y);
-    lv_obj_set_size(obj, w, h);
-    lv_obj_set_style_bg_color(obj, color, 0);
-    lv_obj_set_style_bg_opa(obj, LV_OPA_COVER, 0);
-    lv_obj_set_style_border_width(obj, 0, 0);
-    lv_obj_set_style_radius(obj, 0, 0);
-    lv_obj_set_style_pad_all(obj, 0, 0);
-    lv_obj_remove_flag(obj, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
-    return obj;
-}
-
-static void _ensure_underbars_created_mms(bk_lv_ui_t *bk_ui)
-{
-    if (bk_ui->manualmodestart_manual_freeze_temp_underbar) return;
-    lv_obj_t *scr = bk_ui->manualmodestart;
-    bk_ui->manualmodestart_manual_fermentation_temp_underbar     = _make_underbar_mms(scr, lv_color_hex(0xD82020), 417, 325, 75,  7);
-    bk_ui->manualmodestart_manual_fermentation_humidity_underbar = _make_underbar_mms(scr, lv_color_hex(0xD82020), 528, 325, 60,  7);
-    bk_ui->manualmodestart_manual_freeze_temp_underbar           = _make_underbar_mms(scr, lv_color_hex(0x1F3FA0), 457, 340+4, 110, 7);
-    bk_ui->manualmodestart_manual_defrost_temp_underbar          = _make_underbar_mms(scr, lv_color_hex(0x55B5D8), 457, 340+4, 110, 7);
-}
-
-/* Hide all underbars (NULL-safe: called from load_event_cb before creation) */
+/* Hide all underbars. They are created by the step initializer. */
 static void _underbar_all_hide_mms(bk_lv_ui_t *bk_ui)
 {
     if (bk_ui->manualmodestart_manual_freeze_temp_underbar)
@@ -152,8 +126,8 @@ static void _maxmin_mms(bk_lv_ui_t *bk_ui)
     lv_label_set_text(bk_ui->manualmodestart_manual_defrost_temp_txt, _buf);
 
     _v = atoi(lv_label_get_text(bk_ui->manualmodestart_manual_fermentation_temp_txt));
-    if (is_f) { if (_v < 59) _v = 59; if (_v > 104) _v = 104; }   /* F: 59~104 */
-    else       { if (_v < 15) _v = 15; if (_v > 40)  _v = 40;  }   /* C: 15~40 */
+    if (is_f) { if (_v < 41) _v = 41; if (_v > 104) _v = 104; }   /* F: 41~104 */
+    else       { if (_v < 5) _v = 5; if (_v > 40)  _v = 40;  }   /* C: 5~40 */
     snprintf(_buf, sizeof(_buf), "%d", _v);
     lv_label_set_text(bk_ui->manualmodestart_manual_fermentation_temp_txt, _buf);
 
@@ -209,108 +183,19 @@ static void _keypad_set_images_mms(bk_lv_ui_t *bk_ui)
 
 static void _keypad_on_manualmodestart(bk_lv_ui_t *bk_ui)
 {
-    /* Lazy create keypadbaseim (once per screen lifetime) */
-    if (!bk_ui->manualmodestart_keypadbaseim) {
-        bk_ui->manualmodestart_keypadbaseim = lv_image_create(bk_ui->manualmodestart);
-        lv_obj_add_flag(bk_ui->manualmodestart_keypadbaseim, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_set_pos(bk_ui->manualmodestart_keypadbaseim, 0, 430);
-        // lv_obj_set_size(bk_ui->manualmodestart_keypadbaseim, 1024, 130);
-    }
-    /* Always update src to match current mode + language */
-    {
-        // static const char *kp_pfx[4] = {
-        //     "/images/freeze_keypad",
-        //     "/images/freeze_keypad",
-        //     "/images/defrost_keypad",
-        //     "/images/fermentation_keypad",
-        // };
-         static const char *kp_pfx[4] = {
-            "/images/keypadn",
-            "/images/keypadn",
-            "/images/keypadn",
-            "/images/keypadn",
-        };
-        int _mode = g_device_state.manual_current_mode;
-        int _lang = settings_get_int("LANGUAGE");
-        const char *_lsuf = (_lang == 1) ? "_china" : (_lang == 2) ? "_english" : "";
-        const char *_pfx  = kp_pfx[(_mode >= 1 && _mode <= 3) ? _mode : 0];
-        char _kp[128];
-        snprintf(_kp, sizeof(_kp), "%s%s.jpg", _pfx, _lsuf);
-        _img_set_src_timed(bk_ui->manualmodestart_keypadbaseim, _kp);
-    }
-
-    /* Lazy create 12 digit buttons + images + keypadhide */
-    if (!bk_ui->manualmodestart_keypad1) {
-        lv_obj_t *scr = bk_ui->manualmodestart;
-        lv_obj_t **bt[12] = {
-            &bk_ui->manualmodestart_keypad1,     &bk_ui->manualmodestart_keypad2,
-            &bk_ui->manualmodestart_keypad3,     &bk_ui->manualmodestart_keypad4,
-            &bk_ui->manualmodestart_keypad5,     &bk_ui->manualmodestart_keypad6,
-            &bk_ui->manualmodestart_keypad7,     &bk_ui->manualmodestart_keypad8,
-            &bk_ui->manualmodestart_keypad9,     &bk_ui->manualmodestart_keypad0,
-            &bk_ui->manualmodestart_keypadminor, &bk_ui->manualmodestart_keypadbackspace,
-        };
-        lv_obj_t **im[12] = {
-            &bk_ui->manualmodestart_keypad1_im,        &bk_ui->manualmodestart_keypad2_im,
-            &bk_ui->manualmodestart_keypad3_im,        &bk_ui->manualmodestart_keypad4_im,
-            &bk_ui->manualmodestart_keypad5_im,        &bk_ui->manualmodestart_keypad6_im,
-            &bk_ui->manualmodestart_keypad7_im,        &bk_ui->manualmodestart_keypad8_im,
-            &bk_ui->manualmodestart_keypad9_im,        &bk_ui->manualmodestart_keypad0_im,
-            &bk_ui->manualmodestart_keypadminor_im,    &bk_ui->manualmodestart_keypadbackspace_im,
-        };
-        for (int i = 0; i < 12; i++) {
-            *bt[i] = lv_button_create(scr);
-            lv_obj_set_style_bg_opa(*bt[i], 0, 0);
-            lv_obj_set_style_border_width(*bt[i], 0, 0);
-            lv_obj_set_style_shadow_width(*bt[i], 0, 0);
-            lv_obj_set_pos(*bt[i], 20 + i * 72, 453);
-            lv_obj_set_size(*bt[i], 65, 75);
-            lv_obj_add_event_cb(*bt[i], manualmodestart_keypad_event_cb,
-                                LV_EVENT_ALL, (void *)(intptr_t)i);
-
-            *im[i] = lv_image_create(scr);
-            lv_obj_add_flag(*im[i], LV_OBJ_FLAG_HIDDEN);
-            lv_obj_remove_flag(*im[i], LV_OBJ_FLAG_CLICKABLE);
-            lv_obj_set_pos(*im[i], 20 + i * 72, 453);
-            lv_obj_set_size(*im[i], 65, 75);
-        }
-        bk_ui->manualmodestart_keypadhide = lv_button_create(scr);
-        lv_obj_set_style_bg_opa(bk_ui->manualmodestart_keypadhide, 0, 0);
-        lv_obj_set_style_border_width(bk_ui->manualmodestart_keypadhide, 0, 0);
-        lv_obj_set_style_shadow_width(bk_ui->manualmodestart_keypadhide, 0, 0);
-        lv_obj_set_pos(bk_ui->manualmodestart_keypadhide, 884, 453);
-        lv_obj_set_size(bk_ui->manualmodestart_keypadhide, 120, 75);
-        lv_obj_add_event_cb(bk_ui->manualmodestart_keypadhide,
-                            manualmodestart_keypadhide_event_cb, LV_EVENT_ALL, NULL);
-        lv_obj_add_flag(bk_ui->manualmodestart_keypadhide, LV_OBJ_FLAG_HIDDEN);
-
-        bk_ui->manualmodestart_keypadhide_im = lv_image_create(scr);
-        lv_obj_set_pos(bk_ui->manualmodestart_keypadhide_im, 884, 453);
-        lv_obj_set_size(bk_ui->manualmodestart_keypadhide_im, 120, 75);
-        lv_obj_remove_flag(bk_ui->manualmodestart_keypadhide_im, LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_add_flag(bk_ui->manualmodestart_keypadhide_im, LV_OBJ_FLAG_HIDDEN);
-    }
-    {
-        int _lang2 = settings_get_int("LANGUAGE");
-        const char *_lsuf2 = (_lang2 == 1) ? "_china" : (_lang2 == 2) ? "_english" : "";
-        char _kc[64];
-        snprintf(_kc, sizeof(_kc), "/images/keypadback_close%s.png", _lsuf2);
-        _img_set_src_timed(bk_ui->manualmodestart_keypadhide_im, _kc);
-    }
-
-    /* Set mode-specific digit images before showing */
+    /* Objects and language-specific fixed images are created by the step initializer. */
     _keypad_set_images_mms(bk_ui);
 
-    lv_obj_t **bt[12] = {
-        &bk_ui->manualmodestart_keypad1,     &bk_ui->manualmodestart_keypad2,
-        &bk_ui->manualmodestart_keypad3,     &bk_ui->manualmodestart_keypad4,
-        &bk_ui->manualmodestart_keypad5,     &bk_ui->manualmodestart_keypad6,
-        &bk_ui->manualmodestart_keypad7,     &bk_ui->manualmodestart_keypad8,
-        &bk_ui->manualmodestart_keypad9,     &bk_ui->manualmodestart_keypad0,
-        &bk_ui->manualmodestart_keypadminor, &bk_ui->manualmodestart_keypadbackspace,
+    lv_obj_t *buttons[12] = {
+        bk_ui->manualmodestart_keypad1,     bk_ui->manualmodestart_keypad2,
+        bk_ui->manualmodestart_keypad3,     bk_ui->manualmodestart_keypad4,
+        bk_ui->manualmodestart_keypad5,     bk_ui->manualmodestart_keypad6,
+        bk_ui->manualmodestart_keypad7,     bk_ui->manualmodestart_keypad8,
+        bk_ui->manualmodestart_keypad9,     bk_ui->manualmodestart_keypad0,
+        bk_ui->manualmodestart_keypadminor, bk_ui->manualmodestart_keypadbackspace,
     };
     for (int i = 0; i < 12; i++)
-        lv_obj_add_flag(*bt[i], LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_flag(buttons[i], LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_flag(bk_ui->manualmodestart_keypadhide,   LV_OBJ_FLAG_CLICKABLE);
     lv_obj_clear_flag(bk_ui->manualmodestart_keypadhide, LV_OBJ_FLAG_HIDDEN);
     /* keypadhide_im: 항상 보이지 않고 눌렀을 때만 표시(press feedback) — event_cb에서 처리 */
@@ -367,7 +252,6 @@ static void _common_click_mms(bk_lv_ui_t *bk_ui)
         s_save_manualmodestart[sizeof(s_save_manualmodestart) - 1] = '\0';
     }
     s_edit_buf_manualmodestart[0] = '\0';
-    _ensure_underbars_created_mms(bk_ui);
     _underbar_all_hide_mms(bk_ui);
     _underbar_show_mms(bk_ui);
     _keypad_on_manualmodestart(bk_ui);
@@ -569,9 +453,15 @@ static void _arc_anim_start(lv_obj_t *arc)
 
 static void _arc_anim_stop(lv_obj_t *arc)
 {
+    if (arc == NULL || !lv_obj_is_valid(arc))
+    {
+        return;
+    }
+
     lv_anim_delete(arc, _arc_anim_cb);
     lv_arc_set_angles(arc, 225, 315);   /* 원점 복귀 — 12시 중앙 (90°) */
 }
+
 
 /* ── manual_gif PNG 애니메이션 (냉동/발효: 회전, 해동: 물방울 낙하) ── */
 static void _gif_rotate_cb_mms(void *obj, int32_t val)
@@ -675,50 +565,81 @@ static void _gif_anim_stop_mms(bk_lv_ui_t *bk_ui)
  * → arc 이동 시 구 위치가 bg_img_src raw픽셀로 덮임 → 찌꺼기 없음              */
 static void _ferm2_bg_load(bk_lv_ui_t *bk_ui, const char *bg_path, int lang)
 {
+    if (bk_ui == NULL || bg_path == NULL ||
+        bk_ui->manualmodestart == NULL || !lv_obj_is_valid(bk_ui->manualmodestart))
+    {
+        return;
+    }
+
     lv_obj_t *scr = bk_ui->manualmodestart;
 
-    size_t _free = rtos_get_psram_free_heap_size();
-    bk_printf(TAG "[FERM2] psram free = %u B\n", (unsigned)_free);
-    if (_free < 1300 * 1024) {
-        bk_printf(TAG "[FERM2] psram low, skip bg load\n");
-        return;
+    size_t freePsram = rtos_get_psram_free_heap_size();
+    bk_printf(TAG "[FERM2] psram free = %u B\n", (unsigned)freePsram);
+
+    if (s_ferm2_canvas_buf == NULL)
+    {
+        if (freePsram < 1300 * 1024)
+        {
+            bk_printf(TAG "[FERM2] psram low, fallback to direct JPEG\n");
+            lv_obj_set_style_bg_img_src(scr, bg_path, 0);
+            lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
+            return;
+        }
+
+        uint32_t bufSize = LV_CANVAS_BUF_SIZE(1024, 540, 16, LV_DRAW_BUF_ALIGN);
+        s_ferm2_canvas_buf = lv_malloc(bufSize);
+        if (s_ferm2_canvas_buf == NULL)
+        {
+            bk_printf(TAG "[FERM2] canvas buffer alloc failed, fallback to direct JPEG\n");
+            lv_obj_set_style_bg_img_src(scr, bg_path, 0);
+            lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
+            return;
+        }
     }
 
-    if (!s_ferm2_canvas_buf) {
-        uint32_t buf_sz = LV_CANVAS_BUF_SIZE(1024, 540, 16, LV_DRAW_BUF_ALIGN);
-        s_ferm2_canvas_buf = lv_malloc(buf_sz);
-    }
-    if (!s_ferm2_canvas_buf) {
-        /* fallback: JPEG 직접 (느리지만 기능은 유지) */
-        lv_obj_set_style_bg_img_src(scr, bg_path, 0);
-        lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
-        return;
+    /* canvas/image는 페이지가 살아 있는 동안 재사용한다. */
+    if (s_ferm2_bg_canvas == NULL || !lv_obj_is_valid(s_ferm2_bg_canvas))
+    {
+        s_ferm2_bg_canvas = lv_canvas_create(scr);
+        lv_canvas_set_buffer(s_ferm2_bg_canvas,
+                             s_ferm2_canvas_buf,
+                             1024,
+                             540,
+                             LV_COLOR_FORMAT_RGB565);
+        lv_obj_add_flag(s_ferm2_bg_canvas, LV_OBJ_FLAG_HIDDEN);
+        s_ferm2_buf_lang = -1;
     }
 
-    /* canvas: buffer 소유 + image dsc 제공 전용, 화면에 표시하지 않음 */
-    s_ferm2_bg_canvas = lv_canvas_create(scr);
-    lv_canvas_set_buffer(s_ferm2_bg_canvas, s_ferm2_canvas_buf, 1024, 540, LV_COLOR_FORMAT_RGB565);
-    lv_obj_add_flag(s_ferm2_bg_canvas, LV_OBJ_FLAG_HIDDEN);
-
-    if (s_ferm2_buf_lang != lang) {
-        /* 최초 또는 언어 변경 시만 JPEG decode (이후 재진입은 buffer 재사용) */
+    if (s_ferm2_buf_lang != lang)
+    {
         lv_layer_t layer;
         lv_canvas_init_layer(s_ferm2_bg_canvas, &layer);
-        lv_draw_image_dsc_t img_dsc;
-        lv_draw_image_dsc_init(&img_dsc);
-        img_dsc.src = bg_path;
+
+        lv_draw_image_dsc_t imgDsc;
+        lv_draw_image_dsc_init(&imgDsc);
+        imgDsc.src = bg_path;
+
         lv_area_t area = {0, 0, 1023, 539};
-        lv_draw_image(&layer, &img_dsc, &area);
+        lv_draw_image(&layer, &imgDsc, &area);
         lv_canvas_finish_layer(s_ferm2_bg_canvas, &layer);
         s_ferm2_buf_lang = lang;
     }
 
-    /* lv_image child at (0,0): bg_img_src와 달리 pos 제어 가능 → 정확히 (0,0) 고정 */
-    s_ferm2_bg_img = lv_image_create(scr);
-    lv_image_set_src(s_ferm2_bg_img, lv_canvas_get_image(s_ferm2_bg_canvas));
-    lv_obj_set_pos(s_ferm2_bg_img, 0, 0);
+    if (s_ferm2_bg_img == NULL || !lv_obj_is_valid(s_ferm2_bg_img))
+    {
+        s_ferm2_bg_img = lv_image_create(scr);
+        lv_obj_set_pos(s_ferm2_bg_img, 0, 0);
+        lv_obj_remove_flag(s_ferm2_bg_img, LV_OBJ_FLAG_CLICKABLE);
+    }
 
+    lv_image_set_src(s_ferm2_bg_img, lv_canvas_get_image(s_ferm2_bg_canvas));
+    lv_obj_clear_flag(s_ferm2_bg_img, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_move_background(s_ferm2_bg_img);
+
+    /* raw canvas를 쓰는 경우 screen style의 direct JPEG fallback은 제거한다. */
+    lv_obj_set_style_bg_img_src(scr, NULL, 0);
 }
+
 
 /* ── 실시간 온도/습도 갱신 ─────────────────────────────────────────── */
 static void _refresh_running_ui_mms(bk_lv_ui_t *bk_ui)
@@ -856,6 +777,247 @@ static void _ui_apply_stopped_mms(bk_lv_ui_t *bk_ui)
     if (s_ui_timer_mms) { lv_timer_delete(s_ui_timer_mms); s_ui_timer_mms = NULL; }
 }
 
+/* ── page runtime lifecycle ------------------------------------------------- */
+
+static bool _manualmodestart_runtime_ready(bk_lv_ui_t *bk_ui)
+{
+    return bk_ui != NULL &&
+           bk_ui->manualmodestart != NULL && lv_obj_is_valid(bk_ui->manualmodestart) &&
+           bk_ui->manualmodestart_run_arc != NULL && lv_obj_is_valid(bk_ui->manualmodestart_run_arc) &&
+           s_run_arc_bg_white != NULL && lv_obj_is_valid(s_run_arc_bg_white) &&
+           s_run_arc_inner_white != NULL && lv_obj_is_valid(s_run_arc_inner_white) &&
+           s_mms_drop_clip != NULL && lv_obj_is_valid(s_mms_drop_clip) &&
+           s_mms_drop_img != NULL && lv_obj_is_valid(s_mms_drop_img) &&
+           s_mms_ferm_inner != NULL && lv_obj_is_valid(s_mms_ferm_inner) &&
+           s_mms_ferm_top_img != NULL && lv_obj_is_valid(s_mms_ferm_top_img) &&
+           s_mms_ferm_btm_clip != NULL && lv_obj_is_valid(s_mms_ferm_btm_clip) &&
+           s_mms_ferm_btm_img != NULL && lv_obj_is_valid(s_mms_ferm_btm_img);
+}
+
+bool manualmodestart_runtime_create(bk_lv_ui_t *bk_ui)
+{
+    if (bk_ui == NULL || bk_ui->manualmodestart == NULL ||
+        !lv_obj_is_valid(bk_ui->manualmodestart))
+    {
+        return false;
+    }
+
+    if (_manualmodestart_runtime_ready(bk_ui))
+    {
+        return true;
+    }
+
+    /* 일부만 살아 있는 상태에서 덧붙이면 중복 child와 dangling pointer가 생긴다. */
+    if (bk_ui->manualmodestart_run_arc != NULL ||
+        s_run_arc_bg_white != NULL || s_run_arc_inner_white != NULL ||
+        s_mms_drop_clip != NULL || s_mms_drop_img != NULL ||
+        s_mms_ferm_inner != NULL || s_mms_ferm_top_img != NULL ||
+        s_mms_ferm_btm_clip != NULL || s_mms_ferm_btm_img != NULL)
+    {
+        bk_printf(TAG "[ERROR] manualmodestart runtime objects are partially initialized\n");
+        return false;
+    }
+
+    lv_obj_t *scr = bk_ui->manualmodestart;
+
+    s_mms_drop_clip = lv_obj_create(scr);
+    lv_obj_set_pos(s_mms_drop_clip, 474, 170);
+    lv_obj_set_size(s_mms_drop_clip, 76, 55);
+    lv_obj_add_flag(s_mms_drop_clip, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_remove_flag(s_mms_drop_clip, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_opa(s_mms_drop_clip, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(s_mms_drop_clip, 0, 0);
+    lv_obj_set_style_pad_all(s_mms_drop_clip, 0, 0);
+
+    s_mms_drop_img = lv_image_create(s_mms_drop_clip);
+    lv_obj_set_pos(s_mms_drop_img, 0, 0);
+    lv_obj_remove_flag(s_mms_drop_img, LV_OBJ_FLAG_CLICKABLE);
+
+    s_mms_ferm_inner = lv_obj_create(s_mms_drop_clip);
+    lv_obj_set_pos(s_mms_ferm_inner, 0, 0);
+    lv_obj_set_size(s_mms_ferm_inner, 76, 24);
+    lv_obj_remove_flag(s_mms_ferm_inner, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_opa(s_mms_ferm_inner, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(s_mms_ferm_inner, 0, 0);
+    lv_obj_set_style_pad_all(s_mms_ferm_inner, 0, 0);
+
+    s_mms_ferm_top_img = lv_image_create(s_mms_ferm_inner);
+    lv_obj_set_pos(s_mms_ferm_top_img, 0, 0);
+    lv_obj_remove_flag(s_mms_ferm_top_img, LV_OBJ_FLAG_CLICKABLE);
+
+    s_mms_ferm_btm_clip = lv_obj_create(scr);
+    lv_obj_set_pos(s_mms_ferm_btm_clip, 474, 194);
+    lv_obj_set_size(s_mms_ferm_btm_clip, 76, 31);
+    lv_obj_add_flag(s_mms_ferm_btm_clip, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_remove_flag(s_mms_ferm_btm_clip, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_opa(s_mms_ferm_btm_clip, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(s_mms_ferm_btm_clip, 0, 0);
+    lv_obj_set_style_pad_all(s_mms_ferm_btm_clip, 0, 0);
+
+    s_mms_ferm_btm_img = lv_image_create(s_mms_ferm_btm_clip);
+    lv_obj_set_pos(s_mms_ferm_btm_img, 0, -24);
+    lv_obj_remove_flag(s_mms_ferm_btm_img, LV_OBJ_FLAG_CLICKABLE);
+
+    /* 실제 색은 SHOW_START에서 현재 mode에 맞춰 갱신한다. */
+    bk_ui->manualmodestart_run_arc = _create_run_arc(scr, lv_color_hex(0xD8D8D8));
+
+    if (!_manualmodestart_runtime_ready(bk_ui))
+    {
+        bk_printf(TAG "[ERROR] manualmodestart runtime object creation failed\n");
+        return false;
+    }
+
+    /* 고정 child보다 뒤쪽에 배치. FERM2 background는 load 시 더 뒤로 이동한다. */
+    lv_obj_move_background(s_mms_drop_clip);
+    lv_obj_move_background(s_mms_ferm_btm_clip);
+    lv_obj_move_background(bk_ui->manualmodestart_manual_gif);
+    lv_obj_move_background(bk_ui->manualmodestart_manual_gif_basic);
+    lv_obj_move_background(bk_ui->manualmodestart_manual_txt_basic);
+    lv_obj_move_background(bk_ui->manualmodestart_manual_circle_basic);
+    lv_obj_move_background(bk_ui->manualmodestart_manual_circle_gif);
+
+    return true;
+}
+
+void manualmodestart_runtime_stop(bk_lv_ui_t *bk_ui)
+{
+    if (bk_ui == NULL)
+    {
+        return;
+    }
+
+    _gif_anim_stop_mms(bk_ui);
+    _arc_anim_stop(bk_ui->manualmodestart_run_arc);
+
+    if (bk_ui->manualmodestart_run_arc && lv_obj_is_valid(bk_ui->manualmodestart_run_arc))
+    {
+        lv_obj_add_flag(bk_ui->manualmodestart_run_arc, LV_OBJ_FLAG_HIDDEN);
+    }
+    if (s_run_arc_bg_white && lv_obj_is_valid(s_run_arc_bg_white))
+    {
+        lv_obj_add_flag(s_run_arc_bg_white, LV_OBJ_FLAG_HIDDEN);
+    }
+    if (s_run_arc_inner_white && lv_obj_is_valid(s_run_arc_inner_white))
+    {
+        lv_obj_add_flag(s_run_arc_inner_white, LV_OBJ_FLAG_HIDDEN);
+    }
+
+    if (s_run_anim_timer_mms != NULL)
+    {
+        lv_timer_delete(s_run_anim_timer_mms);
+        s_run_anim_timer_mms = NULL;
+    }
+
+    if (s_ui_timer_mms != NULL)
+    {
+        lv_timer_delete(s_ui_timer_mms);
+        s_ui_timer_mms = NULL;
+    }
+}
+
+void manualmodestart_runtime_reset(void)
+{
+    /* 이 함수는 page root 삭제 후 호출한다. */
+    s_mms_drop_clip       = NULL;
+    s_mms_drop_img        = NULL;
+    s_mms_ferm_inner      = NULL;
+    s_mms_ferm_top_img    = NULL;
+    s_mms_ferm_btm_clip   = NULL;
+    s_mms_ferm_btm_img    = NULL;
+    s_run_arc_bg_white    = NULL;
+    s_run_arc_inner_white = NULL;
+    s_ferm2_bg_canvas     = NULL;
+    s_ferm2_bg_img        = NULL;
+
+    if (s_ferm2_canvas_buf != NULL)
+    {
+        lv_free(s_ferm2_canvas_buf);
+        s_ferm2_canvas_buf = NULL;
+    }
+
+    s_ferm2_buf_lang = -1;
+    s_last_temp_mms = 0x7FFFFFFF;
+    s_last_hum_mms  = 0x7FFFFFFF;
+    s_tci_manualmodestart = 0;
+    s_save_manualmodestart[0] = '\0';
+    s_edit_buf_manualmodestart[0] = '\0';
+    s_arc_angle_mms = 0;
+    s_gif_val_mms = 0;
+    s_gif_type_mms = 0;
+}
+
+static bool _set_mode_image_mms(lv_obj_t *obj,
+                                const char *basePath,
+                                bool hasLanguageVariant,
+                                bool hasDegreeVariant)
+{
+    if (obj == NULL || !lv_obj_is_valid(obj))
+    {
+        bk_printf(TAG "[ERROR] image target is NULL/invalid: %s\n", basePath);
+        return false;
+    }
+
+    char fullPath[128] = {0};
+    if (!getImageFullPath(basePath,
+                          hasLanguageVariant,
+                          hasDegreeVariant,
+                          ".png",
+                          fullPath,
+                          sizeof(fullPath)))
+    {
+        bk_printf(TAG "[ERROR] failed to resolve image path: %s\n", basePath);
+        return false;
+    }
+
+    lv_image_set_src(obj, fullPath);
+    return true;
+}
+
+static void _reset_show_state_mms(bk_lv_ui_t *bk_ui)
+{
+    lv_obj_t *modeObjects[] =
+    {
+        bk_ui->manualmodestart_manual_freeze_temp_txt,
+        bk_ui->manualmodestart_manual_freeze_temp_bt,
+        bk_ui->manualmodestart_manual_defrost_temp_txt,
+        bk_ui->manualmodestart_manual_defrost_temp_bt,
+        bk_ui->manualmodestart_manual_fermentation_temp_txt,
+        bk_ui->manualmodestart_manual_fermentation_humidity_txt,
+        bk_ui->manualmodestart_manual_fermentation_temp_bt,
+        bk_ui->manualmodestart_manual_fermentation_humidity_bt,
+        bk_ui->manualmodestart_over_time_korea,
+        bk_ui->manualmodestart_over_time_china,
+        bk_ui->manualmodestart_over_time_english,
+    };
+
+    for (uint32_t i = 0; i < sizeof(modeObjects) / sizeof(modeObjects[0]); i++)
+    {
+        if (modeObjects[i] != NULL && lv_obj_is_valid(modeObjects[i]))
+        {
+            lv_obj_add_flag(modeObjects[i], LV_OBJ_FLAG_HIDDEN);
+        }
+    }
+
+    _underbar_all_hide_mms(bk_ui);
+    _keypad_off_manualmodestart(bk_ui);
+
+    if (s_ferm2_bg_img != NULL && lv_obj_is_valid(s_ferm2_bg_img))
+    {
+        lv_obj_add_flag(s_ferm2_bg_img, LV_OBJ_FLAG_HIDDEN);
+    }
+
+    /* direct-JPEG fallback가 남아 있을 수 있으므로 일반 mode 시작 전에 제거한다. */
+    lv_obj_set_style_bg_img_src(bk_ui->manualmodestart, NULL, 0);
+
+    lv_obj_set_style_text_color(bk_ui->manualmodestart_manual_fermentation_temp_txt,
+                                lv_color_hex(0xD1232A), 0);
+    lv_obj_set_style_text_color(bk_ui->manualmodestart_manual_fermentation_humidity_txt,
+                                lv_color_hex(0xD1232A), 0);
+
+    s_tci_manualmodestart = 0;
+    s_edit_buf_manualmodestart[0] = '\0';
+}
+
 /* ─────────────────────────────────────────────────────────────────────────── */
 
 void manualmodestart_backbt_event_cb(lv_event_t *e)
@@ -866,11 +1028,15 @@ void manualmodestart_backbt_event_cb(lv_event_t *e)
     if (lv_tick_elaps(s_last_click_manualmodestart) < 250) return;
     s_last_click_manualmodestart = lv_tick_get();
     hal_buzzer_beep();
-
     /* 타이머 정지 */
-    if (s_ui_timer_mms) { lv_timer_delete(s_ui_timer_mms); s_ui_timer_mms = NULL; }
+    if (s_ui_timer_mms) 
+    { 
+        lv_timer_delete(s_ui_timer_mms); 
+        s_ui_timer_mms = NULL; 
+    }
 
-    if (state->auto_mode_over) {
+    if (state->auto_mode_over) 
+    {
         /* 과발효방지 저온발효 중 Stop:
          * Android: AutoModeOver=false, Operation=false, AutoModeStart=false
          *          blackOutChecking=false, saveChecking=0 → AutoModeFragment */
@@ -892,26 +1058,11 @@ void manualmodestart_backbt_event_cb(lv_event_t *e)
         state->manual_current_mode    = 0;
         settings_set_str("saveChecking", "0");
         settings_set_str("SaveWriting",  "0");
-#if UI_PRENDERING_ENABLE
         ui_page_change(PAGE_AUTOMODE);
-#else
-        if (!bk_ui->automode || !lv_obj_is_valid(bk_ui->automode))
-            init_page_automode(bk_ui);
-        lv_scr_load(bk_ui->automode);
-#endif /* UI_PRENDERING_ENABLE */
-        destroy_page_manualmodestart(bk_ui);
+        //destroy_page_manualmodestart(bk_ui);
         bk_printf(TAG "[OVER_FERM] Stop → AutoModeOver 해제, automode 화면\n");
         return;
     }
-
-#if UI_PRENDERING_ENABLE
-    ui_page_change(PAGE_MANUALMODE);
-#else
-    if (bk_ui->manualmode == NULL || !lv_obj_is_valid(bk_ui->manualmode))
-        init_page_manualmode(bk_ui);
-    lv_scr_load(bk_ui->manualmode);
-#endif /* UI_PRENDERING_ENABLE */
-    destroy_page_manualmodestart(bk_ui);
     state->operation           = false;
     /* start_run=false로 두면 이후 _write_process()가 아무 TX도 보내지 않게 되어
      * RX no data가 계속 쌓인다 — over_ferm Stop 경로와 동일한 문제이므로 true 유지. */
@@ -920,6 +1071,7 @@ void manualmodestart_backbt_event_cb(lv_event_t *e)
     state->auto_mode_start     = false;
     state->manual_current_mode = 0;
     settings_set_str("saveChecking", "0");
+    ui_page_change(PAGE_MANUALMODE);
 }
 
 void manualmodestart_startbt_event_cb(lv_event_t *e)
@@ -1100,304 +1252,244 @@ void manualmodestart_keypadhide_event_cb(lv_event_t *e)
 void manualmodestart_load_start_event_cb(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
+    if (code != LV_EVENT_SCREEN_LOAD_START && code != UI_EVENT_PAGE_SHOW_START)
+    {
+        bk_printf(TAG "[WARN] manualmodestart_load_start_event_cb: unexpected event code %d\n", code);
+        return;
+    }
+
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
+
+    if (bk_ui->manualmodestart == NULL || !lv_obj_is_valid(bk_ui->manualmodestart))
     {
-        int _is_f = (strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0);
+        bk_printf(TAG "[ERROR] SHOW_START with invalid page root\n");
+        return;
+    }
+
+    /* SHOW callback에서는 child를 만들지 않는다. init이 끝났다는 invariant를 확인만 한다. */
+    if (!_manualmodestart_runtime_ready(bk_ui))
+    {
+        bk_printf(TAG "[ERROR] SHOW_START before runtime objects are ready, mode=%d\n",
+                  state->manual_current_mode);
+        return;
+    }
+
+    /* prerender 상태로 살아 있던 page의 이전 animation/UI 상태를 먼저 지운다. */
+    manualmodestart_runtime_stop(bk_ui);
+    _reset_show_state_mms(bk_ui);
+
+    /* 기본 title은 manual mode. FERM2만 아래에서 automode title로 덮는다. */
+    _set_mode_image_mms(bk_ui->manualmodestart_title,
+                        "/images/manualmode_title",
+                        true,
+                        false);
+
+    /* mode-dependent fixed images. 모든 target은 init에서 이미 생성되어 있어야 한다. */
+    switch (state->manual_current_mode)
+    {
+        case MANUAL_MODE_FREEZE:
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_txt_basic,
+                                "/images/manual_freeze_circle_txt", true, true);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_circle_basic,
+                                "/images/manual_freeze_circle_basic", true, true);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif_basic,
+                                "/images/manual_freeze_gif", false, false);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif,
+                                "/images/manual_freeze_gif", false, false);
+            lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 52, 52);
+            lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 486, 171);
+            break;
+
+        case MANUAL_MODE_DEFROST:
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_txt_basic,
+                                "/images/manual_defrost_circle_txt", true, true);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_circle_basic,
+                                "/images/manual_defrost_circle_basic", true, true);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif_basic,
+                                "/images/manual_defrost_gif", false, false);
+            _set_mode_image_mms(s_mms_drop_img,
+                                "/images/manual_defrost_gif", false, false);
+            lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 76, 55);
+            lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 474, 170);
+            break;
+
+        case MANUAL_MODE_FERM:
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_txt_basic,
+                                "/images/manual_fermentation2_circle_txt", true, true);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_circle_basic,
+                                "/images/manual_fermentation2_circle_basic", true, true);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif_basic,
+                                "/images/manual_fermentation2_gif", false, false);
+            _set_mode_image_mms(s_mms_ferm_top_img,
+                                "/images/manual_fermentation2_gif", false, false);
+            _set_mode_image_mms(s_mms_ferm_btm_img,
+                                "/images/manual_fermentation2_gif", false, false);
+            lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 76, 55);
+            lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 474, 170);
+            break;
+
+        case MANUAL_MODE_FERM2:
+            _set_mode_image_mms(bk_ui->manualmodestart_title,
+                                "/images/automode_title", true, false);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_txt_basic,
+                                "/images/manual_fermentation1_circle_txt", true, true);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_circle_basic,
+                                "/images/manual_fermentation1_circle_basic", true, true);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif_basic,
+                                "/images/manual_fermentation1_gif", false, false);
+            _set_mode_image_mms(s_mms_ferm_top_img,
+                                "/images/manual_fermentation1_gif", false, false);
+            _set_mode_image_mms(s_mms_ferm_btm_img,
+                                "/images/manual_fermentation1_gif", false, false);
+            lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 76, 55);
+            lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 474, 170);
+            break;
+
+        default:
+            bk_printf(TAG "[ERROR] invalid manual_current_mode=%d\n", state->manual_current_mode);
+            return;
+    }
+
+    if (state->black_out_checking)
+    {
+        lv_obj_clear_flag(bk_ui->manualmodestart_blackout, LV_OBJ_FLAG_HIDDEN);
+    }
+    else
+    {
+        lv_obj_add_flag(bk_ui->manualmodestart_blackout, LV_OBJ_FLAG_HIDDEN);
+    }
+
+    /* 설정값 -> label */
+    {
+        int isF = (strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0);
 #define _LT(obj, key) do { \
-    const char *_sv = settings_get_str(key); \
-    if (_is_f && _sv && _sv[0]) { \
-        char _fb[16]; snprintf(_fb, sizeof(_fb), "%02d", atoi(_sv) * 9 / 5 + 32); \
-        lv_label_set_text(obj, _fb); \
-    } else lv_label_set_text(obj, _sv ? _sv : ""); \
-} while(0)
-        _LT(bk_ui->manualmodestart_manual_freeze_temp_txt,       "ManualFreezeTemp");
-        _LT(bk_ui->manualmodestart_manual_defrost_temp_txt,      "ManualDefrostTemp");
-        /* FERM2(저온발효/과발효방지, automode에서 넘어옴)는 편집 불가(표시 전용,
-         * 아래 분기에서 버튼 숨김)이고, Android 원본(ManualModeStartFragment.java
-         * AutoModeOver 분기)도 별도 설정이 아니라 automode가 실제로 MCU에 보낸
-         * 값(sendfermation1temp/humidity)을 그대로 보여준다 — 표시가 실제 동작과
-         * 항상 일치하도록 우리도 동일하게 state->send_ferm1_temp/humidity를 사용. */
-        if (state->manual_current_mode == MANUAL_MODE_FERM2) {
-            char _fb[16];
-            int _t = _is_f ? (state->send_ferm1_temp * 9 / 5 + 32) : state->send_ferm1_temp;
-            snprintf(_fb, sizeof(_fb), "%d", _t);
-            lv_label_set_text(bk_ui->manualmodestart_manual_fermentation_temp_txt, _fb);
-            snprintf(_fb, sizeof(_fb), "%d", state->send_ferm1_humidity);
-            lv_label_set_text(bk_ui->manualmodestart_manual_fermentation_humidity_txt, _fb);
-        } else {
+    const char *sv = settings_get_str(key); \
+    if (isF && sv && sv[0]) { \
+        char fb[16]; \
+        snprintf(fb, sizeof(fb), "%02d", atoi(sv) * 9 / 5 + 32); \
+        lv_label_set_text(obj, fb); \
+    } else { \
+        lv_label_set_text(obj, sv ? sv : ""); \
+    } \
+} while (0)
+
+        _LT(bk_ui->manualmodestart_manual_freeze_temp_txt,  "ManualFreezeTemp");
+        _LT(bk_ui->manualmodestart_manual_defrost_temp_txt, "ManualDefrostTemp");
+
+        if (state->manual_current_mode == MANUAL_MODE_FERM2)
+        {
+            char fb[16];
+            int temp = isF ? (state->send_ferm1_temp * 9 / 5 + 32) : state->send_ferm1_temp;
+            snprintf(fb, sizeof(fb), "%d", temp);
+            lv_label_set_text(bk_ui->manualmodestart_manual_fermentation_temp_txt, fb);
+            snprintf(fb, sizeof(fb), "%d", state->send_ferm1_humidity);
+            lv_label_set_text(bk_ui->manualmodestart_manual_fermentation_humidity_txt, fb);
+        }
+        else
+        {
             _LT(bk_ui->manualmodestart_manual_fermentation_temp_txt, "ManualFermentationTemp");
             lv_label_set_text(bk_ui->manualmodestart_manual_fermentation_humidity_txt,
-                settings_get_str("ManualFermentationHumidity"));
+                              settings_get_str("ManualFermentationHumidity"));
         }
 #undef _LT
     }
 
-    /* All underbars hidden on load — shown only when editing */
-    _underbar_all_hide_mms(bk_ui);
+    lv_color_t arcColor = lv_color_hex(0xC81D25);
 
-    /* Keypad not clickable on entry; activated only when a field button is pressed */
-    _keypad_off_manualmodestart(bk_ui);
-    s_tci_manualmodestart        = 0;
-    s_edit_buf_manualmodestart[0] = '\0';
+    switch (state->manual_current_mode)
+    {
+        case MANUAL_MODE_FREEZE:
+            lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0x162A9E), 0);
+            arcColor = lv_color_hex(0x162A9E);
+            lv_obj_clear_flag(bk_ui->manualmodestart_manual_freeze_temp_txt, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(bk_ui->manualmodestart_manual_freeze_temp_bt, LV_OBJ_FLAG_HIDDEN);
+            break;
 
-    /* ── 모드 색상 결정 ── */
-    lv_color_t arc_color;
-    if (state->manual_current_mode == 1) {
-        // lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0x182F99), 0);
+        case MANUAL_MODE_DEFROST:
+            lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0x53BAE4), 0);
+            arcColor = lv_color_hex(0x53BAE4);
+            lv_obj_clear_flag(bk_ui->manualmodestart_manual_defrost_temp_txt, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(bk_ui->manualmodestart_manual_defrost_temp_bt, LV_OBJ_FLAG_HIDDEN);
+            break;
 
-        lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0x162a9e), 0);
-        lv_obj_set_style_bg_opa(bk_ui->manualmodestart, LV_OPA_COVER, 0);
-        arc_color = lv_color_hex(0x162a9e);
-        _img_ensure_src(bk_ui->manualmodestart_manual_freeze_temp_txt);
-        lv_obj_clear_flag(bk_ui->manualmodestart_manual_freeze_temp_txt, LV_OBJ_FLAG_HIDDEN);
-        _img_ensure_src(bk_ui->manualmodestart_manual_freeze_temp_bt);
-        lv_obj_clear_flag(bk_ui->manualmodestart_manual_freeze_temp_bt,  LV_OBJ_FLAG_HIDDEN);
-    } else if (state->manual_current_mode == 2) {
-        // lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0x4CAED9), 0);
-        lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0x53bae4), 0);
-        lv_obj_set_style_bg_opa(bk_ui->manualmodestart, LV_OPA_COVER, 0);
-        arc_color = lv_color_hex(0x53bae4);
-        _img_ensure_src(bk_ui->manualmodestart_manual_defrost_temp_txt);
-        lv_obj_clear_flag(bk_ui->manualmodestart_manual_defrost_temp_txt, LV_OBJ_FLAG_HIDDEN);
-        _img_ensure_src(bk_ui->manualmodestart_manual_defrost_temp_bt);
-        lv_obj_clear_flag(bk_ui->manualmodestart_manual_defrost_temp_bt,  LV_OBJ_FLAG_HIDDEN);
-    } else if (state->manual_current_mode == MANUAL_MODE_FERM2) {
-        /* 저온발효 (과발효방지 AutoModeOver):
-         * 배경: manualmodestart_bg 위젯 (lv_image) — bg_img_src 매 프레임 JPEG 디코딩 방지
-         * arc: 0xD4A020 (저온발효 색 — 황금색, 고온발효 빨강과 구분), 라운드 없음
-         * 편집 필드 없음, 설정 온도/습도는 표시만 */
-        {
-            int _lang_f2 = settings_get_int("LANGUAGE");
-            const char *_bg = (_lang_f2 == 1) ? "/images/fermentation_bg_china.jpg" :
-                              (_lang_f2 == 2) ? "/images/fermentation_bg_english.jpg" :
-                                                "/images/fermentation_bg.jpg";
-            /* canvas bg: 최초 1회만 JPEG decode → raw buffer 유지 (매 frame decode 방지)
-             * z-order 조정은 arc 생성 블록 이후 수행 */
-            _ferm2_bg_load(bk_ui, _bg, _lang_f2);
-            arc_color = lv_color_hex(0xD4A020);  /* 저온발효 색 (automodestart OP_MODE_FERM2) */
-            /* 편집 버튼/레이블 모두 숨김 */
-            lv_obj_add_flag(bk_ui->manualmodestart_manual_freeze_temp_txt,           LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(bk_ui->manualmodestart_manual_freeze_temp_bt,            LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(bk_ui->manualmodestart_manual_defrost_temp_txt,          LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(bk_ui->manualmodestart_manual_defrost_temp_bt,           LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(bk_ui->manualmodestart_manual_fermentation_temp_bt,      LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(bk_ui->manualmodestart_manual_fermentation_humidity_bt,  LV_OBJ_FLAG_HIDDEN);
-            /* 설정 온도/습도 텍스트: 버튼 없이 표시만, 황금색 */
-            _img_ensure_src(bk_ui->manualmodestart_manual_fermentation_temp_txt);
-            lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_temp_txt,     LV_OBJ_FLAG_HIDDEN);
-            lv_obj_set_style_text_color(bk_ui->manualmodestart_manual_fermentation_temp_txt,     lv_color_hex(0xD4A020), 0);
-            _img_ensure_src(bk_ui->manualmodestart_manual_fermentation_humidity_txt);
+        case MANUAL_MODE_FERM:
+            lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0xC81D25), 0);
+            arcColor = lv_color_hex(0xC81D25);
+            lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_temp_txt, LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_humidity_txt, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_set_style_text_color(bk_ui->manualmodestart_manual_fermentation_humidity_txt, lv_color_hex(0xD4A020), 0);
-            /* 과발효 방지 시간(분) 표시 — DetailOverFermentation 설정값 */
-            lv_obj_add_flag(bk_ui->manualmodestart_over_time_korea,   LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(bk_ui->manualmodestart_over_time_china,   LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(bk_ui->manualmodestart_over_time_english, LV_OBJ_FLAG_HIDDEN);
-            int _over_min = atoi(settings_get_str("DetailOverFermentation"));
-            if (_over_min > 0) {
-                char _ot[8];
-                snprintf(_ot, sizeof(_ot), "%d", _over_min);
-                lv_obj_t *_ot_lbl = (_lang_f2 == 1) ? bk_ui->manualmodestart_over_time_china :
-                                    (_lang_f2 == 2) ? bk_ui->manualmodestart_over_time_english :
-                                                       bk_ui->manualmodestart_over_time_korea;
-                if (_ot_lbl) {
-                    lv_label_set_text(_ot_lbl, _ot);
-                    lv_obj_clear_flag(_ot_lbl, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_temp_bt, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_humidity_bt, LV_OBJ_FLAG_HIDDEN);
+            break;
+
+        case MANUAL_MODE_FERM2:
+        {
+            int lang = settings_get_int("LANGUAGE");
+            const char *bgPath = (lang == 1) ? "/images/fermentation_bg_china.jpg" :
+                                 (lang == 2) ? "/images/fermentation_bg_english.jpg" :
+                                               "/images/fermentation_bg.jpg";
+
+            _ferm2_bg_load(bk_ui, bgPath, lang);
+            arcColor = lv_color_hex(0xD4A020);
+
+            lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_temp_txt, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_humidity_txt, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_set_style_text_color(bk_ui->manualmodestart_manual_fermentation_temp_txt,
+                                        arcColor, 0);
+            lv_obj_set_style_text_color(bk_ui->manualmodestart_manual_fermentation_humidity_txt,
+                                        arcColor, 0);
+
+            int overMin = atoi(settings_get_str("DetailOverFermentation"));
+            if (overMin > 0)
+            {
+                char overText[8];
+                snprintf(overText, sizeof(overText), "%d", overMin);
+
+                lv_obj_t *overLabel = (lang == 1) ? bk_ui->manualmodestart_over_time_china :
+                                      (lang == 2) ? bk_ui->manualmodestart_over_time_english :
+                                                    bk_ui->manualmodestart_over_time_korea;
+                if (overLabel != NULL)
+                {
+                    lv_label_set_text(overLabel, overText);
+                    lv_obj_clear_flag(overLabel, LV_OBJ_FLAG_HIDDEN);
                 }
             }
+            break;
         }
-    } else {
-        lv_obj_set_style_bg_color(bk_ui->manualmodestart, lv_color_hex(0xC81D25), 0);
-        lv_obj_set_style_bg_opa(bk_ui->manualmodestart, LV_OPA_COVER, 0);
-        arc_color = lv_color_hex(0xC81D25);
-        // _img_ensure_src(bk_ui->manualmodestart_manual_fermentation_temp_txt);
-        lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_temp_txt,     LV_OBJ_FLAG_HIDDEN);
-        _img_ensure_src(bk_ui->manualmodestart_manual_fermentation_humidity_txt);
-        lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_humidity_txt, LV_OBJ_FLAG_HIDDEN);
-        _img_ensure_src(bk_ui->manualmodestart_manual_fermentation_temp_bt);
-        lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_temp_bt,      LV_OBJ_FLAG_HIDDEN);
-        _img_ensure_src(bk_ui->manualmodestart_manual_fermentation_humidity_bt);
-        lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_humidity_bt,  LV_OBJ_FLAG_HIDDEN);
+
+        default:
+            return;
     }
 
-    /* ── arc + circle_basic/circle_gif 생성 또는 업데이트 ──
-     * z-order (back→front): circle_basic → circle_gif → run_arc → 기존 버튼/레이블
-     * circle_basic : 흰색 원 + 아이콘/텍스트 PNG
-     * circle_gif    : 발효(FERM/FERM2) 전용 색 링 PNG (냉동/해동은 HIDDEN, run_arc 뒤에 위치)
-     * run_arc      : 회색 ring + 모드색 세그먼트 (중앙 투명 → circle_gif/circle_basic 보임)
-     */
-    if (!bk_ui->manualmodestart_run_arc) {
-        lv_obj_t *scr = bk_ui->manualmodestart;
+    lv_obj_set_style_arc_color(bk_ui->manualmodestart_run_arc, arcColor, LV_PART_INDICATOR);
+    _arc_anim_stop(bk_ui->manualmodestart_run_arc);
+    lv_obj_add_flag(bk_ui->manualmodestart_run_arc, LV_OBJ_FLAG_HIDDEN);
 
-        bk_ui->manualmodestart_manual_circle_basic = lv_image_create(scr);
-        lv_obj_set_pos(bk_ui->manualmodestart_manual_circle_basic, 362, 117);
-        lv_obj_set_size(bk_ui->manualmodestart_manual_circle_basic, 300, 300);
+    if (state->manual_start || state->auto_mode_over)
+    {
+        _ui_apply_running_mms(bk_ui);
 
-        /* circle_gif: 모드별 색 링 PNG(300x300) — circle_basic 바로 위, 아이콘/텍스트 레이어 아래 */
-        bk_ui->manualmodestart_manual_circle_gif = lv_image_create(scr);
-        lv_obj_set_pos(bk_ui->manualmodestart_manual_circle_gif, 362, 117);
-        lv_obj_set_size(bk_ui->manualmodestart_manual_circle_gif, 300, 300);
-        lv_obj_remove_flag(bk_ui->manualmodestart_manual_circle_gif, LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_add_flag(bk_ui->manualmodestart_manual_circle_gif, LV_OBJ_FLAG_HIDDEN);
-
-        bk_ui->manualmodestart_manual_txt_basic = lv_image_create(scr);
-        lv_obj_set_pos(bk_ui->manualmodestart_manual_txt_basic, 362, 117);
-        lv_obj_set_size(bk_ui->manualmodestart_manual_txt_basic, 300, 300);
-
-        /* gif_basic (정지 아이콘) — 냉동 원본 52x52(Pillow 확인), 중심 유지 위해 위치 재조정 */
-        bk_ui->manualmodestart_manual_gif_basic = lv_image_create(scr);
-        lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 486, 171);
-        lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 52, 52);
-        lv_obj_remove_flag(bk_ui->manualmodestart_manual_gif_basic, LV_OBJ_FLAG_CLICKABLE);
-
-        /* gif (회전 아이콘, 운전 중 표시) — manual_freeze_gif.png 전용, 원본 52x52 */
-        bk_ui->manualmodestart_manual_gif = lv_image_create(scr);
-        lv_obj_set_pos(bk_ui->manualmodestart_manual_gif, 486, 171);
-        lv_obj_set_size(bk_ui->manualmodestart_manual_gif, 52, 52);
-        lv_obj_remove_flag(bk_ui->manualmodestart_manual_gif, LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_add_flag(bk_ui->manualmodestart_manual_gif, LV_OBJ_FLAG_HIDDEN);
-        lv_image_set_pivot(bk_ui->manualmodestart_manual_gif, 26, 26);
-
-        /* 해동/발효 상단 클립 컨테이너 (크기는 모드 시작 시 동적으로 변경) */
-        s_mms_drop_clip = lv_obj_create(scr);
-        lv_obj_set_pos(s_mms_drop_clip, 474, 170);
-        lv_obj_set_size(s_mms_drop_clip, 76, 55);
-        lv_obj_add_flag(s_mms_drop_clip, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_remove_flag(s_mms_drop_clip, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_set_style_bg_opa(s_mms_drop_clip, LV_OPA_TRANSP, 0);
-        lv_obj_set_style_border_width(s_mms_drop_clip, 0, 0);
-        lv_obj_set_style_pad_all(s_mms_drop_clip, 0, 0);
-
-        /* 해동 전용 이미지 (drop_clip 직속 자식, 전체 55px 이동) */
-        s_mms_drop_img = lv_image_create(s_mms_drop_clip);
-        lv_obj_set_pos(s_mms_drop_img, 0, 0);
-        lv_obj_remove_flag(s_mms_drop_img, LV_OBJ_FLAG_CLICKABLE);
-
-        /* 발효 상단 내부 클립 (76×24, drop_clip 안에서 애니메이션)
-         * 내부 컨테이너가 24px 이므로 이미지 상단 24px 모양만 항상 노출됨 */
-        s_mms_ferm_inner = lv_obj_create(s_mms_drop_clip);
-        lv_obj_set_pos(s_mms_ferm_inner, 0, 0);
-        lv_obj_set_size(s_mms_ferm_inner, 76, 24);
-        lv_obj_remove_flag(s_mms_ferm_inner, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_set_style_bg_opa(s_mms_ferm_inner, LV_OPA_TRANSP, 0);
-        lv_obj_set_style_border_width(s_mms_ferm_inner, 0, 0);
-        lv_obj_set_style_pad_all(s_mms_ferm_inner, 0, 0);
-
-        s_mms_ferm_top_img = lv_image_create(s_mms_ferm_inner);
-        lv_obj_set_pos(s_mms_ferm_top_img, 0, 0);
-        lv_obj_remove_flag(s_mms_ferm_top_img, LV_OBJ_FLAG_CLICKABLE);
-
-        /* 발효 하단 고정 클립 (76×31: 이미지 하단 31px 고정 표시)
-         * 상단 클립(24px)과 이어 붙여야 정지 아이콘(76x55)과 동일한 위치가 됨
-         * 이미지 y=-24 → 컨테이너가 이미지 pixels 24~54 를 보여줌 */
-        s_mms_ferm_btm_clip = lv_obj_create(scr);
-        lv_obj_set_pos(s_mms_ferm_btm_clip, 474, 194);   /* 170 + 24 (ferm_inner 높이) */
-        lv_obj_set_size(s_mms_ferm_btm_clip, 76, 31);
-        lv_obj_add_flag(s_mms_ferm_btm_clip, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_remove_flag(s_mms_ferm_btm_clip, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_set_style_bg_opa(s_mms_ferm_btm_clip, LV_OPA_TRANSP, 0);
-        lv_obj_set_style_border_width(s_mms_ferm_btm_clip, 0, 0);
-        lv_obj_set_style_pad_all(s_mms_ferm_btm_clip, 0, 0);
-
-        s_mms_ferm_btm_img = lv_image_create(s_mms_ferm_btm_clip);
-        lv_obj_set_pos(s_mms_ferm_btm_img, 0, -24);      /* 이미지 상단 24px 잘라냄 */
-        _img_set_src_deferred(s_mms_ferm_btm_img,
-            (state->manual_current_mode == MANUAL_MODE_FERM2) ?
-                "/images/manual_fermentation1_gif.png" :
-                "/images/manual_fermentation2_gif.png");
-        lv_obj_remove_flag(s_mms_ferm_btm_img, LV_OBJ_FLAG_CLICKABLE);
-
-        /* arc 생성 (_create_run_arc 내부에서 move_background → arc[0]) */
-        bk_ui->manualmodestart_run_arc = _create_run_arc(scr, arc_color);
-
-        /* Z-order (back→front): circle_gif(불투명) → circle_basic(투명 영역으로 링이 비침) →
-         * txt_basic → gif_basic → gif → ferm_btm → drop_clip → arc → buttons */
-        lv_obj_move_background(s_mms_drop_clip);
-        lv_obj_move_background(s_mms_ferm_btm_clip);
-        lv_obj_move_background(bk_ui->manualmodestart_manual_gif);
-        lv_obj_move_background(bk_ui->manualmodestart_manual_gif_basic);
-        lv_obj_move_background(bk_ui->manualmodestart_manual_txt_basic);
-        lv_obj_move_background(bk_ui->manualmodestart_manual_circle_basic);
-        lv_obj_move_background(bk_ui->manualmodestart_manual_circle_gif);
-        if (s_ferm2_bg_img) lv_obj_move_background(s_ferm2_bg_img);
-    } else {
-        lv_obj_set_style_arc_color(bk_ui->manualmodestart_run_arc, arc_color, LV_PART_INDICATOR);
-        _arc_anim_stop(bk_ui->manualmodestart_run_arc);
-        lv_obj_add_flag(bk_ui->manualmodestart_run_arc, LV_OBJ_FLAG_HIDDEN);
-        _gif_anim_stop_mms(bk_ui);
+        if (state->auto_mode_over)
+        {
+            lv_obj_add_flag(bk_ui->manualmodestart_startbt, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(bk_ui->manualmodestart_startim, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(bk_ui->manualmodestart_backim, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(bk_ui->manualmodestart_backbt, LV_OBJ_FLAG_HIDDEN);
+        }
     }
-
-    /* 정전 복구 아이콘 */
-    if (state->black_out_checking) {
-        _img_ensure_src(bk_ui->manualmodestart_blackout);
-        lv_obj_clear_flag(bk_ui->manualmodestart_blackout, LV_OBJ_FLAG_HIDDEN);
-    } else
-        lv_obj_add_flag(bk_ui->manualmodestart_blackout,   LV_OBJ_FLAG_HIDDEN);
-
-    // ui_lang_apply_manualmodestart(bk_ui);
-
-    /* FERM2(저온발효): ui_lang이 manualmode_title로 덮어쓰므로 automode_title로 재설정
-     * 온도/습도는 _refresh_running_ui_mms() °F 변환 적용 (1초 타이머) */
-    if (state->manual_current_mode == MANUAL_MODE_FERM2 && bk_ui->manualmodestart_title) {
-        int _lang = settings_get_int("LANGUAGE");
-        if      (_lang == 1) _img_set_src_timed(bk_ui->manualmodestart_title, "/images/automode_title_china.png");
-        else if (_lang == 2) _img_set_src_timed(bk_ui->manualmodestart_title, "/images/automode_title_english.png");
-        else                 _img_set_src_timed(bk_ui->manualmodestart_title, "/images/automode_title.png");
+    else
+    {
+        _ui_apply_stopped_mms(bk_ui);
     }
 }
 
-void manualmodestart_screen_unload_start_cb(lv_event_t *e)
-{
-    if (s_run_anim_timer_mms) { lv_timer_delete(s_run_anim_timer_mms); s_run_anim_timer_mms = NULL; }
-    if (s_ui_timer_mms)       { lv_timer_delete(s_ui_timer_mms);       s_ui_timer_mms = NULL; }
-    s_mms_drop_clip     = NULL;
-    s_run_arc_bg_white  = NULL;
-    s_run_arc_inner_white = NULL;
-    s_mms_drop_img      = NULL;
-    s_mms_ferm_btm_clip = NULL;
-    s_mms_ferm_btm_img  = NULL;
-    s_mms_ferm_inner    = NULL;
-    s_mms_ferm_top_img  = NULL;
-    s_ferm2_bg_canvas   = NULL;
-    s_ferm2_bg_img      = NULL;
-    lv_free(s_ferm2_canvas_buf); /* 화면 이탈 시 1082 KB 반납 — 재진입 시 재할당 */
-    s_ferm2_canvas_buf  = NULL;
-    s_ferm2_buf_lang    = -1;
-    return;
-}
 
 void manualmodestart_unload_start_event_cb(lv_event_t *e)
 {
     (void)e;
-
-    if (s_run_anim_timer_mms)
-    {
-        lv_timer_delete(s_run_anim_timer_mms);
-        s_run_anim_timer_mms = NULL;
-    }
-
-    if (s_ui_timer_mms)
-    {
-        lv_timer_delete(s_ui_timer_mms);
-        s_ui_timer_mms = NULL;
-    }
-
-    s_mms_drop_clip       = NULL;
-    s_run_arc_bg_white    = NULL;
-    s_run_arc_inner_white = NULL;
-    s_mms_drop_img        = NULL;
-    s_mms_ferm_btm_clip   = NULL;
-    s_mms_ferm_btm_img    = NULL;
-    s_mms_ferm_inner      = NULL;
-    s_mms_ferm_top_img    = NULL;
-    s_ferm2_bg_canvas     = NULL;
-    s_ferm2_bg_img        = NULL;
-
-    lv_free(s_ferm2_canvas_buf);
-    s_ferm2_canvas_buf = NULL;
-    s_ferm2_buf_lang   = -1;
+    manualmodestart_runtime_stop(&bk_lv_tool_ui);
 }
+
 
 
 void manualmodestart_unloaded_event_cb(lv_event_t *e)
@@ -1409,85 +1501,7 @@ void manualmodestart_unloaded_event_cb(lv_event_t *e)
 
 void manualmodestart_loaded_event_cb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    device_state_t *state = &g_device_state;
-
     ui_title_anim(bk_ui->manualmodestart_title);
-    if (bk_ui->manualmodestart_manual_circle_basic) {
-        const char *src =
-            (state->manual_current_mode == MANUAL_MODE_FREEZE) ? "/images/manual_freeze_circle_basic.png" :
-            (state->manual_current_mode == MANUAL_MODE_DEFROST) ? "/images/manual_defrost_circle_basic.png" :
-            (state->manual_current_mode == MANUAL_MODE_FERM2) ? "/images/manual_fermentation1_circle_basic.png" :
-            (state->manual_current_mode == MANUAL_MODE_FERM) ? "/images/manual_fermentation2_circle_basic.png" :
-                                                "/images/manual_fermentation2_circle_basic.png";
-        _img_set_src_timed(bk_ui->manualmodestart_manual_circle_basic, src);
-    }
-    /* circle_gif(색 링): 냉동/해동은 circle_basic.png에 이미 링이 포함돼 있어 문제
-        * 없었고, 발효(FERM/FERM2)만 별도 링 이미지가 필요했던 상황 — 그 두 모드에서만
-        * 표시하고 냉동/해동에서는 숨긴다(이전 모드의 잔상 방지). */
-    // if (bk_ui->manualmodestart_manual_circle_gif) {
-    //     if (state->manual_current_mode == MANUAL_MODE_FERM ||
-    //         state->manual_current_mode == MANUAL_MODE_FERM2) {
-    //         const char *src_ring =
-    //             (state->manual_current_mode == MANUAL_MODE_FERM2) ? "/images/manual_fermentation1_circle.png" :
-    //                                                 "/images/manual_fermentation2_circle.png";
-    //         _img_set_src_timed(bk_ui->manualmodestart_manual_circle_gif, src_ring);
-    //         lv_obj_clear_flag(bk_ui->manualmodestart_manual_circle_gif, LV_OBJ_FLAG_HIDDEN);
-    //     } else {
-    //         lv_obj_add_flag(bk_ui->manualmodestart_manual_circle_gif, LV_OBJ_FLAG_HIDDEN);
-    //     }
-    // }
-    /* manual_txt_basic: SCREEN_LOAD_START 말미의 ui_lang_apply_manualmodestart()가
-        * 언어 suffix(_china/_english)를 포함한 올바른 경로로 이미 설정했으므로 여기서 덮어쓰지 않음. */
-    if (bk_ui->manualmodestart_manual_gif_basic) {
-        const char *gif_src =
-            (state->manual_current_mode == 1) ? "/images/manual_freeze_gif.png" :
-            (state->manual_current_mode == 2) ? "/images/manual_defrost_gif.png" :
-            (state->manual_current_mode == MANUAL_MODE_FERM2) ? "/images/manual_fermentation1_gif.png" :
-                                                "/images/manual_fermentation2_gif.png";
-        _img_set_src_timed(bk_ui->manualmodestart_manual_gif_basic, gif_src);
-        /* manual_gif_basic 박스 크기는 원본 PNG 크기(Pillow 확인)에 맞춰야
-            * 클리핑/중심 틀어짐이 없다: 냉동(manual_freeze_gif.png)=52x52,
-            * 해동/발효(manual_defrost/fermentation*_gif.png)=76x55. */
-        if (state->manual_current_mode == MANUAL_MODE_FREEZE) {
-            lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 52, 52);
-            lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 486, 171);
-        } else {
-            lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 76, 55);
-            lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 474, 170);
-        }
-        if (state->manual_current_mode == MANUAL_MODE_FREEZE) {
-            if (bk_ui->manualmodestart_manual_gif)
-                _img_set_src_timed(bk_ui->manualmodestart_manual_gif, gif_src);
-        } else if (state->manual_current_mode == MANUAL_MODE_DEFROST) {
-            if (s_mms_drop_img)
-                _img_set_src_timed(s_mms_drop_img, gif_src);
-        } else {
-            if (s_mms_ferm_top_img)
-                _img_set_src_timed(s_mms_ferm_top_img, gif_src);
-        }
-    }
-    if (state->manual_start || state->auto_mode_over) {
-        _ui_apply_running_mms(bk_ui);
-        if (state->auto_mode_over) {
-            /* Android AutoModeOver (FERM2 저온발효 모드):
-                * StartBt INVISIBLE, 나가기 버튼 복원 (자동운전 화면으로 이동 가능) */
-            if (bk_ui->manualmodestart_startbt && lv_obj_is_valid(bk_ui->manualmodestart_startbt))
-                lv_obj_add_flag(bk_ui->manualmodestart_startbt, LV_OBJ_FLAG_HIDDEN);
-            if (bk_ui->manualmodestart_startim && lv_obj_is_valid(bk_ui->manualmodestart_startim))
-                lv_obj_add_flag(bk_ui->manualmodestart_startim, LV_OBJ_FLAG_HIDDEN);
-            /* 나가기 버튼 표시 (_ui_apply_running_mms 에서 숨겼으므로 복원) */
-            if (bk_ui->manualmodestart_backim && lv_obj_is_valid(bk_ui->manualmodestart_backim))
-                lv_obj_clear_flag(bk_ui->manualmodestart_backim, LV_OBJ_FLAG_HIDDEN);
-            if (bk_ui->manualmodestart_backbt && lv_obj_is_valid(bk_ui->manualmodestart_backbt))
-                lv_obj_clear_flag(bk_ui->manualmodestart_backbt, LV_OBJ_FLAG_HIDDEN);
-        }
-    } 
-    else
-    {
-        _ui_apply_stopped_mms(bk_ui);
-    }
-        
     return;
 }

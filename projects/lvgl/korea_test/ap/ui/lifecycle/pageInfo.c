@@ -132,9 +132,10 @@ static const preRenderImageInfo_t AutomodeendPreRenderImages[] =
 };
 static const preRenderImageInfo_t ManualmodestartPreRenderImages[] =
 {
-    { "/images/manual_freeze_circle_basic", false, false, ".png" },
-    { "/images/manual_fermentation2_circle_basic", false, false, ".png" },
-    { "/images/manual_defrost_circle_basic", false, false, ".png" },
+    // { "/images/manual_freeze_circle_basic", false, false, ".png" },
+    // { "/images/manual_fermentation2_circle_basic", false, false, ".png" },
+    // { "/images/manual_fermentation1_circle_basic", false, false, ".png" },
+    // { "/images/manual_defrost_circle_basic", false, false, ".png" },
     { "/images/tempbox", true, true, ".png" },
     { "/images/manual_fermentation1_circle_txt", true, true, ".png" },
     { "/images/manual_fermentation2_circle_txt", true, true, ".png" },
@@ -148,7 +149,10 @@ static const preRenderImageInfo_t ManualmodestartPreRenderImages[] =
     { "/images/manual_fermentation2_gif", false, false, ".png" },
     { "/images/start_bt", true, false, ".png" },
     { "/images/stop_bt", true, false, ".png" },
-    { "/images/manual_defrost_gif", false, false, ".png" }
+    { "/images/manual_defrost_gif", false, false, ".png" },
+    { "/images/keypad", true, false, ".png" },
+    { "/images/keypadback_close", true, false, ".png" },
+    { "/images/automode_title", true, false, ".png" }
 };
 static const preRenderImageInfo_t SettingmodedetailsettingPreRenderImages[] =
 {
