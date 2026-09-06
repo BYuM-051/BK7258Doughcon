@@ -88,7 +88,7 @@ fi
 PROJECT="${FULL_PROJECT##*/}"
 PARTITION_TABLE="build/bk7258/${PROJECT}/partitions/partitions.csv"
 BUILD_OUTPUT="build/bk7258/${PROJECT}/package/all-app.bin"
-LITTLEFS_SOURCE="projects/${FULL_PROJECT}/vfs_file/"
+LITTLEFS_SOURCE="projects/${FULL_PROJECT}/tree_file/"
 LITTLEFS_OUTPUT="littlefs.bin"
 NOTICED=false
 
