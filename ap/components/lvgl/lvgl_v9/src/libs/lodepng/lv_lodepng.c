@@ -58,7 +58,7 @@ unsigned lodepng_decode_native(lodepng_native_image_t * out,
 
 void lodepng_native_image_cleanup(lodepng_native_image_t * image);
 #define TAG "[lv_lodepng.c] "
-#define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 /*********************
  *      DEFINES

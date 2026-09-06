@@ -16,6 +16,14 @@
 
 static uint32_t currentStep = RENDER_STEP_CREATE_PAGE;
 static uint32_t currentImageStep = 0;
+#include "settings.h"
+
+#define TAG "[manualmodestart_init.c] "
+#include "pageManager.h"
+// #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
+
+static uint32_t currentStep = RENDER_STEP_CREATE_PAGE;
+static uint32_t currentImageStep = 0;
 
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
@@ -1006,6 +1014,141 @@ rendererFuncStatus_t init_page_manualmodestart_with_step(bk_lv_ui_t *bk_ui)
         default:
         {
             bk_printf(TAG "[RENDER][MANUALMODESTART] INVALID STEP: %lu\n", (unsigned long)currentStep);
+            return RENDERER_FUNC_FAILED;
+        }
+    }
+}
+
+rendererFuncStatus_t init_page_manualmodestart_with_step(bk_lv_ui_t *bk_ui)
+{
+    static uint32_t renderStartTick = 0;
+
+    if(preRenderPageState[PAGE_MANUALMODESTART].isRendered)
+    {
+        return RENDERER_FUNC_DONE;
+    }
+
+    switch(currentStep)
+    {
+        case RENDER_STEP_CREATE_PAGE:
+        {
+            renderStartTick = lv_tick_get();
+            bk_printf(TAG "[RENDER][MANUALMODESTART] start tick=%lu\n", (unsigned long)renderStartTick);
+
+            if(bk_ui == NULL)
+            {
+                return RENDERER_FUNC_FAILED;
+            }
+
+            stepInitMode = true;
+            init_page_manualmodestart(bk_ui);
+            stepInitMode = false;
+            if(bk_ui->manualmodestart == NULL || !lv_obj_is_valid(bk_ui->manualmodestart))
+            {
+                bk_printf(TAG "[RENDER][MANUALMODESTART] CREATE_PAGE failed\n");
+                return RENDERER_FUNC_FAILED;
+            }
+
+#if UI_PRENDERING_ENABLE
+            lv_obj_add_flag(bk_ui->manualmodestart, LV_OBJ_FLAG_HIDDEN);
+#endif
+            currentStep = RENDER_STEP_CREATE_CHILD;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_CREATE_CHILD:
+        {
+            stepInitMode = true;
+            init_page_manualmodestart(bk_ui);
+            stepInitMode = false;
+            currentStep = RENDER_STEP_CACHE_BACKGROUND;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_CACHE_BACKGROUND:
+        {
+            if(preRenderPageConfig[PAGE_MANUALMODESTART].backgroundImageAssetId != SHARED_IMAGE_NONE)
+            {
+                const sharedImageAssetId_t assetId =
+                    preRenderPageConfig[PAGE_MANUALMODESTART].backgroundImageAssetId;
+                if(set_shared_image_asset(bk_ui->manualmodestart_bg, assetId) != RENDERER_FUNC_DONE)
+                {
+                    return RENDERER_FUNC_FAILED;
+                }
+            }
+
+            currentStep = RENDER_STEP_CACHE_IMAGE;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_CACHE_IMAGE:
+        {
+            const uint32_t imageCount = preRenderPageConfig[PAGE_MANUALMODESTART].preRenderImageCount;
+            if(currentImageStep < imageCount)
+            {
+                const preRenderImageInfo_t *imageInfo =
+                    &preRenderPageConfig[PAGE_MANUALMODESTART].preRenderImageInfo[currentImageStep];
+                const char *languageSuffix = imageInfo->hasLanguageVariant ?
+                                             (settings_get_int("LANGUAGE") == 1 ? "_china" :
+                                              settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
+                const char *degreeSuffix = imageInfo->hasDegreeVariant &&
+                                           strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
+                const char *extension =
+                    imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
+                char imagePath[128] = {0};
+                uint32_t imageStartTick = lv_tick_get();
+
+                snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
+                         imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
+
+                lv_result_t result = lv_image_decoder_prewarm(imagePath);
+                if(result != LV_RESULT_OK)
+                {
+                    bk_printf(TAG "[PREWARM][MANUALMODESTART] image %lu/%lu failed: %s (%lu ms)\n",
+                              (unsigned long)(currentImageStep + 1),
+                              (unsigned long)imageCount,
+                              imagePath,
+                              (unsigned long)lv_tick_elaps(imageStartTick));
+                    return RENDERER_FUNC_FAILED;
+                }
+
+                bk_printf(TAG "[PREWARM][MANUALMODESTART] image %lu/%lu done: %s (%lu ms)\n",
+                          (unsigned long)(currentImageStep + 1),
+                          (unsigned long)imageCount,
+                          imagePath,
+                          (unsigned long)lv_tick_elaps(imageStartTick));
+                currentImageStep++;
+                return RENDERER_FUNC_NOT_DONE;
+            }
+
+            currentImageStep = 0;
+            currentStep = RENDER_STEP_ATTACH_EVENT;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_ATTACH_EVENT:
+        {
+            /* init_page_manualmodestart() also attaches the page and control callbacks. */
+            currentStep = RENDER_STEP_DONE;
+            return RENDERER_FUNC_NOT_DONE;
+        }
+
+        case RENDER_STEP_DONE:
+        {
+            bk_printf(TAG "[RENDER][MANUALMODESTART] done total=%lu ms\n",
+                      (unsigned long)lv_tick_elaps(renderStartTick));
+
+            currentStep = RENDER_STEP_CREATE_PAGE;
+            currentImageStep = 0;
+            renderStartTick = 0;
+            preRenderPageState[PAGE_MANUALMODESTART].isRendered = true;
+            return RENDERER_FUNC_DONE;
+        }
+
+        default:
+        {
+            bk_printf(TAG "[RENDER][MANUALMODESTART] invalid step=%lu\n",
+                      (unsigned long)currentStep);
             return RENDERER_FUNC_FAILED;
         }
     }

@@ -437,6 +437,8 @@ static unsigned lodepng_buffer_file(unsigned char * out, size_t size, const char
     return 0;
 }
 
+#define USE_DEFAULT_LOAD_FILE 0
+#if USE_DEFAULT_LOAD_FILE // custom lodepng load file to open once to reduce file latency #0905BYuM
 unsigned lodepng_load_file(unsigned char ** out, size_t * outsize, const char * filename)
 {
     long size = lodepng_filesize(filename);
@@ -448,6 +450,102 @@ unsigned lodepng_load_file(unsigned char ** out, size_t * outsize, const char * 
 
     return lodepng_buffer_file(*out, (size_t)size, filename);
 }
+#else 
+unsigned lodepng_load_file(unsigned char **out,
+                           size_t *outsize,
+                           const char *filename)
+{
+    lv_fs_file_t f;
+    lv_fs_res_t res;
+    uint32_t size = 0;
+    uint32_t br = 0;
+    uint32_t t;
+
+    t = lv_tick_get();
+    res = lv_fs_open(&f, filename, LV_FS_MODE_RD);
+    uint32_t openMs = lv_tick_elaps(t);
+
+    if(res != LV_FS_RES_OK)
+    {
+        bk_printf("[FS_PERF] %s open=%lu FAIL\n",
+               filename,
+               (unsigned long)openMs);
+        return 78;
+    }
+
+    t = lv_tick_get();
+    res = lv_fs_seek(&f, 0, LV_FS_SEEK_END);
+    uint32_t seekEndMs = lv_tick_elaps(t);
+
+    if(res != LV_FS_RES_OK)
+    {
+        lv_fs_close(&f);
+        return 78;
+    }
+
+    t = lv_tick_get();
+    res = lv_fs_tell(&f, &size);
+    uint32_t tellMs = lv_tick_elaps(t);
+
+    if(res != LV_FS_RES_OK)
+    {
+        lv_fs_close(&f);
+        return 78;
+    }
+
+    t = lv_tick_get();
+    res = lv_fs_seek(&f, 0, LV_FS_SEEK_SET);
+    uint32_t seekSetMs = lv_tick_elaps(t);
+
+    if(res != LV_FS_RES_OK)
+    {
+        lv_fs_close(&f);
+        return 78;
+    }
+
+    *outsize = size;
+
+    t = lv_tick_get();
+    *out = (unsigned char *)lodepng_malloc(size);
+    uint32_t mallocMs = lv_tick_elaps(t);
+
+    if(*out == NULL && size > 0)
+    {
+        lv_fs_close(&f);
+        return 83;
+    }
+
+    t = lv_tick_get();
+    res = lv_fs_read(&f, *out, size, &br);
+    uint32_t readMs = lv_tick_elaps(t);
+
+    t = lv_tick_get();
+    lv_fs_close(&f);
+    uint32_t closeMs = lv_tick_elaps(t);
+
+    bk_printf("[FS_PERF] %s size=%lu "
+           "open=%lu seekEnd=%lu tell=%lu seekSet=%lu "
+           "malloc=%lu read=%lu close=%lu\n",
+           filename,
+           (unsigned long)size,
+           (unsigned long)openMs,
+           (unsigned long)seekEndMs,
+           (unsigned long)tellMs,
+           (unsigned long)seekSetMs,
+           (unsigned long)mallocMs,
+           (unsigned long)readMs,
+           (unsigned long)closeMs);
+
+    if(res != LV_FS_RES_OK || br != size)
+    {
+        lodepng_free(*out);
+        *out = NULL;
+        return 78;
+    }
+
+    return 0;
+}
+#endif
 
 /*write given buffer to the file, overwriting the file, it doesn't append to it.*/
 unsigned lodepng_save_file(const unsigned char * buffer, size_t buffersize, const char * filename)

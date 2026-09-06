@@ -73,6 +73,16 @@ void uiResetPreprocessQueue(void)
     xQueueReset(preRendererQueue);
     lv_timer_pause(preRendererTimer);
 }
+void uiResetPreprocessedPages(pageId_t except)
+{
+    for(int i = 0 ; i < PAGE_COUNT ; i++)
+    {
+        if(preRenderPageState[i].page != NULL && i != except)
+        {
+            getPageDeinitFunc(i)(&bk_lv_tool_ui);
+        }
+    }
+}
 static void uiPagePreloadTask(lv_timer_t *timer)
 {
     pageId_t pageId;
@@ -150,8 +160,8 @@ void uiPreloadPageForce(pageId_t pageID)
     }
     bk_printf(TAG "[SCREEN] Preloading pageId: %d completed\n", pageID);
     return;
-    
 fatal:
+    bk_printf(TAG "[SCREEN] Fatal error in uiPreloadPageForce\n");
     lv_delay_ms(2000);
     LV_ASSERT(0);
     return;

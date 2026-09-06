@@ -34,9 +34,9 @@ static int         s_tm_bg_idx   = 0;
 
 void settingmode_testmode_prewarm_reset(void)
 {
-    if (s_tm_bg_timer) { lv_timer_delete(s_tm_bg_timer); s_tm_bg_timer = NULL; }
-    if (s_tm_bg_dummy) { lv_obj_del(s_tm_bg_dummy); s_tm_bg_dummy = NULL; }
-    s_tm_bg_idx = 0;
+    // if (s_tm_bg_timer) { lv_timer_delete(s_tm_bg_timer); s_tm_bg_timer = NULL; }
+    // if (s_tm_bg_dummy) { lv_obj_del(s_tm_bg_dummy); s_tm_bg_dummy = NULL; }
+    // s_tm_bg_idx = 0;
 }
 
 /* Popup-password prewarm — caches ONLY the two large popup backgrounds.
@@ -100,7 +100,7 @@ static void _pp_pw_cancel(void)
 
 void settingmode_popuppassword_prewarm_reset(void)
 {
-    _pp_pw_cancel();
+    // _pp_pw_cancel();
 }
 
 void settingmode_setting_detailsettingbt_event_cb(lv_event_t *e);

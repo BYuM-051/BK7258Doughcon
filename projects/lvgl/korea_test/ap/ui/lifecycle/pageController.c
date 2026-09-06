@@ -195,25 +195,29 @@ void ui_page_change_ShowOption(pageId_t newPageID, bool showOption)
         lv_obj_send_event(oldPage, UI_EVENT_PAGE_HIDE_START, NULL);
         if(oldPageID != PAGE_NONE && oldPageID != newPageID)
         {
-            for(int i = 0 ; i < PAGE_COUNT ; i++)
-            {
-                lv_obj_t *page = *(preRenderPageState[i].page);
-                if(page == NULL || !lv_obj_is_valid(page) || i == newPageID)
-                {
-                    // bk_printf(TAG "[SCREEN] Skipping hide for pageId: %d\n", i);
-                    continue;
-                }
-                lv_obj_add_flag(page, LV_OBJ_FLAG_HIDDEN);
-                bk_printf
-                (
-                    TAG "[PTR] main=%p auto=%p manual=%p autodry=%p root=%p\n",
-                    bk_lv_tool_ui.main,
-                    bk_lv_tool_ui.automode,
-                    bk_lv_tool_ui.manualmode,
-                    bk_lv_tool_ui.autodrymode,
-                    preRenderRoot
-                );
-            }
+#if MINIMIZE_HIDDEN_ALGORITHM
+            // for(int i = 0 ; i < PAGE_COUNT ; i++)
+            // {
+            //     lv_obj_t *page = *(preRenderPageState[i].page);
+            //     if(page == NULL || !lv_obj_is_valid(page) || i == newPageID)
+            //     {
+            //         bk_printf(TAG "[SCREEN] Skipping hide for pageId: %d\n", i);
+            //         continue;
+            //     }
+            //     lv_obj_add_flag(page, LV_OBJ_FLAG_HIDDEN);
+            //     bk_printf
+            //     (
+            //         TAG "[PTR] main=%p auto=%p manual=%p autodry=%p root=%p\n",
+            //         bk_lv_tool_ui.main,
+            //         bk_lv_tool_ui.automode,
+            //         bk_lv_tool_ui.manualmode,
+            //         bk_lv_tool_ui.autodrymode,
+            //         preRenderRoot
+            //     );
+            // }
+#else
+            lv_obj_add_flag(oldPage, LV_OBJ_FLAG_HIDDEN);
+#endif
         }
         else
         {

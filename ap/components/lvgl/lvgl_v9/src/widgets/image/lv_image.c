@@ -147,6 +147,376 @@ lv_obj_t * lv_image_create(lv_obj_t * parent)
 /*=====================
  * Setter functions
  *====================*/
+#define _UI_USE_TREE_DIRECTORY 1
+#include "../../ui_image_tree_map.h"
+
+#include <string.h>
+#include <stdio.h>
+
+#define UI_IMAGE_PATH_PREFIX      "/images/"
+#define UI_IMAGE_PATH_PREFIX_LEN  8
+#define UI_IMAGE_TREE_PATH_MAX    256
+#if _UI_USE_TREE_DIRECTORY
+
+static const char *ui_image_tree_resolve_path(const char *src, char *pathBuffer, size_t pathBufferSize)
+{
+    if(src == NULL)
+    {
+        return NULL;
+    }
+
+    /*
+     * /images/ 로 시작하지 않으면 그대로.
+     */
+    if(strncmp(
+           src,
+           UI_IMAGE_PATH_PREFIX,
+           UI_IMAGE_PATH_PREFIX_LEN) != 0)
+    {
+        return src;
+    }
+
+    const char *fileName =
+        src + UI_IMAGE_PATH_PREFIX_LEN;
+
+    /*
+     * 이미:
+     *
+     * /images/d003/foo.png
+     *
+     * 같은 tree path라면 그대로.
+     */
+    if(strchr(fileName, '/') != NULL)
+    {
+        return src;
+    }
+
+    for(size_t i = 0;
+        i < UI_IMAGE_TREE_MAP_COUNT;
+        i++)
+    {
+        if(strcmp(
+               fileName,
+               uiImageTreeMap[i].fileName) == 0)
+        {
+            int len = lv_snprintf(
+                pathBuffer,
+                pathBufferSize,
+                "/images/d%03u/%s",
+                (unsigned int)uiImageTreeMap[i].dirIndex,
+                fileName
+            );
+
+            if(len < 0 ||
+               (size_t)len >= pathBufferSize)
+            {
+                LV_LOG_WARN(
+                    "tree image path buffer too small: %s",
+                    src
+                );
+
+                return src;
+            }
+
+            return pathBuffer;
+        }
+    }
+
+    LV_LOG_WARN(
+        "tree image map not found: %s",
+        src
+    );
+
+    return src;
+}
+
+
+void lv_image_set_src(lv_obj_t * obj, const void * src)
+{
+    LV_ASSERT_OBJ(obj, MY_CLASS);
+
+    lv_obj_invalidate(obj);
+
+    lv_image_src_t src_type =
+        lv_image_src_get_type(src);
+
+    lv_image_t * img =
+        (lv_image_t *)obj;
+
+    /*
+     * 실제 LVGL에 저장하고 decoder에 넘길 source.
+     *
+     * VARIABLE / SYMBOL이면 원본 src 그대로.
+     * FILE이면 tree path로 변환.
+     */
+    const void *resolvedSrc = src;
+
+    char treePath[UI_IMAGE_TREE_PATH_MAX];
+
+    if(src_type == LV_IMAGE_SRC_FILE)
+    {
+        resolvedSrc =
+            ui_image_tree_resolve_path(
+                (const char *)src,
+                treePath,
+                sizeof(treePath)
+            );
+    }
+
+#if LV_USE_LOG && LV_LOG_LEVEL <= LV_LOG_LEVEL_INFO
+    switch(src_type)
+    {
+        case LV_IMAGE_SRC_FILE:
+            LV_LOG_TRACE(
+                "`LV_IMAGE_SRC_FILE` type found"
+            );
+            break;
+
+        case LV_IMAGE_SRC_VARIABLE:
+            LV_LOG_TRACE(
+                "`LV_IMAGE_SRC_VARIABLE` type found"
+            );
+            break;
+
+        case LV_IMAGE_SRC_SYMBOL:
+            LV_LOG_TRACE(
+                "`LV_IMAGE_SRC_SYMBOL` type found"
+            );
+            break;
+
+        default:
+            LV_LOG_WARN(
+                "unknown type"
+            );
+    }
+#endif
+
+    /*
+     * If the new source type is unknown
+     * free the memories of the old source
+     */
+    if(src_type == LV_IMAGE_SRC_UNKNOWN)
+    {
+        if(src)
+        {
+            LV_LOG_WARN(
+                "unknown image type"
+            );
+        }
+
+        if(img->src_type == LV_IMAGE_SRC_SYMBOL ||
+           img->src_type == LV_IMAGE_SRC_FILE)
+        {
+            lv_free(
+                (void *)img->src
+            );
+        }
+
+        img->src = NULL;
+        img->src_type =
+            LV_IMAGE_SRC_UNKNOWN;
+
+        return;
+    }
+
+    lv_image_header_t header;
+
+    /*
+     * 여기부터 FILE이면 반드시 resolvedSrc 사용.
+     */
+    lv_result_t res =
+        lv_image_decoder_get_info(
+            resolvedSrc,
+            &header
+        );
+
+    if(res != LV_RESULT_OK)
+    {
+#if LV_USE_LOG
+        char buf[24];
+
+        LV_LOG_WARN(
+            "failed to get image info: %s",
+            src_type == LV_IMAGE_SRC_FILE
+                ? (const char *)resolvedSrc
+                : (
+                    lv_snprintf(
+                        buf,
+                        sizeof(buf),
+                        "%p",
+                        resolvedSrc
+                    ),
+                    buf
+                )
+        );
+#endif
+
+        return;
+    }
+
+    /*
+     * Save the source
+     */
+    if(src_type == LV_IMAGE_SRC_VARIABLE)
+    {
+        if(header.flags &
+           LV_IMAGE_FLAGS_ALLOCATED)
+        {
+            lv_draw_buf_t *buf =
+                (lv_draw_buf_t *)resolvedSrc;
+
+            if(!buf->unaligned_data ||
+               !buf->handlers)
+            {
+                LV_LOG_ERROR(
+                    "Invalid draw buffer, "
+                    "unaligned_data: %p, handlers: %p",
+                    buf->unaligned_data,
+                    (void *)buf->handlers
+                );
+
+                return;
+            }
+        }
+
+        /*
+         * If memory was allocated because
+         * of the previous src_type then free it
+         */
+        if(img->src_type == LV_IMAGE_SRC_FILE ||
+           img->src_type == LV_IMAGE_SRC_SYMBOL)
+        {
+            lv_free(
+                (void *)img->src
+            );
+        }
+
+        img->src = resolvedSrc;
+    }
+    else if(src_type == LV_IMAGE_SRC_FILE ||
+            src_type == LV_IMAGE_SRC_SYMBOL)
+    {
+        /*
+         * If the new and the old src are the same
+         * then it was only a refresh.
+         */
+        if(img->src != resolvedSrc)
+        {
+            const void *old_src = NULL;
+
+            /*
+             * If memory was allocated because of
+             * the previous src_type then save its
+             * pointer and free after allocation.
+             */
+            if(img->src_type == LV_IMAGE_SRC_FILE ||
+               img->src_type == LV_IMAGE_SRC_SYMBOL)
+            {
+                old_src = img->src;
+            }
+
+            /*
+             * FILE이면 여기서 treePath 내용이 strdup됨.
+             *
+             * 따라서 treePath가 stack buffer여도
+             * 함수 종료 후 lifetime 문제 없음.
+             */
+            char *new_str =
+                lv_strdup(
+                    resolvedSrc
+                );
+
+            LV_ASSERT_MALLOC(
+                new_str
+            );
+
+            if(new_str == NULL)
+            {
+                return;
+            }
+
+            img->src = new_str;
+
+            if(old_src)
+            {
+                lv_free(
+                    (void *)old_src
+                );
+            }
+        }
+    }
+
+    if(src_type == LV_IMAGE_SRC_SYMBOL)
+    {
+        /*
+         * lv_image_dsc_get_info couldn't set
+         * width and height of a font.
+         */
+        const lv_font_t *font =
+            lv_obj_get_style_text_font(
+                obj,
+                LV_PART_MAIN
+            );
+
+        int32_t letter_space =
+            lv_obj_get_style_text_letter_space(
+                obj,
+                LV_PART_MAIN
+            );
+
+        int32_t line_space =
+            lv_obj_get_style_text_line_space(
+                obj,
+                LV_PART_MAIN
+            );
+
+        lv_point_t size;
+
+        lv_text_get_size(
+            &size,
+            resolvedSrc,
+            font,
+            letter_space,
+            line_space,
+            LV_COORD_MAX,
+            LV_TEXT_FLAG_NONE
+        );
+
+        header.w = size.x;
+        header.h = size.y;
+    }
+
+    img->src_type = src_type;
+    img->w = header.w;
+    img->h = header.h;
+    img->cf = header.cf;
+
+    lv_obj_refresh_self_size(
+        obj
+    );
+
+    update_align(
+        obj
+    );
+
+    /*
+     * Provide enough room for rotated corners
+     */
+    if(img->rotation ||
+       img->scale_x != LV_SCALE_NONE ||
+       img->scale_y != LV_SCALE_NONE)
+    {
+        lv_obj_refresh_ext_draw_size(
+            obj
+        );
+    }
+
+    lv_obj_invalidate(
+        obj
+    );
+}
+
+#else
 
 void lv_image_set_src(lv_obj_t * obj, const void * src)
 {
@@ -191,7 +561,7 @@ void lv_image_set_src(lv_obj_t * obj, const void * src)
         char buf[24];
         LV_LOG_WARN("failed to get image info: %s",
                     src_type == LV_IMAGE_SRC_FILE ? (const char *)src : (lv_snprintf(buf, sizeof(buf), "%p", src), buf));
-#endif /*LV_USE_LOG*/
+#endif
         return;
     }
 
@@ -206,25 +576,24 @@ void lv_image_set_src(lv_obj_t * obj, const void * src)
             }
         }
 
-        /*If memory was allocated because of the previous `src_type` then free it*/
         if(img->src_type == LV_IMAGE_SRC_FILE || img->src_type == LV_IMAGE_SRC_SYMBOL) {
             lv_free((void *)img->src);
         }
+
         img->src = src;
     }
     else if(src_type == LV_IMAGE_SRC_FILE || src_type == LV_IMAGE_SRC_SYMBOL) {
-        /*If the new and the old src are the same then it was only a refresh.*/
         if(img->src != src) {
             const void * old_src = NULL;
-            /*If memory was allocated because of the previous `src_type` then save its pointer and free after allocation.
-             *It's important to allocate first to be sure the new data will be on a new address.
-             *Else `img_cache` wouldn't see the change in source.*/
+
             if(img->src_type == LV_IMAGE_SRC_FILE || img->src_type == LV_IMAGE_SRC_SYMBOL) {
                 old_src = img->src;
             }
+
             char * new_str = lv_strdup(src);
             LV_ASSERT_MALLOC(new_str);
             if(new_str == NULL) return;
+
             img->src = new_str;
 
             if(old_src) lv_free((void *)old_src);
@@ -232,32 +601,46 @@ void lv_image_set_src(lv_obj_t * obj, const void * src)
     }
 
     if(src_type == LV_IMAGE_SRC_SYMBOL) {
-        /*`lv_image_dsc_get_info` couldn't set the width and height of a font so set it here*/
         const lv_font_t * font = lv_obj_get_style_text_font(obj, LV_PART_MAIN);
         int32_t letter_space = lv_obj_get_style_text_letter_space(obj, LV_PART_MAIN);
         int32_t line_space = lv_obj_get_style_text_line_space(obj, LV_PART_MAIN);
+
         lv_point_t size;
-        lv_text_get_size(&size, src, font, letter_space, line_space, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
+
+        lv_text_get_size(
+            &size,
+            src,
+            font,
+            letter_space,
+            line_space,
+            LV_COORD_MAX,
+            LV_TEXT_FLAG_NONE
+        );
+
         header.w = size.x;
         header.h = size.y;
     }
 
     img->src_type = src_type;
-    img->w        = header.w;
-    img->h        = header.h;
-    img->cf       = header.cf;
+    img->w = header.w;
+    img->h = header.h;
+    img->cf = header.cf;
 
     lv_obj_refresh_self_size(obj);
 
     update_align(obj);
 
-    /*Provide enough room for the rotated corners*/
-    if(img->rotation || img->scale_x != LV_SCALE_NONE || img->scale_y != LV_SCALE_NONE) {
+    if(img->rotation ||
+       img->scale_x != LV_SCALE_NONE ||
+       img->scale_y != LV_SCALE_NONE)
+    {
         lv_obj_refresh_ext_draw_size(obj);
     }
 
     lv_obj_invalidate(obj);
 }
+
+#endif /* _UI_USE_TREE_DIRECTORY */
 
 void lv_image_set_offset_x(lv_obj_t * obj, int32_t x)
 {

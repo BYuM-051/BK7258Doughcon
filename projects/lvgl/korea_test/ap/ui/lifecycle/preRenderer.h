@@ -24,6 +24,7 @@ extern bool isPagePreloaded(pageId_t pageID);
 extern void uiEnqueuePreloadTargets(pageId_t newPageID);
 extern void uiPreloadPageForce(pageId_t pageID);
 extern void uiResetPreprocessQueue(void);
+extern void uiResetPreprocessedPages(pageId_t exceptionPage);
 
 #ifdef __cplusplus
 }
