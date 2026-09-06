@@ -418,6 +418,592 @@ static lv_result_t try_cache(lv_image_decoder_dsc_t * dsc)
     return LV_RESULT_INVALID;
 }
 
+#define _UI_USE_TREE_DIRECTORY 1
+
+#if _UI_USE_TREE_DIRECTORY
+
+#include <string.h>
+#include <stdio.h>
+#include "../ui_image_tree_map.h"
+
+#define UI_IMAGE_PATH_PREFIX      "/images/"
+#define UI_IMAGE_PATH_PREFIX_LEN  8
+#define UI_IMAGE_TREE_PATH_MAX    256
+
+
+static const char *uiImageTreeResolvePath(
+    const void *src,
+    char *pathBuffer,
+    size_t pathBufferSize)
+{
+    if(src == NULL)
+    {
+        return NULL;
+    }
+
+    /*
+     * 기존 prewarm 함수들이 file path를 전제로 만들어져 있지만,
+     * 혹시 variable image 등이 들어오는 경우에는 건드리지 않는다.
+     */
+    if(lv_image_src_get_type(src) != LV_IMAGE_SRC_FILE)
+    {
+        return (const char *)src;
+    }
+
+    const char *srcPath = (const char *)src;
+
+    /*
+     * /images/ 경로가 아니면 기존 경로 그대로.
+     */
+    if(strncmp(
+           srcPath,
+           UI_IMAGE_PATH_PREFIX,
+           UI_IMAGE_PATH_PREFIX_LEN) != 0)
+    {
+        return srcPath;
+    }
+
+    const char *fileName =
+        srcPath + UI_IMAGE_PATH_PREFIX_LEN;
+
+    /*
+     * 이미
+     *
+     * /images/d003/foo.png
+     *
+     * 같은 tree path가 들어왔다면 다시 변환하지 않는다.
+     */
+    if(strchr(fileName, '/') != NULL)
+    {
+        return srcPath;
+    }
+
+    /*
+     * Python이 생성한 map에서 filename -> dirIndex 검색.
+     */
+    for(size_t i = 0;
+        i < UI_IMAGE_TREE_MAP_COUNT;
+        i++)
+    {
+        if(strcmp(
+               fileName,
+               uiImageTreeMap[i].fileName) == 0)
+        {
+            int result = snprintf(
+                pathBuffer,
+                pathBufferSize,
+                "/images/d%03u/%s",
+                (unsigned int)uiImageTreeMap[i].dirIndex,
+                fileName
+            );
+
+            if(result < 0 ||
+               (size_t)result >= pathBufferSize)
+            {
+                bk_printf(
+                    TAG
+                    "[TREE] path buffer too small src=[%s]\n",
+                    srcPath
+                );
+
+                return srcPath;
+            }
+
+            return pathBuffer;
+        }
+    }
+
+    bk_printf(
+        TAG
+        "[TREE] image map not found src=[%s]\n",
+        srcPath
+    );
+
+    /*
+     * map에 없으면 기존 경로를 그대로 넘긴다.
+     * tree_file에 flat file이 없다면 decoder open에서 실패하게 됨.
+     */
+    return srcPath;
+}
+
+
+lv_result_t lv_image_decoder_prewarm(const void *src)
+{
+    lv_image_decoder_dsc_t dsc = {0};
+
+    char treePath[UI_IMAGE_TREE_PATH_MAX];
+
+    const char *resolvedSrc =
+        uiImageTreeResolvePath(
+            src,
+            treePath,
+            sizeof(treePath)
+        );
+
+    uint32_t t = lv_tick_get();
+
+    lv_result_t res =
+        lv_image_decoder_open(
+            &dsc,
+            resolvedSrc,
+            NULL
+        );
+
+    bk_printf(
+        "[PREWARM_TIMING] open=%lu ms src=%s\n",
+        (unsigned long)lv_tick_elaps(t),
+        resolvedSrc
+    );
+
+    if(res != LV_RESULT_OK)
+    {
+        return res;
+    }
+
+    t = lv_tick_get();
+
+    lv_image_decoder_close(&dsc);
+
+    bk_printf(
+        "[PREWARM_TIMING] close=%lu ms src=%s\n",
+        (unsigned long)lv_tick_elaps(t),
+        resolvedSrc
+    );
+
+    return LV_RESULT_OK;
+}
+
+
+lv_draw_buf_t *lv_image_decoder_prewarm_to_buffer(const void *src)
+{
+    lv_image_decoder_dsc_t dsc = {0};
+    lv_image_decoder_args_t args = {0};
+
+    args.no_cache = true;
+
+    char treePath[UI_IMAGE_TREE_PATH_MAX];
+
+    const char *resolvedSrc =
+        uiImageTreeResolvePath(
+            src,
+            treePath,
+            sizeof(treePath)
+        );
+
+    bk_printf(
+        TAG
+        "[PREWARM] start src [%s]\n",
+        resolvedSrc
+    );
+
+    lv_result_t res =
+        lv_image_decoder_open(
+            &dsc,
+            resolvedSrc,
+            &args
+        );
+
+    if(res != LV_RESULT_OK)
+    {
+        bk_printf(
+            TAG
+            "[PREWARM] lv_image_decoder_prewarm_to_buffer: "
+            "Failed to open decoder for src [%s]\n",
+            resolvedSrc
+        );
+
+        return NULL;
+    }
+
+    /*
+     * TJPEGD처럼 incremental decoder로 나오는 경우
+     */
+    if(dsc.decoded == NULL)
+    {
+        bk_printf(
+            TAG
+            "[PREWARM] incremental decoder src=[%s] "
+            "w=%u h=%u cf=%d\n",
+            resolvedSrc,
+            dsc.header.w,
+            dsc.header.h,
+            dsc.header.cf
+        );
+
+        lv_draw_buf_t *buffer =
+            lv_draw_buf_create_ex(
+                image_cache_draw_buf_handlers,
+                dsc.header.w,
+                dsc.header.h,
+                LV_COLOR_FORMAT_RGB565,
+                LV_STRIDE_AUTO
+            );
+
+        if(buffer == NULL)
+        {
+            bk_printf(
+                TAG
+                "[PREWARM] lv_image_decoder_prewarm_to_buffer: "
+                "Failed to create draw buffer for src [%s]\n",
+                resolvedSrc
+            );
+
+            lv_image_decoder_close(&dsc);
+
+            return NULL;
+        }
+
+        lv_area_t fullArea =
+        {
+            .x1 = 0,
+            .y1 = 0,
+            .x2 = dsc.header.w - 1,
+            .y2 = dsc.header.h - 1
+        };
+
+        lv_area_t decodedArea =
+        {
+            .x1 = LV_COORD_MIN,
+            .y1 = LV_COORD_MIN,
+            .x2 = LV_COORD_MIN,
+            .y2 = LV_COORD_MIN
+        };
+
+        while(
+            lv_image_decoder_get_area(
+                &dsc,
+                &fullArea,
+                &decodedArea
+            ) == LV_RESULT_OK)
+        {
+            if(dsc.decoded == NULL)
+            {
+                bk_printf(
+                    TAG
+                    "[PREWARM] get_area returned "
+                    "NULL decoded buffer\n"
+                );
+
+                lv_draw_buf_destroy(buffer);
+                lv_image_decoder_close(&dsc);
+
+                return NULL;
+            }
+
+            int32_t tileW =
+                lv_area_get_width(&decodedArea);
+
+            int32_t tileH =
+                lv_area_get_height(&decodedArea);
+
+            for(int32_t y = 0; y < tileH; y++)
+            {
+                const uint8_t *srcRow =
+                    (const uint8_t *)dsc.decoded->data +
+                    y * dsc.decoded->header.stride;
+
+                uint16_t *dstRow =
+                    (uint16_t *)lv_draw_buf_goto_xy(
+                        buffer,
+                        decodedArea.x1,
+                        decodedArea.y1 + y
+                    );
+
+                for(int32_t x = 0; x < tileW; x++)
+                {
+                    const uint8_t b =
+                        srcRow[x * 3 + 0];
+
+                    const uint8_t g =
+                        srcRow[x * 3 + 1];
+
+                    const uint8_t r =
+                        srcRow[x * 3 + 2];
+
+                    dstRow[x] =
+                        ((uint16_t)(r & 0xF8) << 8) |
+                        ((uint16_t)(g & 0xFC) << 3) |
+                        ((uint16_t)b >> 3);
+                }
+            }
+        }
+
+        lv_image_decoder_close(&dsc);
+
+        return buffer;
+    }
+
+    /*
+     * PNG 등 full buffer로 나오는 경우
+     */
+    else
+    {
+        lv_draw_buf_t *buffer =
+            lv_draw_buf_dup_ex(
+                image_cache_draw_buf_handlers,
+                dsc.decoded
+            );
+
+        if(buffer == NULL)
+        {
+            bk_printf(
+                TAG
+                "[PREWARM] lv_image_decoder_prewarm_to_buffer: "
+                "Failed to duplicate decoded buffer for src [%s]\n",
+                resolvedSrc
+            );
+
+            lv_image_decoder_close(&dsc);
+
+            return NULL;
+        }
+
+        lv_image_decoder_close(&dsc);
+
+        return buffer;
+    }
+}
+
+
+lv_result_t lv_image_decoder_prewarm_update(
+    const void *src,
+    lv_draw_buf_t *buffer)
+{
+    if(buffer == NULL)
+    {
+        return LV_RESULT_INVALID;
+    }
+
+    lv_image_decoder_dsc_t dsc = {0};
+    lv_image_decoder_args_t args = {0};
+
+    args.no_cache = true;
+
+    char treePath[UI_IMAGE_TREE_PATH_MAX];
+
+    const char *resolvedSrc =
+        uiImageTreeResolvePath(
+            src,
+            treePath,
+            sizeof(treePath)
+        );
+
+    bk_printf(
+        TAG
+        "[PREWARM] update start src [%s]\n",
+        resolvedSrc
+    );
+
+    lv_result_t res =
+        lv_image_decoder_open(
+            &dsc,
+            resolvedSrc,
+            &args
+        );
+
+    if(res != LV_RESULT_OK)
+    {
+        bk_printf(
+            TAG
+            "[PREWARM] update: Failed to open decoder "
+            "for src [%s]\n",
+            resolvedSrc
+        );
+
+        return LV_RESULT_INVALID;
+    }
+
+    if(buffer->header.w != dsc.header.w ||
+       buffer->header.h != dsc.header.h)
+    {
+        bk_printf(
+            TAG
+            "[PREWARM] update: Size mismatch src=[%s] "
+            "buffer=%ux%u src=%ux%u\n",
+            resolvedSrc,
+            buffer->header.w,
+            buffer->header.h,
+            dsc.header.w,
+            dsc.header.h
+        );
+
+        lv_image_decoder_close(&dsc);
+
+        return LV_RESULT_INVALID;
+    }
+
+    /*
+     * TJPGD 같은 incremental decoder
+     */
+    if(dsc.decoded == NULL)
+    {
+        bk_printf(
+            TAG
+            "[PREWARM] update incremental src=[%s] "
+            "w=%u h=%u cf=%d\n",
+            resolvedSrc,
+            dsc.header.w,
+            dsc.header.h,
+            dsc.header.cf
+        );
+
+        /*
+         * prewarm_to_buffer()에서 incremental JPEG는
+         * RGB565 buffer로 만들었으므로 같은 형식이어야 함.
+         */
+        if(buffer->header.cf != LV_COLOR_FORMAT_RGB565)
+        {
+            bk_printf(
+                TAG
+                "[PREWARM] update: Incremental destination "
+                "is not RGB565 src=[%s] cf=%d\n",
+                resolvedSrc,
+                buffer->header.cf
+            );
+
+            lv_image_decoder_close(&dsc);
+
+            return LV_RESULT_INVALID;
+        }
+
+        lv_area_t fullArea =
+        {
+            .x1 = 0,
+            .y1 = 0,
+            .x2 = dsc.header.w - 1,
+            .y2 = dsc.header.h - 1
+        };
+
+        lv_area_t decodedArea =
+        {
+            .x1 = LV_COORD_MIN,
+            .y1 = LV_COORD_MIN,
+            .x2 = LV_COORD_MIN,
+            .y2 = LV_COORD_MIN
+        };
+
+        while(
+            lv_image_decoder_get_area(
+                &dsc,
+                &fullArea,
+                &decodedArea
+            ) == LV_RESULT_OK)
+        {
+            if(dsc.decoded == NULL)
+            {
+                bk_printf(
+                    TAG
+                    "[PREWARM] update: get_area returned "
+                    "NULL decoded buffer src=[%s]\n",
+                    resolvedSrc
+                );
+
+                lv_image_decoder_close(&dsc);
+
+                return LV_RESULT_INVALID;
+            }
+
+            int32_t tileW =
+                lv_area_get_width(&decodedArea);
+
+            int32_t tileH =
+                lv_area_get_height(&decodedArea);
+
+            for(int32_t y = 0; y < tileH; y++)
+            {
+                const uint8_t *srcRow =
+                    (const uint8_t *)dsc.decoded->data +
+                    y * dsc.decoded->header.stride;
+
+                uint16_t *dstRow =
+                    (uint16_t *)lv_draw_buf_goto_xy(
+                        buffer,
+                        decodedArea.x1,
+                        decodedArea.y1 + y
+                    );
+
+                if(dstRow == NULL)
+                {
+                    bk_printf(
+                        TAG
+                        "[PREWARM] update: Invalid destination "
+                        "coordinate src=[%s] x=%ld y=%ld\n",
+                        resolvedSrc,
+                        (long)decodedArea.x1,
+                        (long)(decodedArea.y1 + y)
+                    );
+
+                    lv_image_decoder_close(&dsc);
+
+                    return LV_RESULT_INVALID;
+                }
+
+                for(int32_t x = 0; x < tileW; x++)
+                {
+                    const uint8_t b =
+                        srcRow[x * 3 + 0];
+
+                    const uint8_t g =
+                        srcRow[x * 3 + 1];
+
+                    const uint8_t r =
+                        srcRow[x * 3 + 2];
+
+                    dstRow[x] =
+                        ((uint16_t)(r & 0xF8) << 8) |
+                        ((uint16_t)(g & 0xFC) << 3) |
+                        ((uint16_t)b >> 3);
+                }
+            }
+        }
+    }
+
+    /*
+     * PNG 등 full buffer
+     */
+    else
+    {
+        if(buffer->header.cf !=
+           dsc.decoded->header.cf)
+        {
+            bk_printf(
+                TAG
+                "[PREWARM] update: Color format mismatch "
+                "src=[%s] buffer_cf=%d decoded_cf=%d\n",
+                resolvedSrc,
+                buffer->header.cf,
+                dsc.decoded->header.cf
+            );
+
+            lv_image_decoder_close(&dsc);
+
+            return LV_RESULT_INVALID;
+        }
+
+        lv_draw_buf_copy(
+            buffer,
+            NULL,
+            dsc.decoded,
+            NULL
+        );
+    }
+
+    lv_image_decoder_close(&dsc);
+
+    lv_draw_buf_flush_cache(
+        buffer,
+        NULL
+    );
+
+    bk_printf(
+        TAG
+        "[PREWARM] update success src [%s]\n",
+        resolvedSrc
+    );
+
+    return LV_RESULT_OK;
+}
+#else
 lv_result_t lv_image_decoder_prewarm(const void *src)
 {
     lv_image_decoder_dsc_t dsc = {0};
@@ -686,3 +1272,4 @@ lv_result_t lv_image_decoder_prewarm_update(const void *src, lv_draw_buf_t *buff
 
     return LV_RESULT_OK;
 }
+#endif // _UI_USE_TREE_DIRECTORY
