@@ -237,7 +237,7 @@ void main_autodrymode_event_cb(lv_event_t *e)
     last_click_time = lv_tick_get();
 
 #if UI_PRENDERING_ENABLE
-    ui_page_change(PAGE_AUTODRYMODE);
+    ui_page_change_ShowOption(PAGE_AUTODRYMODE, false);
     hal_buzzer_beep();
     hal_buzzer_beep();
 #else

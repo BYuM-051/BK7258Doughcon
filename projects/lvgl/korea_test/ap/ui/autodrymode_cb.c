@@ -833,22 +833,11 @@ void autodrymode_loaded_event_cb(lv_event_t *e)
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
 
-    ui_title_anim(bk_ui->autodrymode_title);
-    if (!lv_image_get_src(bk_ui->autodrymode_auto_dry_circle_basic)) {
-        _img_set_src_timed(bk_ui->autodrymode_auto_dry_circle_basic, "/images/auto_dry_circle_basic.png");
-    
+    lv_obj_clear_flag(bk_ui->autodrymode, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_move_to_index(bk_ui->autodrymode, -1);
+    lv_refr_now(NULL);
 
-        // _img_set_src_timed(bk_ui->autodrymode_auto_dry_circle_gif,   "/images/auto_dry_circle.png");
-        /* auto_dry_txt_basic: SCREEN_LOAD_START 말미의 ui_lang_apply_autodrymode()가
-         * 언어 suffix를 포함한 올바른 경로로 이미 설정했으므로 여기서 덮어쓰지 않음. */
-        _img_set_src_timed(bk_ui->autodrymode_auto_dry_gif,          "/images/auto_dry_gif.png");
-        _img_set_src_timed(bk_ui->autodrymode_auto_dry_gif_basic,    "/images/auto_dry_gif.png");
-        lv_image_set_pivot(bk_ui->autodrymode_auto_dry_gif, 26, 26);
-    }
-    if (state->auto_dry_mode_start)
-        _ui_apply_running_adm(bk_ui);
-    else
-        _ui_apply_stopped_adm(bk_ui);
+    ui_title_anim(bk_ui->autodrymode_title);
 }
 
 void autodrymode_unload_start_event_cb(lv_event_t *e)
@@ -924,4 +913,19 @@ void autodrymode_load_start_event_cb(lv_event_t *e)
     s_last_remain_adm = -1;
 
     ui_lang_apply_autodrymode(bk_ui);
+        if (!lv_image_get_src(bk_ui->autodrymode_auto_dry_circle_basic)) {
+        _img_set_src_timed(bk_ui->autodrymode_auto_dry_circle_basic, "/images/auto_dry_circle_basic.png");
+    
+
+        // _img_set_src_timed(bk_ui->autodrymode_auto_dry_circle_gif,   "/images/auto_dry_circle.png");
+        /* auto_dry_txt_basic: SCREEN_LOAD_START 말미의 ui_lang_apply_autodrymode()가
+         * 언어 suffix를 포함한 올바른 경로로 이미 설정했으므로 여기서 덮어쓰지 않음. */
+        _img_set_src_timed(bk_ui->autodrymode_auto_dry_gif,          "/images/auto_dry_gif.png");
+        _img_set_src_timed(bk_ui->autodrymode_auto_dry_gif_basic,    "/images/auto_dry_gif.png");
+        lv_image_set_pivot(bk_ui->autodrymode_auto_dry_gif, 26, 26);
+    }
+    if (state->auto_dry_mode_start)
+        _ui_apply_running_adm(bk_ui);
+    else
+        _ui_apply_stopped_adm(bk_ui);
 }
