@@ -33,49 +33,47 @@ extern void _update_language_ui();
 
 void destroy_page_settingmodelanguage(bk_lv_ui_t *bk_ui)
 {
-    if (bk_ui == NULL) {
+    if (bk_ui == NULL) 
+    {
         return;
     }
-    if (bk_ui->settingmodelanguage != NULL) {
+    if (bk_ui->settingmodelanguage != NULL) 
+    {
         lv_obj_del(bk_ui->settingmodelanguage);
         bk_ui->settingmodelanguage = NULL;
     }
-
-    currentStep = RENDER_STEP_CREATE_PAGE;
-    currentImageStep = 0;
-    preRenderPageState[PAGE_SETTINGMODELANGUAGE].isRendered = false;
 
     const uint32_t imageCount = preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderImageCount;
     for(uint32_t i = 0; i < imageCount; i++)
     {
         const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderImageInfo[i];
-        const char *languageSuffix = imageInfo->hasLanguageVariant ?
-                                     (settings_get_int("LANGUAGE") == 1 ? "_china" :
-                                      settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
-        const char *degreeSuffix = imageInfo->hasDegreeVariant &&
-                                   strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
-        const char *extension = imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
         char imagePath[128] = {0};
-
-        snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
-                 imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
-        lv_image_cache_drop(imagePath);
+        if(getImageFullPath(imageInfo->imagePath, imageInfo->hasLanguageVariant, imageInfo->hasDegreeVariant, imageInfo->fileExtension, imagePath, sizeof(imagePath)))
+        {
+            lv_image_cache_drop(imagePath);
+        }
     }
+
+    currentStep = RENDER_STEP_CREATE_PAGE;
+    currentImageStep = 0;
+    preRenderPageState[PAGE_SETTINGMODELANGUAGE].isRendered = false;
 }
 
-void init_page_settingmodelanguage(bk_lv_ui_t * bk_ui) {
-    if(stepInitMode && currentStep == RENDER_STEP_CREATE_CHILD)
+// NOTE : discontinued initialize method. check _with_step()
+void init_page_settingmodelanguage(bk_lv_ui_t * bk_ui) 
+{
+    bk_printf(TAG "init_page_settingmodelanguage is discontinued.\n");
+    lv_delay_ms(2000);
+    LV_ASSERT(0);
+}
+/* {
+    if (bk_ui->settingmodelanguage != NULL && lv_obj_is_valid(bk_ui->settingmodelanguage)) 
     {
-        goto create_children;
-    }
-
-    if (bk_ui->settingmodelanguage != NULL && lv_obj_is_valid(bk_ui->settingmodelanguage)) {
         destroy_page_settingmodelanguage(bk_ui);
     }
 
     ui_lang_reset_settingmodelanguage_cache();
 
-#if UI_PRENDERING_ENABLE
     bk_ui->settingmodelanguage = lv_obj_create(preRenderRoot);
     lv_obj_remove_style_all(bk_ui->settingmodelanguage);
     lv_obj_set_size(bk_ui->settingmodelanguage, 1024, 600);
@@ -86,23 +84,8 @@ void init_page_settingmodelanguage(bk_lv_ui_t * bk_ui) {
     lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_loaded_event_cb, UI_EVENT_PAGE_SHOWN,     NULL);
     lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
     lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN,     NULL);
-#else
-    bk_ui->settingmodelanguage = lv_obj_create(NULL);
-    lv_obj_set_size(bk_ui->settingmodelanguage, 1024, 600);
-    lv_obj_set_scrollbar_mode(bk_ui->settingmodelanguage, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_loaded_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
-#endif /* UI_PRENDERING_ENABLE */
 
-    if(stepInitMode)
-    {
-        return;
-    }
-
-create_children:
-    /* 배경 — bg.jpg 대신 단색(0xd9d9d9) */
+    // 배경 — bg.jpg 대신 단색(0xd9d9d9) 
     bk_ui->settingmodelanguage_bg = lv_image_create(bk_ui->settingmodelanguage);
     lv_obj_add_flag(bk_ui->settingmodelanguage_bg, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_style_bg_color(bk_ui->settingmodelanguage, lv_color_hex(0xd9d9d9), 0);
@@ -153,8 +136,6 @@ create_children:
     // lv_obj_set_size(bk_ui->settingmodelanguage_koreanim, 296, 156);
     // lv_obj_add_flag(bk_ui->settingmodelanguage_koreanim, LV_OBJ_FLAG_HIDDEN);
 
-
-
     // Button: englishbt
     bk_ui->settingmodelanguage_englishbt = lv_button_create(bk_ui->settingmodelanguage);
     lv_obj_add_flag(bk_ui->settingmodelanguage_englishbt, LV_OBJ_FLAG_CLICKABLE);
@@ -191,12 +172,19 @@ create_children:
     lv_obj_set_pos(bk_ui->settingmodelanguage_chinaim, 19, 192);
     lv_obj_set_size(bk_ui->settingmodelanguage_chinaim, 296, 156);
     _update_language_ui();
-
-}
+} */
 
 rendererFuncStatus_t init_page_settingmodelanguage_with_step(bk_lv_ui_t *bk_ui)
 {
     static uint32_t renderStartTick = 0;
+
+    uint32_t funcEntryTick = lv_tick_get();
+
+    bk_printf(TAG
+              "[RENDER][SETTINGMODELANGUAGE] ENTER tick=%lu step=%d imageStep=%lu\n",
+              (unsigned long)funcEntryTick,
+              (int)currentStep,
+              (unsigned long)currentImageStep);
 
     if(preRenderPageState[PAGE_SETTINGMODELANGUAGE].isRendered)
     {
@@ -207,45 +195,128 @@ rendererFuncStatus_t init_page_settingmodelanguage_with_step(bk_lv_ui_t *bk_ui)
     {
         case RENDER_STEP_CREATE_PAGE:
         {
-            renderStartTick = lv_tick_get();
-            bk_printf(TAG "[RENDER][SETTINGMODELANGUAGE] start tick=%lu\n", (unsigned long)renderStartTick);
+            uint32_t stepStartTick = lv_tick_get();
+            renderStartTick = stepStartTick;
 
-            if(bk_ui == NULL)
-            {
-                return RENDERER_FUNC_FAILED;
-            }
+            bk_printf(TAG "[RENDER][AUTOMODE] start tick=%lu\n", (unsigned long)renderStartTick);
 
-            stepInitMode = true;
-            init_page_settingmodelanguage(bk_ui);
-            stepInitMode = false;
-            if(bk_ui->settingmodelanguage == NULL || !lv_obj_is_valid(bk_ui->settingmodelanguage))
-            {
-                bk_printf(TAG "[RENDER][SETTINGMODELANGUAGE] CREATE_PAGE failed\n");
-                return RENDERER_FUNC_FAILED;
-            }
+            bk_ui->settingmodelanguage = lv_obj_create(preRenderRoot);
+            lv_obj_remove_style_all(bk_ui->settingmodelanguage);
+            lv_obj_set_size(bk_ui->settingmodelanguage, 1024, 600);
+            lv_obj_set_pos(bk_ui->settingmodelanguage, 0, 0);
+            lv_obj_set_style_radius(bk_ui->settingmodelanguage, 0, LV_PART_MAIN);
+            lv_obj_set_scrollbar_mode(bk_ui->settingmodelanguage, LV_SCROLLBAR_MODE_OFF);
 
-#if UI_PRENDERING_ENABLE
-            lv_obj_add_flag(bk_ui->settingmodelanguage, LV_OBJ_FLAG_HIDDEN);
-#endif
+            bk_printf(TAG "[RENDER][AUTOMODE] CREATE_PAGE done tick=%lu\n", (unsigned long)lv_tick_get());
+
             currentStep = RENDER_STEP_CREATE_CHILD;
             return RENDERER_FUNC_NOT_DONE;
         }
 
         case RENDER_STEP_CREATE_CHILD:
         {
-            stepInitMode = true;
-            init_page_settingmodelanguage(bk_ui);
-            stepInitMode = false;
+            char fullPath[128];
+
+            // 배경 — bg.jpg 대신 단색(0xd9d9d9) 
+            bk_ui->settingmodelanguage_bg = lv_image_create(bk_ui->settingmodelanguage);
+            lv_obj_add_flag(bk_ui->settingmodelanguage_bg, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_set_style_bg_color(bk_ui->settingmodelanguage, lv_color_hex(0xd9d9d9), 0);
+            lv_obj_set_style_bg_opa(bk_ui->settingmodelanguage, LV_OPA_COVER, 0);
+            lv_obj_set_pos(bk_ui->settingmodelanguage_bg, 0, 0);
+
+            // ImageView: title
+            bk_ui->settingmodelanguage_title = lv_image_create(bk_ui->settingmodelanguage);
+            getImageFullPath("/images/language_title", true, false, ".png", fullPath, sizeof(fullPath));
+            lv_image_set_src(bk_ui->settingmodelanguage_title, fullPath);
+            lv_obj_set_pos(bk_ui->settingmodelanguage_title, 0, 10);
+            lv_obj_set_size(bk_ui->settingmodelanguage_title, 380, 80);
+            lv_image_set_inner_align(bk_ui->settingmodelanguage_title, LV_IMAGE_ALIGN_TOP_LEFT);
+
+            // Button: backbt
+            bk_ui->settingmodelanguage_backbt = lv_button_create(bk_ui->settingmodelanguage);
+            lv_obj_add_flag(bk_ui->settingmodelanguage_backbt, LV_OBJ_FLAG_CLICKABLE);
+            lv_obj_set_style_bg_opa(bk_ui->settingmodelanguage_backbt, 0, 0);
+            lv_obj_set_style_border_width(bk_ui->settingmodelanguage_backbt, 0, 0);
+            lv_obj_set_style_shadow_width(bk_ui->settingmodelanguage_backbt, 0, 0);
+            lv_obj_set_pos(bk_ui->settingmodelanguage_backbt, 825, 13);
+            lv_obj_set_size(bk_ui->settingmodelanguage_backbt, 179, 74);
+
+            // ImageView: exitim
+            bk_ui->settingmodelanguage_exitim = lv_image_create(bk_ui->settingmodelanguage);
+            getImageFullPath("/images/exit_bt", true, false, ".png", fullPath, sizeof(fullPath));
+            lv_image_set_src(bk_ui->settingmodelanguage_exitim, fullPath);
+            lv_obj_set_pos(bk_ui->settingmodelanguage_exitim, 825, 13);
+            lv_obj_set_size(bk_ui->settingmodelanguage_exitim, 179, 74);
+
+            // Button: koreanbt
+            bk_ui->settingmodelanguage_koreanbt = lv_button_create(bk_ui->settingmodelanguage);
+            lv_obj_add_flag(bk_ui->settingmodelanguage_koreanbt, LV_OBJ_FLAG_CLICKABLE);
+            lv_obj_set_style_bg_opa(bk_ui->settingmodelanguage_koreanbt, 0, 0);
+            lv_obj_set_style_border_width(bk_ui->settingmodelanguage_koreanbt, 0, 0);
+            lv_obj_set_style_shadow_width(bk_ui->settingmodelanguage_koreanbt, 0, 0);
+            lv_obj_set_pos(bk_ui->settingmodelanguage_koreanbt, 711, 192);
+            lv_obj_set_size(bk_ui->settingmodelanguage_koreanbt, 296, 156);
+
+            // ImageView: koreanim
+            bk_ui->settingmodelanguage_koreanim = lv_image_create(bk_ui->settingmodelanguage);
+            lv_obj_set_pos(bk_ui->settingmodelanguage_koreanim, 711, 192);
+            lv_obj_set_size(bk_ui->settingmodelanguage_koreanim, 296, 156);
+
+            // Button: englishbt
+            bk_ui->settingmodelanguage_englishbt = lv_button_create(bk_ui->settingmodelanguage);
+            lv_obj_add_flag(bk_ui->settingmodelanguage_englishbt, LV_OBJ_FLAG_CLICKABLE);            
+            lv_obj_set_style_bg_opa(bk_ui->settingmodelanguage_englishbt, 0, 0);
+            lv_obj_set_style_border_width(bk_ui->settingmodelanguage_englishbt, 0, 0);
+            lv_obj_set_style_shadow_width(bk_ui->settingmodelanguage_englishbt, 0, 0);
+            lv_obj_set_pos(bk_ui->settingmodelanguage_englishbt, 365, 192);
+            lv_obj_set_size(bk_ui->settingmodelanguage_englishbt, 296, 156);
+
+            // ImageView: englishim
+            bk_ui->settingmodelanguage_englishim = lv_image_create(bk_ui->settingmodelanguage);
+            lv_obj_set_pos(bk_ui->settingmodelanguage_englishim, 365, 192);
+            lv_obj_set_size(bk_ui->settingmodelanguage_englishim, 296, 156);
+
+            // Button: chinabt
+            bk_ui->settingmodelanguage_chinabt = lv_button_create(bk_ui->settingmodelanguage);
+            lv_obj_add_flag(bk_ui->settingmodelanguage_chinabt, LV_OBJ_FLAG_CLICKABLE);
+            lv_obj_set_style_bg_opa(bk_ui->settingmodelanguage_chinabt, 0, 0);
+            lv_obj_set_style_border_width(bk_ui->settingmodelanguage_chinabt, 0, 0);
+            lv_obj_set_style_shadow_width(bk_ui->settingmodelanguage_chinabt, 0, 0);
+            lv_obj_set_pos(bk_ui->settingmodelanguage_chinabt, 19, 192);
+            lv_obj_set_size(bk_ui->settingmodelanguage_chinabt, 296, 156);
+
+            // ImageView: chinaim
+            bk_ui->settingmodelanguage_chinaim = lv_image_create(bk_ui->settingmodelanguage);
+            lv_obj_set_pos(bk_ui->settingmodelanguage_chinaim, 19, 192);
+            lv_obj_set_size(bk_ui->settingmodelanguage_chinaim, 296, 156);
+
+            lv_image_set_src(bk_ui->settingmodelanguage_koreanim, "/images/language_korean_off.png");
+            lv_image_set_src(bk_ui->settingmodelanguage_chinaim, "/images/language_china_off.png");
+            lv_image_set_src(bk_ui->settingmodelanguage_englishim, "/images/language_english_off.png");
+
+            // 선택된 언어만 On 이미지로 변경 및 타이틀/종료버튼 언어 교체
+            if (g_device_state.language == 0) 
+            {
+                lv_image_set_src(bk_ui->settingmodelanguage_koreanim, "/images/language_korean_on.png");
+            } 
+            else if (g_device_state.language == 1) 
+            {
+                lv_image_set_src(bk_ui->settingmodelanguage_chinaim, "/images/language_china_on.png");
+            } 
+            else if (g_device_state.language == 2) 
+            {
+                lv_image_set_src(bk_ui->settingmodelanguage_englishim, "/images/language_english_on.png");
+            }
+
             currentStep = RENDER_STEP_CACHE_BACKGROUND;
             return RENDERER_FUNC_NOT_DONE;
         }
 
         case RENDER_STEP_CACHE_BACKGROUND:
         {
-            if(preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].backgroundImageAssetId != SHARED_IMAGE_NONE)
+            const sharedImageAssetId_t assetId = preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].backgroundImageAssetId;
+            if(assetId != SHARED_IMAGE_NONE)
             {
-                const sharedImageAssetId_t assetId =
-                    preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].backgroundImageAssetId;
                 if(set_shared_image_asset(bk_ui->settingmodelanguage_bg, assetId) != RENDERER_FUNC_DONE)
                 {
                     return RENDERER_FUNC_FAILED;
@@ -259,42 +330,60 @@ rendererFuncStatus_t init_page_settingmodelanguage_with_step(bk_lv_ui_t *bk_ui)
         case RENDER_STEP_CACHE_IMAGE:
         {
             const uint32_t imageCount = preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderImageCount;
+
             if(currentImageStep < imageCount)
             {
-                const preRenderImageInfo_t *imageInfo =
-                    &preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderImageInfo[currentImageStep];
-                const char *languageSuffix = imageInfo->hasLanguageVariant ?
-                                             (settings_get_int("LANGUAGE") == 1 ? "_china" :
-                                              settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
-                const char *degreeSuffix = imageInfo->hasDegreeVariant &&
-                                           strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
-                const char *extension =
-                    imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
+                const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderImageInfo[currentImageStep];
+
                 char imagePath[128] = {0};
-                uint32_t imageStartTick = lv_tick_get();
+                lv_result_t res = LV_RESULT_INVALID;
 
-                snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
-                         imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
+                uint32_t prepareTick = lv_tick_get();
 
-                lv_result_t result = lv_image_decoder_prewarm(imagePath);
-                if(result != LV_RESULT_OK)
+                bool pathResult = getImageFullPath(imageInfo->imagePath,
+                                    imageInfo->hasLanguageVariant,
+                                    imageInfo->hasDegreeVariant,
+                                    imageInfo->fileExtension,
+                                    imagePath,
+                                    sizeof(imagePath));
+
+                uint32_t prewarmStartTick = lv_tick_get();
+
+                bk_printf(TAG "[PREWARM][SETTINGMODELANGUAGE] %lu/%lu BEFORE entry=%lu prepare=%lu path=%s\n",
+                        (unsigned long)(currentImageStep + 1),
+                        (unsigned long)imageCount,
+                        (unsigned long)funcEntryTick,
+                        (unsigned long)lv_tick_elaps(prepareTick),
+                        imagePath);
+
+                if(pathResult)
                 {
-                    bk_printf(TAG "[PREWARM][SETTINGMODELANGUAGE] image %lu/%lu failed: %s (%lu ms)\n",
-                              (unsigned long)(currentImageStep + 1),
-                              (unsigned long)imageCount,
-                              imagePath,
-                              (unsigned long)lv_tick_elaps(imageStartTick));
+                    res = lv_image_decoder_prewarm(imagePath);
+                }
+
+                uint32_t prewarmElapsed = lv_tick_elaps(prewarmStartTick);
+
+                bk_printf(TAG "[PREWARM][SETTINGMODELANGUAGE] %lu/%lu AFTER prewarm=%lu ms now=%lu res=%d path=%s\n",
+                        (unsigned long)(currentImageStep + 1),
+                        (unsigned long)imageCount,
+                        (unsigned long)prewarmElapsed,
+                        (unsigned long)lv_tick_get(),
+                        (int)res,
+                        imagePath);
+
+                if(res != LV_RESULT_OK)
+                {
                     return RENDERER_FUNC_FAILED;
                 }
 
-                bk_printf(TAG "[PREWARM][SETTINGMODELANGUAGE] image %lu/%lu done: %s (%lu ms)\n",
-                          (unsigned long)(currentImageStep + 1),
-                          (unsigned long)imageCount,
-                          imagePath,
-                          (unsigned long)lv_tick_elaps(imageStartTick));
                 currentImageStep++;
+
+                bk_printf(TAG "[PREWARM][SETTINGMODELANGUAGE] RETURN NOT_DONE next=%lu tick=%lu\n", (unsigned long)currentImageStep, (unsigned long)lv_tick_get());
+
                 return RENDERER_FUNC_NOT_DONE;
             }
+
+            bk_printf(TAG "[PREWARM][SETTINGMODELANGUAGE] CACHE_IMAGE finished tick=%lu\n", (unsigned long)lv_tick_get());
 
             currentImageStep = 0;
             currentStep = RENDER_STEP_ATTACH_EVENT;
@@ -303,7 +392,16 @@ rendererFuncStatus_t init_page_settingmodelanguage_with_step(bk_lv_ui_t *bk_ui)
 
         case RENDER_STEP_ATTACH_EVENT:
         {
-            /* init_page_settingmodelanguage() also attaches the page and control callbacks. */
+            lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_load_start_event_cb, UI_EVENT_PAGE_SHOW_START, NULL);
+            lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_loaded_event_cb, UI_EVENT_PAGE_SHOWN,     NULL);
+            lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
+            lv_obj_add_event_cb(bk_ui->settingmodelanguage, settingmodelanguage_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN,     NULL);
+            
+            lv_obj_add_event_cb(bk_ui->settingmodelanguage_chinabt, settingmodelanguage_chinabt_event_cb, LV_EVENT_ALL, NULL);
+            lv_obj_add_event_cb(bk_ui->settingmodelanguage_englishbt, settingmodelanguage_englishbt_event_cb, LV_EVENT_ALL, NULL);
+            lv_obj_add_event_cb(bk_ui->settingmodelanguage_koreanbt, settingmodelanguage_koreanbt_event_cb, LV_EVENT_ALL, NULL);
+            lv_obj_add_event_cb(bk_ui->settingmodelanguage_backbt, settingmodelanguage_backbt_event_cb, LV_EVENT_ALL, NULL);
+
             currentStep = RENDER_STEP_DONE;
             return RENDERER_FUNC_NOT_DONE;
         }

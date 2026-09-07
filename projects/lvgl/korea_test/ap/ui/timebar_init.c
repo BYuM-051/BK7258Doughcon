@@ -10,6 +10,7 @@
 #include "beken_ui.h"
 #include "settings.h"
 #include "device_state.h"
+#include "pageManager.h"
 
 #include "ui_config.h"
 
@@ -40,8 +41,11 @@ void destroy_page_timebar(bk_lv_ui_t *bk_ui)
     }
 }
 
-void init_page_timebar(bk_lv_ui_t * bk_ui) {
-    if (bk_ui->timebar != NULL && lv_obj_is_valid(bk_ui->timebar)) {
+void init_page_timebar(bk_lv_ui_t * bk_ui) 
+{
+    char fullPath[128] = {0};
+    if (bk_ui->timebar != NULL && lv_obj_is_valid(bk_ui->timebar)) 
+    {
         destroy_page_timebar(bk_ui);
     }
 
@@ -74,13 +78,15 @@ void init_page_timebar(bk_lv_ui_t * bk_ui) {
 
     // ImageView: timebar_bg
     bk_ui->timebar_timebar_bg = lv_image_create(bk_ui->timebar);
-    _img_set_src_timed(bk_ui->timebar_timebar_bg, "/images/timebar_timebar.png");
+    getImageFullPath("/images/timebar_timebar", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_timebar_bg, fullPath);
     lv_obj_set_pos(bk_ui->timebar_timebar_bg, 0, 0);
     lv_obj_set_size(bk_ui->timebar_timebar_bg, 1024, 60);
 
     // ImageView: timebar_error_checkim
     bk_ui->timebar_timebar_error_checkim = lv_image_create(bk_ui->timebar);
-    _img_set_src_deferred(bk_ui->timebar_timebar_error_checkim, "/images/timebar_error_on.png");
+    getImageFullPath("/images/timebar_error_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_timebar_error_checkim, fullPath);
     lv_obj_add_flag(bk_ui->timebar_timebar_error_checkim, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_pos(bk_ui->timebar_timebar_error_checkim, 234, 0);
     lv_obj_set_size(bk_ui->timebar_timebar_error_checkim, 70, 60);
@@ -88,7 +94,10 @@ void init_page_timebar(bk_lv_ui_t * bk_ui) {
     // Button: timebar_error_checkbt
     bk_ui->timebar_timebar_error_checkbt = lv_button_create(bk_ui->timebar);
     lv_obj_add_flag(bk_ui->timebar_timebar_error_checkbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->timebar_timebar_error_checkbt, timebar_timebar_error_checkbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->timebar_timebar_error_checkbt,
+                        timebar_timebar_error_checkbt_event_cb,
+                        LV_EVENT_ALL,
+                        NULL);
     lv_obj_set_style_bg_opa(bk_ui->timebar_timebar_error_checkbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->timebar_timebar_error_checkbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->timebar_timebar_error_checkbt, 0, 0);
@@ -97,56 +106,64 @@ void init_page_timebar(bk_lv_ui_t * bk_ui) {
 
     // ImageView: comp_checkim
     bk_ui->timebar_comp_checkim = lv_image_create(bk_ui->timebar);
-    _img_set_src_deferred(bk_ui->timebar_comp_checkim, "/images/timebar_comp_on.png");
+    getImageFullPath("/images/timebar_comp_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_comp_checkim, fullPath);
     lv_obj_add_flag(bk_ui->timebar_comp_checkim, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_pos(bk_ui->timebar_comp_checkim, 306, 0);
     lv_obj_set_size(bk_ui->timebar_comp_checkim, 70, 60);
 
     // ImageView: watervalve_checkim
     bk_ui->timebar_watervalve_checkim = lv_image_create(bk_ui->timebar);
-    _img_set_src_deferred(bk_ui->timebar_watervalve_checkim, "/images/timebar_watevalve_on.png");
+    getImageFullPath("/images/timebar_watevalve_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_watervalve_checkim, fullPath);
     lv_obj_add_flag(bk_ui->timebar_watervalve_checkim, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_pos(bk_ui->timebar_watervalve_checkim, 378, 0);
     lv_obj_set_size(bk_ui->timebar_watervalve_checkim, 70, 60);
 
     // ImageView: roomfan_checkim
     bk_ui->timebar_roomfan_checkim = lv_image_create(bk_ui->timebar);
-    _img_set_src_deferred(bk_ui->timebar_roomfan_checkim, "/images/timebar_roomfan_on.png");
+    getImageFullPath("/images/timebar_roomfan_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_roomfan_checkim, fullPath);
     lv_obj_add_flag(bk_ui->timebar_roomfan_checkim, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_pos(bk_ui->timebar_roomfan_checkim, 450, 0);
     lv_obj_set_size(bk_ui->timebar_roomfan_checkim, 70, 60);
 
     // ImageView: damper_checkim
     bk_ui->timebar_damper_checkim = lv_image_create(bk_ui->timebar);
-    _img_set_src_deferred(bk_ui->timebar_damper_checkim, "/images/timebar_damper_on.png");
+    getImageFullPath("/images/timebar_damper_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_damper_checkim, fullPath);
     lv_obj_add_flag(bk_ui->timebar_damper_checkim, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_pos(bk_ui->timebar_damper_checkim, 522, 0);
     lv_obj_set_size(bk_ui->timebar_damper_checkim, 70, 60);
 
     // ImageView: humid_checkim
     bk_ui->timebar_humid_checkim = lv_image_create(bk_ui->timebar);
-    _img_set_src_deferred(bk_ui->timebar_humid_checkim, "/images/timebar_humidityheater_on.png");
+    getImageFullPath("/images/timebar_humidityheater_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_humid_checkim, fullPath);
     lv_obj_add_flag(bk_ui->timebar_humid_checkim, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_pos(bk_ui->timebar_humid_checkim, 666, 0);
     lv_obj_set_size(bk_ui->timebar_humid_checkim, 70, 60);
 
     // ImageView: heat_checkim
     bk_ui->timebar_heat_checkim = lv_image_create(bk_ui->timebar);
-    _img_set_src_deferred(bk_ui->timebar_heat_checkim, "/images/timebar_fireheater_on.png");
+    getImageFullPath("/images/timebar_fireheater_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_heat_checkim, fullPath);
     lv_obj_add_flag(bk_ui->timebar_heat_checkim, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_pos(bk_ui->timebar_heat_checkim, 594, 0);
     lv_obj_set_size(bk_ui->timebar_heat_checkim, 70, 60);
 
     // ImageView: defrost_checkim
     bk_ui->timebar_defrost_checkim = lv_image_create(bk_ui->timebar);
-    _img_set_src_deferred(bk_ui->timebar_defrost_checkim, "/images/timebar_defrostheater_on.png");
+    getImageFullPath("/images/timebar_defrostheater_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_defrost_checkim, fullPath);
     lv_obj_add_flag(bk_ui->timebar_defrost_checkim, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_pos(bk_ui->timebar_defrost_checkim, 738, 0);
     lv_obj_set_size(bk_ui->timebar_defrost_checkim, 70, 60);
 
     // ImageView: sound_checkim
     bk_ui->timebar_sound_checkim = lv_image_create(bk_ui->timebar);
-    _img_set_src_timed(bk_ui->timebar_sound_checkim, "/images/timebar_volume_off.png");
+    getImageFullPath("/images/timebar_volume_off", false, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_sound_checkim, fullPath);
     lv_obj_set_pos(bk_ui->timebar_sound_checkim, 810, 0);
     lv_obj_set_size(bk_ui->timebar_sound_checkim, 60, 60);
 
@@ -187,3 +204,4 @@ void init_page_timebar(bk_lv_ui_t * bk_ui) {
     /* 아이콘 상태 갱신 타이머 시작 (1초 주기) */
     timebar_start_icon_timer();
 }
+

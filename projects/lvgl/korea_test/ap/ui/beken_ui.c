@@ -131,7 +131,6 @@ static void _uart_comm_task(beken_thread_arg_t arg)
 
     _boot_t = lv_tick_get();
     init_page_timebar(&bk_lv_tool_ui);
-    ui_lang_apply_timebar(&bk_lv_tool_ui);
     bk_printf(TAG "[BOOT] init_page_timebar: %lu ms\n", lv_tick_elaps(_boot_t));
 
     if (!g_device_state.black_out_checking) 

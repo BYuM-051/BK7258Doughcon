@@ -43,8 +43,8 @@ void ui_lang_apply_settingmodemanual(bk_lv_ui_t *bk_ui);
 void ui_lang_reset_settingmodemanual_cache(void);
 void ui_lang_apply_settingmodetime(bk_lv_ui_t *bk_ui);
 void ui_lang_reset_settingmodetime_cache(void);
-void ui_lang_apply_settingmodelanguage(bk_lv_ui_t *bk_ui);
-void ui_lang_reset_settingmodelanguage_cache(void);
+// void ui_lang_apply_settingmodelanguage(bk_lv_ui_t *bk_ui);
+// void ui_lang_reset_settingmodelanguage_cache(void);
 void ui_lang_apply_settingmoderecord(bk_lv_ui_t *bk_ui);
 void ui_lang_reset_settingmoderecord_cache(void);
 void ui_lang_apply_settingmodetest(bk_lv_ui_t *bk_ui);
@@ -61,8 +61,8 @@ void ui_lang_apply_detailsettingtime(bk_lv_ui_t *bk_ui);
 void ui_lang_reset_detailsettingtime_cache(void);
 void ui_lang_apply_detailsettingdamper(bk_lv_ui_t *bk_ui);
 void ui_lang_reset_detailsettingdamper_cache(void);
-void ui_lang_apply_timebar(bk_lv_ui_t *bk_ui);
-void ui_lang_reset_timebar_cache(void);  /* timebar는 destroy 안 되므로 실제 호출처는 없음 */
+// void ui_lang_apply_timebar(bk_lv_ui_t *bk_ui);
+// void ui_lang_reset_timebar_cache(void);  /* timebar는 destroy 안 되므로 실제 호출처는 없음 */
 // void ui_lang_apply_main(bk_lv_ui_t *bk_ui);
 // void ui_lang_reset_main_cache(void);
 void ui_lang_apply_popupcaution(bk_lv_ui_t *bk_ui);

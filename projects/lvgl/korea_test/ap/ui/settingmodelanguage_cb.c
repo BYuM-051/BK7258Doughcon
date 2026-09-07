@@ -25,33 +25,6 @@ void settingmodelanguage_load_start_event_cb(lv_event_t *e);
 void settingmodelanguage_loaded_event_cb(lv_event_t *e);
 void settingmodelanguage_unload_start_event_cb(lv_event_t *e);
 void settingmodelanguage_unloaded_event_cb(lv_event_t *e);
-/* 이미지 상태 업데이트 함수 (alloffim 역할) */
-void _update_language_ui(void)
-{
-    // 전체 체크 해제 상태로 초기화 (Off 이미지)
-    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    device_state_t *state = &g_device_state;
-
-    _img_set_src_timed(bk_ui->settingmodelanguage_koreanim, "/images/language_korean_off.png");
-    _img_set_src_timed(bk_ui->settingmodelanguage_chinaim, "/images/language_china_off.png");
-    _img_set_src_timed(bk_ui->settingmodelanguage_englishim, "/images/language_english_off.png");
-
-    // 선택된 언어만 On 이미지로 변경 및 타이틀/종료버튼 언어 교체
-    if (state->language == 0) {
-        _img_set_src_timed(bk_ui->settingmodelanguage_koreanim, "/images/language_korean_on.png");
-        // _img_set_src_timed(bk_ui->settingmodelanguage_chinaim, "/images/language_china_off.png");
-        // _img_set_src_timed(bk_ui->settingmodelanguage_englishim, "/images/language_english_off.png");
-    } else if (state->language == 1) {
-        _img_set_src_timed(bk_ui->settingmodelanguage_chinaim, "/images/language_china_on.png");
-        // _img_set_src_timed(s_title_img, "/images/language_title_china.png");
-        // _img_set_src_timed(s_exit_img, "/images/exit_bt_china.png");
-    } else if (state->language == 2) {
-        _img_set_src_timed(bk_ui->settingmodelanguage_englishim, "/images/language_english_on.png");
-        // _img_set_src_timed(s_title_img, "/images/language_title_english.png");
-        // _img_set_src_timed(s_exit_img, "/images/exit_bt_english.png");
-    }
-}
-
 
 void settingmodelanguage_backbt_event_cb(lv_event_t *e)
 {
@@ -59,15 +32,8 @@ void settingmodelanguage_backbt_event_cb(lv_event_t *e)
     if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
-
     hal_buzzer_beep();
-#if UI_PRENDERING_ENABLE
     ui_page_change(PAGE_SETTINGMODE);
-#else
-    if (bk_ui->settingmode == NULL || !lv_obj_is_valid(bk_ui->settingmode))
-        init_page_settingmode(bk_ui);
-    lv_scr_load(bk_ui->settingmode);
-#endif /* UI_PRENDERING_ENABLE */
 }
 
 extern void main_settingmode_prewarm_reset(void);
@@ -77,16 +43,59 @@ extern void automode_ams_prewarm_reset(void);
 
 static void _apply_language_change(bk_lv_ui_t *bk_ui)
 {
-    _update_language_ui();
-    main_settingmode_prewarm_reset();
-    settingmode_testmode_prewarm_reset();
-    settingmode_popuppassword_prewarm_reset();
-    automode_ams_prewarm_reset();
-    /* Destroy cached screens instead of re-decoding images on all of them.
-     * Each screen will be re-created with the new language on next visit. */
+    volatile int language = g_device_state.language;
+    
+    char fullPath[128];
+    getImageFullPath("/images/language_title", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->settingmodelanguage_title, fullPath);
+
+    getImageFullPath("/images/exit_bt", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->settingmodelanguage_exitim, fullPath);
+
+    lv_image_set_src(bk_ui->settingmodelanguage_koreanim, "/images/language_korean_off.png");
+    lv_image_set_src(bk_ui->settingmodelanguage_chinaim, "/images/language_china_off.png");
+    lv_image_set_src(bk_ui->settingmodelanguage_englishim, "/images/language_english_off.png");
+
+    // 선택된 언어만 On 이미지로 변경 및 타이틀/종료버튼 언어 교체
+    if (g_device_state.language == 0) 
+    {
+        lv_image_set_src(bk_ui->settingmodelanguage_koreanim, "/images/language_korean_on.png");
+    } 
+    else if (g_device_state.language == 1) 
+    {
+        lv_image_set_src(bk_ui->settingmodelanguage_chinaim, "/images/language_china_on.png");
+    } 
+    else if (g_device_state.language == 2) 
+    {
+        lv_image_set_src(bk_ui->settingmodelanguage_englishim, "/images/language_english_on.png");
+    }
+
+    getImageFullPath("/images/timebar_timebar", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_timebar_bg, fullPath);
+    getImageFullPath("/images/timebar_error_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_timebar_error_checkim, fullPath);
+    getImageFullPath("/images/timebar_comp_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_comp_checkim, fullPath);
+    getImageFullPath("/images/timebar_watevalve_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_watervalve_checkim, fullPath);
+    getImageFullPath("/images/timebar_roomfan_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_roomfan_checkim, fullPath);
+    getImageFullPath("/images/timebar_damper_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_damper_checkim, fullPath);
+    getImageFullPath("/images/timebar_humidityheater_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_humid_checkim, fullPath);
+    getImageFullPath("/images/timebar_fireheater_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_heat_checkim, fullPath);
+    getImageFullPath("/images/timebar_defrostheater_on", true, false, ".png", fullPath, sizeof(fullPath));
+    lv_image_set_src(bk_ui->timebar_defrost_checkim, fullPath);
+
+    lv_lock();
+    lv_obj_invalidate(bk_ui->settingmodelanguage);
+    lv_refr_now(NULL);
+    lv_unlock();
+
     ui_lang_invalidate_cached_screens(bk_ui);
     /* 현재 화면(언어선택)의 타이틀·나가기 버튼을 새 언어로 즉시 갱신 */
-    ui_lang_apply_settingmodelanguage(bk_ui);
 }
 
 void settingmodelanguage_koreanbt_event_cb(lv_event_t *e)
@@ -157,7 +166,4 @@ void settingmodelanguage_unloaded_event_cb(lv_event_t *e)
 
 void settingmodelanguage_load_start_event_cb(lv_event_t *e)
 {
-    bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    ui_lang_apply_settingmodelanguage(bk_ui);
-    _update_language_ui();
 }
