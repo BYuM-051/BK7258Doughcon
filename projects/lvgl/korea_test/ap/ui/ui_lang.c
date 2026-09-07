@@ -943,16 +943,17 @@ extern void automodestart_lang_invalidate(bk_lv_ui_t *bk_ui);
 void ui_lang_invalidate_cached_screens(bk_lv_ui_t *bk_ui)
 {
     lv_obj_t *current_page = ui_get_current_page();
+    pageId_t current_page_id = ui_get_current_page_id();
     lv_obj_t *active = current_page;
     automodestart_lang_invalidate(bk_ui); // TODO : 이거 없앨거임.
 
     uiResetPreprocessQueue();
-    uiResetPreprocessedPages(PAGE_SETTINGMODELANGUAGE);
+    uiResetPreprocessedPages(current_page_id);
     lv_image_cache_drop(NULL);
-    for(int i = 0 ; i < preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderTargetPageCount ; i++)
+    for(int i = 0 ; i < preRenderPageConfig[current_page_id].preRenderTargetPageCount ; i++)
     {
-        uiEnqueuePreloadTargets(preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderTargetPages[i]);
+        uiEnqueuePreloadTargets(preRenderPageConfig[current_page_id].preRenderTargetPages[i]);
     }
 
-    
+    update_shared_image_asset();
 }

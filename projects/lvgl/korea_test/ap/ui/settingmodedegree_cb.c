@@ -16,6 +16,7 @@
 #include "hardware_hal.h"
 #include "pageManager.h"
 
+#define TAG "[settingmodedegree_cb]"
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern double degree_basic_change(double ch);
 extern double reverse_degree_basic_change(double ch);
@@ -111,6 +112,7 @@ void settingmodedegree_backbt_event_cb(lv_event_t *e)
 
 void settingmodedegree_degree_c_bt_event_cb(lv_event_t *e)
 {
+    bk_printf(TAG " change to celsius\n");
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
     if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
@@ -126,11 +128,14 @@ void settingmodedegree_degree_c_bt_event_cb(lv_event_t *e)
     settings_set_str("Degree", DEGREE_C);
     settings_save_dirty();
     _update_images(bk_ui, 0);
+    lv_obj_invalidate(bk_ui->settingmodedegree);
+    lv_refr_now(NULL);
     ui_lang_invalidate_cached_screens(bk_ui);
 }
 
 void settingmodedegree_degree_f_bt_event_cb(lv_event_t *e)
 {
+    bk_printf(TAG " change to farenheit\n");
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
     if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
@@ -146,5 +151,7 @@ void settingmodedegree_degree_f_bt_event_cb(lv_event_t *e)
     settings_set_str("Degree", DEGREE_F);
     settings_save_dirty();
     _update_images(bk_ui, 1);
+    lv_obj_invalidate(bk_ui->settingmodedegree);
+    lv_refr_now(NULL);
     ui_lang_invalidate_cached_screens(bk_ui);
 }
