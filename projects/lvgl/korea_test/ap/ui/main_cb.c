@@ -250,7 +250,6 @@ void main_memorymode_event_cb(lv_event_t *e)
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
     if(lv_event_get_code(e) != LV_EVENT_PRESSED) return;
-    if(lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (state->lock || state->hard_lock) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
@@ -260,8 +259,7 @@ void main_memorymode_event_cb(lv_event_t *e)
     state->memory_mode_check = MEMORY_MODE_NONE;
 #if UI_PRENDERING_ENABLE
     bk_printf(TAG "[SCREEN] ── main→memorymode ────────────────\n");    
-    ui_page_change(PAGE_MEMORYMODE);
-    hal_buzzer_beep();
+    ui_page_change_ShowOption(PAGE_MEMORYMODE, false);
     hal_buzzer_beep();
 #else
     uint32_t _t0 = lv_tick_get();

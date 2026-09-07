@@ -540,7 +540,6 @@ void memorymode_loaded_event_cb(lv_event_t *e)
     bk_printf(TAG "memorymode loaded at tick=%u\n", lv_tick_get());
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
 
-    ui_title_anim(bk_ui->memorymode_title);
     /* Ensure deferred static images — 0ms cache hit if prewarm completed */
     _img_ensure_src(bk_ui->memorymode_title);
     _img_ensure_src(bk_ui->memorymode_imageview4);   /* memory_title_line */
@@ -568,8 +567,12 @@ void memorymode_loaded_event_cb(lv_event_t *e)
     _refresh_display(bk_ui);
     ui_lang_apply_memorymode(bk_ui);
     bk_printf(TAG "memorymode loaded event done at tick=%u\n", lv_tick_get());
-
+    
+    lv_obj_remove_flag(bk_ui->memorymode, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_move_to_index(bk_ui->memorymode, -1);
     lv_refr_now(NULL);
+
+    ui_title_anim(bk_ui->memorymode_title);
 }
 
 void memorymode_unload_start_event_cb(lv_event_t *e)
