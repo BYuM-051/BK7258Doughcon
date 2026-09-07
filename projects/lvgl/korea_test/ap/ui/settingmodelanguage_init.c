@@ -206,6 +206,7 @@ rendererFuncStatus_t init_page_settingmodelanguage_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_pos(bk_ui->settingmodelanguage, 0, 0);
             lv_obj_set_style_radius(bk_ui->settingmodelanguage, 0, LV_PART_MAIN);
             lv_obj_set_scrollbar_mode(bk_ui->settingmodelanguage, LV_SCROLLBAR_MODE_OFF);
+            lv_obj_add_flag(bk_ui->settingmodelanguage, LV_OBJ_FLAG_HIDDEN);
 
             bk_printf(TAG "[RENDER][AUTOMODE] CREATE_PAGE done tick=%lu\n", (unsigned long)lv_tick_get());
 
