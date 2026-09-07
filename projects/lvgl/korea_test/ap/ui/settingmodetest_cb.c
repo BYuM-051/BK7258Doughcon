@@ -279,19 +279,18 @@ void settingmodetest_unloaded_event_cb(lv_event_t *e)
 void settingmodetest_loaded_event_cb(lv_event_t *e)
 {
     (void)e;
-
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-
-    ui_title_anim(bk_ui->settingmodetest_title);
-
-    uint32_t tb = lv_tick_get();
 
     /* 화면 표시 후 버튼 9개 일괄 로드 */
     _restore_button_imgs(bk_ui);
+    
+    lv_obj_clear_flag(bk_ui->settingmodetest, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_move_to_index(bk_ui->settingmodetest, -1);
+    lv_refr_now(NULL);
 
-    bk_printf(
-        TAG "[PERF] settingmodetest btn imgs (LOADED) +%lu ms\n",
-        (unsigned long)lv_tick_elaps(tb)
+    ui_title_anim(bk_ui->settingmodetest_title);
+    uint32_t tb = lv_tick_get();
+    bk_printf(TAG "[PERF] settingmodetest btn imgs (LOADED) +%lu ms\n", (unsigned long)lv_tick_elaps(tb)
     );
 }
 

@@ -489,7 +489,7 @@ void ui_lang_apply_settingmodetest(bk_lv_ui_t *bk_ui)
     s_last_key_settingmodetest = _key_settingmodetest;
     _L(bk_ui->settingmodetest_title,             "/images/test_title",           ".png");
     _L(bk_ui->settingmodetest_imageview3,        "/images/exit_bt",              ".png");
-    _L(bk_ui->settingmodetest_imageview4,        "/images/testmode_box",         ".jpg");
+    _L(bk_ui->settingmodetest_imageview4,        "/images/testmode_box",         ".png");
 }
 
 /* ── settingmodedegree ───────────────────────────────────────────────── */

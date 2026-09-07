@@ -175,7 +175,7 @@ void settingmode_setting_testbt_event_cb(lv_event_t *e)
 
     state->test_mode = true;
 #if UI_PRENDERING_ENABLE
-    ui_page_change(PAGE_SETTINGMODETEST);
+    ui_page_change_ShowOption(PAGE_SETTINGMODETEST, false);
 #else
     {
         uint32_t _pt = lv_tick_get();
