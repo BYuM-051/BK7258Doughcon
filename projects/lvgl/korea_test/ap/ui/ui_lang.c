@@ -953,4 +953,6 @@ void ui_lang_invalidate_cached_screens(bk_lv_ui_t *bk_ui)
     {
         uiEnqueuePreloadTargets(preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderTargetPages[i]);
     }
+
+    
 }

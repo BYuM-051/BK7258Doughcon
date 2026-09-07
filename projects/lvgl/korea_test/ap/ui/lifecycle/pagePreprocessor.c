@@ -221,3 +221,50 @@ rendererFuncStatus_t init_shared_image_asset()
     failed:
     return RENDERER_FUNC_FAILED;
 }
+
+rendererFuncStatus_t update_shared_image_asset(void)
+{
+    for(int i = SHARED_IMAGE_NONE + 1;
+        i < SHARED_IMAGE_COUNT;
+        i++)
+    {
+        const preRenderImageInfo_t *info =
+            &sharedImageAssetInfo[i];
+
+        if(!info->hasLanguageVariant &&
+           !info->hasDegreeVariant)
+        {
+            continue;
+        }
+
+        lv_draw_buf_t *buffer =
+            sharedImageAssetState[i].imageBuffer;
+
+        if(buffer == NULL)
+        {
+            return RENDERER_FUNC_FAILED;
+        }
+
+        char imagePath[128];
+
+        if(!getImageFullPath(
+                info->imagePath,
+                info->hasLanguageVariant,
+                info->hasDegreeVariant,
+                info->fileExtension,
+                imagePath,
+                sizeof(imagePath)))
+        {
+            return RENDERER_FUNC_FAILED;
+        }
+
+        if(lv_image_decoder_prewarm_update(
+                imagePath,
+                buffer) != LV_RESULT_OK)
+        {
+            return RENDERER_FUNC_FAILED;
+        }
+    }
+
+    return RENDERER_FUNC_DONE;
+}
