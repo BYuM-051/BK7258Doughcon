@@ -76,16 +76,16 @@ static void     *s_ams_canvas_buf = NULL;
 static lv_obj_t *s_ams_bg_canvas  = NULL;
 static int       s_ams_buf_lang   = -1;  /* lang*10 + is_f */
 
-void automodestart_canvas_buf_alloc(void)
-{
-    if (s_ams_canvas_buf) return;
-    uint32_t buf_sz = LV_CANVAS_BUF_SIZE(1024, 540, 16, LV_DRAW_BUF_ALIGN);
-    s_ams_canvas_buf = lv_malloc(buf_sz);
-    if (s_ams_canvas_buf)
-        bk_printf(TAG "[AMS] bg buf alloc ok (%lu B)\n", (unsigned long)buf_sz);
-    else
-        bk_printf(TAG "[AMS] bg buf alloc FAILED\n");
-}
+// void automodestart_canvas_buf_alloc(void)
+// {
+//     if (s_ams_canvas_buf) return;
+//     uint32_t buf_sz = LV_CANVAS_BUF_SIZE(1024, 540, 16, LV_DRAW_BUF_ALIGN);
+//     s_ams_canvas_buf = lv_malloc(buf_sz);
+//     if (s_ams_canvas_buf)
+//         bk_printf(TAG "[AMS] bg buf alloc ok (%lu B)\n", (unsigned long)buf_sz);
+//     else
+//         bk_printf(TAG "[AMS] bg buf alloc FAILED\n");
+// }
 
 /* ── 서클 PNG 사전 캐싱 canvas (PSRAM 힙 동적 할당 360KB — 모드 전환 시 재렌더) ─ */
 #define CIRCLE_CANVAS_W  300
@@ -943,6 +943,8 @@ static lv_obj_t *_make_clip_ams(lv_obj_t *parent, int x, int y, int w, int h, bo
     return obj;
 }
 
+#define NOT_USE_OLD_CANVAS_ALLOC 1
+#if !NOT_USE_OLD_CANVAS_ALLOC
 /* ── bg JPEG 1회 decode → canvas 영구 buffer, auto_bg src에 직접 적용 ─ */
 static void _ams_bg_load(bk_lv_ui_t *bk_ui)
 {
@@ -996,18 +998,6 @@ static void _ams_bg_load(bk_lv_ui_t *bk_ui)
     lv_obj_move_background(bk_ui->automodestart_auto_bg);
 }
 
-/* ── PNG를 canvas RAM 버퍼에 1회 디코딩 — 이후 렌더는 memcpy (~5ms) ──── */
-static const char *_circle_png_for_mode(int op_mode)
-{
-    switch (op_mode) {
-        // case OP_MODE_FREEZE:  return "/images/freeze_gif.png";
-        // case OP_MODE_DEFROST: return "/images/defrost_gif.png";
-        // case OP_MODE_FERM1:   return "/images/fermentation1_gif.png";
-        // case OP_MODE_FERM2:   return "/images/fermentation2_gif.png";
-        default:              return NULL;
-    }
-}
-
 /* 모드 전환 시 canvas 버퍼에 해당 PNG를 1회 디코딩 */
 static void _load_circle_canvas_ams(int op_mode)
 {
@@ -1026,6 +1016,18 @@ static void _load_circle_canvas_ams(int op_mode)
     lv_canvas_finish_layer(s_cc_canvas, &layer);
     s_cc_mode = op_mode;
     bk_printf(TAG "[CANVAS] mode=%d %s\n", op_mode, src);
+}
+#endif // !NOT_USE_OLD_CANVAS_ALLOC
+/* ── PNG를 canvas RAM 버퍼에 1회 디코딩 — 이후 렌더는 memcpy (~5ms) ──── */
+static const char *_circle_png_for_mode(int op_mode)
+{
+    switch (op_mode) {
+        // case OP_MODE_FREEZE:  return "/images/freeze_gif.png";
+        // case OP_MODE_DEFROST: return "/images/defrost_gif.png";
+        // case OP_MODE_FERM1:   return "/images/fermentation1_gif.png";
+        // case OP_MODE_FERM2:   return "/images/fermentation2_gif.png";
+        default:              return NULL;
+    }
 }
 
 /* ui_lang_invalidate_cached_screens 에서 lv_obj_del이 SCREEN_UNLOAD_START를 우회하므로
@@ -1100,6 +1102,8 @@ void automodestart_loaded_event_cb(lv_event_t *e)
     _refresh_running_ui(bk_ui);
     if (s_ui_timer) { lv_timer_delete(s_ui_timer); s_ui_timer = NULL; }
     s_ui_timer = lv_timer_create(_ui_timer_cb, 1000, NULL);
+
+    ui_lang_apply_automodestart(bk_ui);
 }
 
 void automodestart_unloaded_event_cb(lv_event_t *e)
@@ -1299,7 +1303,5 @@ clip_alloc_done:;
     } else {
         lv_obj_add_flag(bk_ui->automodestart_blackout, LV_OBJ_FLAG_HIDDEN);
     }
-
-    ui_lang_apply_automodestart(bk_ui);
-    _ams_bg_load(bk_ui);  /* canvas dsc로 JPEG 경로 덮어쓰기 → 이후 렌더 시 decode 없음 */
+    // _ams_bg_load(bk_ui);  /* canvas dsc로 JPEG 경로 덮어쓰기 → 이후 렌더 시 decode 없음 */
 }
