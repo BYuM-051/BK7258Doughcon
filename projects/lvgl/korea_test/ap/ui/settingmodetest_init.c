@@ -51,13 +51,13 @@ static int       s_tmbox_buf_lang   = -1;
  * teraterm719final.log에서 실측 확인). */
 void settingmodetest_canvas_buf_alloc(void)
 {
-    if (s_tmbox_canvas_buf) return;
-    uint32_t buf_sz = LV_CANVAS_BUF_SIZE(984, 433, 16, LV_DRAW_BUF_ALIGN);
-    s_tmbox_canvas_buf = lv_malloc(buf_sz);
-    if (s_tmbox_canvas_buf)
-        bk_printf(TAG "[PERF] testmode_box buf alloc ok (%lu B)\n", (unsigned long)buf_sz);
-    else
-        bk_printf(TAG "[PERF] testmode_box buf alloc FAILED\n");
+    // if (s_tmbox_canvas_buf) return;
+    // uint32_t buf_sz = LV_CANVAS_BUF_SIZE(984, 433, 16, LV_DRAW_BUF_ALIGN);
+    // s_tmbox_canvas_buf = lv_malloc(buf_sz);
+    // if (s_tmbox_canvas_buf)
+    //     bk_printf(TAG "[PERF] testmode_box buf alloc ok (%lu B)\n", (unsigned long)buf_sz);
+    // else
+    //     bk_printf(TAG "[PERF] testmode_box buf alloc FAILED\n");
 }
 
 void settingmodetest_canvas_free(void)
@@ -122,11 +122,11 @@ void settingmodetest_bg_preload(void)
  * 함수를 호출해 canvas를 보장하고 src를 다시 맞춘다. */
 void settingmodetest_apply_bg(bk_lv_ui_t *bk_ui)
 {
-    settingmodetest_bg_preload();
-    if (s_tmbox_canvas && lv_obj_is_valid(s_tmbox_canvas) &&
-        bk_ui->settingmodetest_imageview4 && lv_obj_is_valid(bk_ui->settingmodetest_imageview4)) {
-        lv_image_set_src(bk_ui->settingmodetest_imageview4, lv_canvas_get_image(s_tmbox_canvas));
-    }
+    // settingmodetest_bg_preload();
+    // if (s_tmbox_canvas && lv_obj_is_valid(s_tmbox_canvas) &&
+    //     bk_ui->settingmodetest_imageview4 && lv_obj_is_valid(bk_ui->settingmodetest_imageview4)) {
+    //     lv_image_set_src(bk_ui->settingmodetest_imageview4, lv_canvas_get_image(s_tmbox_canvas));
+    // }
 }
 
 void destroy_page_settingmodetest(bk_lv_ui_t *bk_ui)
