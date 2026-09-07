@@ -948,10 +948,7 @@ void manualmodestart_runtime_reset(void)
     s_gif_type_mms = 0;
 }
 
-static bool _set_mode_image_mms(lv_obj_t *obj,
-                                const char *basePath,
-                                bool hasLanguageVariant,
-                                bool hasDegreeVariant)
+static bool _set_mode_image_mms(lv_obj_t *obj, const char *basePath, bool hasLanguageVariant, bool hasDegreeVariant)
 {
     if (obj == NULL || !lv_obj_is_valid(obj))
     {
@@ -960,12 +957,7 @@ static bool _set_mode_image_mms(lv_obj_t *obj,
     }
 
     char fullPath[128] = {0};
-    if (!getImageFullPath(basePath,
-                          hasLanguageVariant,
-                          hasDegreeVariant,
-                          ".png",
-                          fullPath,
-                          sizeof(fullPath)))
+    if (!getImageFullPath(basePath, hasLanguageVariant, hasDegreeVariant, ".png", fullPath, sizeof(fullPath)))
     {
         bk_printf(TAG "[ERROR] failed to resolve image path: %s\n", basePath);
         return false;
@@ -1282,68 +1274,46 @@ void manualmodestart_load_start_event_cb(lv_event_t *e)
     _reset_show_state_mms(bk_ui);
 
     /* 기본 title은 manual mode. FERM2만 아래에서 automode title로 덮는다. */
-    _set_mode_image_mms(bk_ui->manualmodestart_title,
-                        "/images/manualmode_title",
-                        true,
-                        false);
+    _set_mode_image_mms(bk_ui->manualmodestart_title, "/images/manualmode_title", true, false);
 
     /* mode-dependent fixed images. 모든 target은 init에서 이미 생성되어 있어야 한다. */
     switch (state->manual_current_mode)
     {
         case MANUAL_MODE_FREEZE:
-            _set_mode_image_mms(bk_ui->manualmodestart_manual_txt_basic,
-                                "/images/manual_freeze_circle_txt", true, true);
-            _set_mode_image_mms(bk_ui->manualmodestart_manual_circle_basic,
-                                "/images/manual_freeze_circle_basic", true, true);
-            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif_basic,
-                                "/images/manual_freeze_gif", false, false);
-            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif,
-                                "/images/manual_freeze_gif", false, false);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_txt_basic, "/images/manual_freeze_circle_txt", true, true);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_circle_basic, "/images/manual_freeze_circle_basic", false, false);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif_basic, "/images/manual_freeze_gif", false, false);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif, "/images/manual_freeze_gif", false, false);
             lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 52, 52);
             lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 486, 171);
             break;
 
         case MANUAL_MODE_DEFROST:
-            _set_mode_image_mms(bk_ui->manualmodestart_manual_txt_basic,
-                                "/images/manual_defrost_circle_txt", true, true);
-            _set_mode_image_mms(bk_ui->manualmodestart_manual_circle_basic,
-                                "/images/manual_defrost_circle_basic", true, true);
-            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif_basic,
-                                "/images/manual_defrost_gif", false, false);
-            _set_mode_image_mms(s_mms_drop_img,
-                                "/images/manual_defrost_gif", false, false);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_txt_basic, "/images/manual_defrost_circle_txt", true, true);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_circle_basic, "/images/manual_defrost_circle_basic", false, false);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif_basic, "/images/manual_defrost_gif", false, false);
+            _set_mode_image_mms(s_mms_drop_img, "/images/manual_defrost_gif", false, false);
             lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 76, 55);
             lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 474, 170);
             break;
 
         case MANUAL_MODE_FERM:
-            _set_mode_image_mms(bk_ui->manualmodestart_manual_txt_basic,
-                                "/images/manual_fermentation2_circle_txt", true, true);
-            _set_mode_image_mms(bk_ui->manualmodestart_manual_circle_basic,
-                                "/images/manual_fermentation2_circle_basic", true, true);
-            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif_basic,
-                                "/images/manual_fermentation2_gif", false, false);
-            _set_mode_image_mms(s_mms_ferm_top_img,
-                                "/images/manual_fermentation2_gif", false, false);
-            _set_mode_image_mms(s_mms_ferm_btm_img,
-                                "/images/manual_fermentation2_gif", false, false);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_txt_basic, "/images/manual_fermentation2_circle_txt", true, true);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_circle_basic, "/images/manual_fermentation2_circle_basic", false, false);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif_basic, "/images/manual_fermentation2_gif", false, false);
+            _set_mode_image_mms(s_mms_ferm_top_img, "/images/manual_fermentation2_gif", false, false);
+            _set_mode_image_mms(s_mms_ferm_btm_img, "/images/manual_fermentation2_gif", false, false);
             lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 76, 55);
             lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 474, 170);
             break;
 
         case MANUAL_MODE_FERM2:
-            _set_mode_image_mms(bk_ui->manualmodestart_title,
-                                "/images/automode_title", true, false);
-            _set_mode_image_mms(bk_ui->manualmodestart_manual_txt_basic,
-                                "/images/manual_fermentation1_circle_txt", true, true);
-            _set_mode_image_mms(bk_ui->manualmodestart_manual_circle_basic,
-                                "/images/manual_fermentation1_circle_basic", true, true);
-            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif_basic,
-                                "/images/manual_fermentation1_gif", false, false);
-            _set_mode_image_mms(s_mms_ferm_top_img,
-                                "/images/manual_fermentation1_gif", false, false);
-            _set_mode_image_mms(s_mms_ferm_btm_img,
-                                "/images/manual_fermentation1_gif", false, false);
+            _set_mode_image_mms(bk_ui->manualmodestart_title, "/images/automode_title", true, false);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_txt_basic, "/images/manual_fermentation1_circle_txt", true, true);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_circle_basic, "/images/manual_fermentation1_circle_basic", false, false);
+            _set_mode_image_mms(bk_ui->manualmodestart_manual_gif_basic, "/images/manual_fermentation1_gif", false, false);
+            _set_mode_image_mms(s_mms_ferm_top_img, "/images/manual_fermentation1_gif", false, false);
+            _set_mode_image_mms(s_mms_ferm_btm_img, "/images/manual_fermentation1_gif", false, false);
             lv_obj_set_size(bk_ui->manualmodestart_manual_gif_basic, 76, 55);
             lv_obj_set_pos(bk_ui->manualmodestart_manual_gif_basic, 474, 170);
             break;
@@ -1504,6 +1474,9 @@ void manualmodestart_unloaded_event_cb(lv_event_t *e)
 void manualmodestart_loaded_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
+    lv_obj_clear_flag(bk_ui->manualmodestart, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_move_to_index(bk_ui->manualmodestart, -1);
+    lv_refr_now(NULL);
     ui_title_anim(bk_ui->manualmodestart_title);
     return;
 }
