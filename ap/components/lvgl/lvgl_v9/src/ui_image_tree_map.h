@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define UI_IMAGE_TREE_FILE_COUNT 661U
+#define UI_IMAGE_TREE_FILE_COUNT 662U
 #define UI_IMAGE_TREE_DIR_COUNT 26U
 #define UI_IMAGE_TREE_FILES_PER_DIR 26U
 
@@ -659,13 +659,14 @@ static const ui_image_tree_map_t uiImageTreeMap[] =
     { "timebar_defrostheater_on_english.png", 24U },
     { "timebar_error_on.png", 24U },
     { "timebar_error_on_china.png", 24U },
+    { "timebar_error_on_english.png", 24U },
     { "timebar_fireheater_on.png", 24U },
     { "timebar_fireheater_on_china.png", 24U },
     { "timebar_fireheater_on_english.png", 24U },
     { "timebar_heat_on.png", 24U },
     { "timebar_humidityheater_on.png", 24U },
     { "timebar_humidityheater_on_china.png", 24U },
-    { "timebar_humidityheater_on_english.png", 24U },
+    { "timebar_humidityheater_on_english.png", 25U },
     { "timebar_roomfan_on.png", 25U },
     { "timebar_roomfan_on_china.png", 25U },
     { "timebar_roomfan_on_english.png", 25U },

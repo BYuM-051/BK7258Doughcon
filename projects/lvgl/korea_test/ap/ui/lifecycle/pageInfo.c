@@ -248,8 +248,7 @@ static const preRenderImageInfo_t SettingmodelanguagePreRenderImages[] =
     { "/images/timebar_volume_on", false, false, ".png" },                 // 637 B
     { "/images/timebar_error_on_english", false, false, ".png" },
     { "/images/timebar_error_on_china", false, false, ".png" },
-    { "/images/timebar_error_on", false, false, ".png" },
-    { "/images/a/a", false, false, ".png" }
+    { "/images/timebar_error_on", false, false, ".png" }
 };
 static const preRenderImageInfo_t SettingmodemanualPreRenderImages[] =
 {
