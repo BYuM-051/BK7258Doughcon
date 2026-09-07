@@ -55,18 +55,20 @@ int popuppassword_is_screen_opening(void) { return s_pw_screen_opening; }
 
 void destroy_page_popuppassword(bk_lv_ui_t *bk_ui)
 {
-    if (bk_ui == NULL) {
+    if (bk_ui == NULL) 
+    {
         return;
     }
-    if (bk_ui->popuppassword != NULL) {
+    if (bk_ui->popuppassword != NULL) 
+    {
 #if UI_POPUPPASSWORD_COMBINED_BG_ENABLE
         /* 독립 화면으로 열었으므로, 삭제 전에 act_scr을 안전한 화면(settingmode)
          * 으로 되돌려야 함 — 그대로 삭제하면 act_scr이 dangling pointer가 됨.
          * 호출자(성공 시 _pw_validate, 취소 시 dismiss)가 바로 이어서 다른
          * 화면으로 lv_scr_load하면, 이 settingmode 전환은 실제 렌더 전에
          * 곧바로 대체되어 화면에는 보이지 않는다. */
-        if (lv_scr_act() == bk_ui->popuppassword &&
-            bk_ui->settingmode && lv_obj_is_valid(bk_ui->settingmode)) {
+        if (lv_scr_act() == bk_ui->popuppassword && bk_ui->settingmode && lv_obj_is_valid(bk_ui->settingmode)) 
+        {
             lv_scr_load(bk_ui->settingmode);
         }
 #endif
@@ -106,52 +108,52 @@ void popuppassword_canvas_free(void)
  * combined-bg 모드에서는 imageview1이 결합 이미지 파일을 직접 로드하므로 no-op */
 void popuppassword_bg_preload(void)
 {
-#if UI_POPUPPASSWORD_COMBINED_BG_ENABLE
-    return;
-#endif
-    int lang = settings_get_int("LANGUAGE");
-    if (s_pw_buf_lang == lang && s_pw_canvas) return;  /* 이미 decode됨 */
+// #if UI_POPUPPASSWORD_COMBINED_BG_ENABLE
+//     return;
+// #endif
+//     int lang = settings_get_int("LANGUAGE");
+//     if (s_pw_buf_lang == lang && s_pw_canvas) return;  /* 이미 decode됨 */
 
-    const char *lsuf = (lang == 1) ? "_china" : (lang == 2) ? "_english" : "";
-    char path[128];
-    snprintf(path, sizeof(path), "/images/password_popup%s.jpg",lsuf);
+//     const char *lsuf = (lang == 1) ? "_china" : (lang == 2) ? "_english" : "";
+//     char path[128];
+//     snprintf(path, sizeof(path), "/images/password_popup%s.jpg",lsuf);
 
-    /* RGB565(알파 없음, 828×372×2 ≈ 602 KB) 사용. 죽은 여백 테두리를 에셋에서
-     * 잘라내(850x392 → 828x372) 필요 없는 픽셀만큼 더 가벼워짐.
-     * password_popup*.png는 더 이상 투명 영역이 없음 — 둥근 모서리 바깥쪽을
-     * 팝업 배경 실측색(bg.jpg를 60% 검정 오버레이로 dim했을 때의 결과, #5B5853)으로
-     * 이미지 자체에 미리 칠해뒀다(에셋 수정, 코드 아님). 그래서 알파 채널이나
-     * ARGB8888 같은 별도 처리 없이도 모서리가 배경과 자연스럽게 섞인다.
-     * (한때 이 문제를 ARGB8888(1302 KB)로 해결했으나 canvas가 settingmode 진입/
-     * 이탈마다 재할당되는 구조라 요청 크기가 커지며 PSRAM 단편화 crash가 늘었음
-     * → 에셋을 고쳐 알파 자체를 없애는 이 방식이 메모리도 가장 가볍고 안전함) */
-    uint32_t buf_sz = LV_CANVAS_BUF_SIZE(828, 372, 16, LV_DRAW_BUF_ALIGN);
-    if (!s_pw_canvas_buf) {
-        s_pw_canvas_buf = lv_malloc(buf_sz);
-    }
-    if (!s_pw_canvas_buf) return;  /* 힙 부족 — 팝업 열릴 때 원본 PNG decode로 fallback */
+//     /* RGB565(알파 없음, 828×372×2 ≈ 602 KB) 사용. 죽은 여백 테두리를 에셋에서
+//      * 잘라내(850x392 → 828x372) 필요 없는 픽셀만큼 더 가벼워짐.
+//      * password_popup*.png는 더 이상 투명 영역이 없음 — 둥근 모서리 바깥쪽을
+//      * 팝업 배경 실측색(bg.jpg를 60% 검정 오버레이로 dim했을 때의 결과, #5B5853)으로
+//      * 이미지 자체에 미리 칠해뒀다(에셋 수정, 코드 아님). 그래서 알파 채널이나
+//      * ARGB8888 같은 별도 처리 없이도 모서리가 배경과 자연스럽게 섞인다.
+//      * (한때 이 문제를 ARGB8888(1302 KB)로 해결했으나 canvas가 settingmode 진입/
+//      * 이탈마다 재할당되는 구조라 요청 크기가 커지며 PSRAM 단편화 crash가 늘었음
+//      * → 에셋을 고쳐 알파 자체를 없애는 이 방식이 메모리도 가장 가볍고 안전함) */
+//     uint32_t buf_sz = LV_CANVAS_BUF_SIZE(828, 372, 16, LV_DRAW_BUF_ALIGN);
+//     if (!s_pw_canvas_buf) {
+//         s_pw_canvas_buf = lv_malloc(buf_sz);
+//     }
+//     if (!s_pw_canvas_buf) return;  /* 힙 부족 — 팝업 열릴 때 원본 PNG decode로 fallback */
 
-    /* decode 전 버퍼 초기화: 이미지가 완전 불투명이라 전체가 덮어써지지만,
-     * lv_malloc은 초기화하지 않으므로 안전하게 0으로 초기화해둠. */
-    memset(s_pw_canvas_buf, 0, buf_sz);
+//     /* decode 전 버퍼 초기화: 이미지가 완전 불투명이라 전체가 덮어써지지만,
+//      * lv_malloc은 초기화하지 않으므로 안전하게 0으로 초기화해둠. */
+//     memset(s_pw_canvas_buf, 0, buf_sz);
 
-    /* 이전 canvas 객체 제거 후 재생성 (lang 변경 또는 첫 호출) */
-    if (s_pw_canvas && lv_obj_is_valid(s_pw_canvas)) lv_obj_del(s_pw_canvas);
-    s_pw_canvas = lv_canvas_create(lv_layer_top());
-    lv_canvas_set_buffer(s_pw_canvas, s_pw_canvas_buf, 828, 372, LV_COLOR_FORMAT_RGB565);
-    lv_obj_add_flag(s_pw_canvas, LV_OBJ_FLAG_HIDDEN);
+//     /* 이전 canvas 객체 제거 후 재생성 (lang 변경 또는 첫 호출) */
+//     if (s_pw_canvas && lv_obj_is_valid(s_pw_canvas)) lv_obj_del(s_pw_canvas);
+//     s_pw_canvas = lv_canvas_create(lv_layer_top());
+//     lv_canvas_set_buffer(s_pw_canvas, s_pw_canvas_buf, 828, 372, LV_COLOR_FORMAT_RGB565);
+//     lv_obj_add_flag(s_pw_canvas, LV_OBJ_FLAG_HIDDEN);
 
-    lv_layer_t layer;
-    lv_canvas_init_layer(s_pw_canvas, &layer);
-    lv_draw_image_dsc_t img_dsc;
-    lv_draw_image_dsc_init(&img_dsc);
-    img_dsc.src = path;
-    lv_area_t area = {0, 0, 827, 371};
-    lv_draw_image(&layer, &img_dsc, &area);
-    lv_canvas_finish_layer(s_pw_canvas, &layer);
+//     lv_layer_t layer;
+//     lv_canvas_init_layer(s_pw_canvas, &layer);
+//     lv_draw_image_dsc_t img_dsc;
+//     lv_draw_image_dsc_init(&img_dsc);
+//     img_dsc.src = path;
+//     lv_area_t area = {0, 0, 827, 371};
+//     lv_draw_image(&layer, &img_dsc, &area);
+//     lv_canvas_finish_layer(s_pw_canvas, &layer);
 
-    s_pw_buf_lang = lang;
-    bk_printf(TAG "[POPUP] password_popup preloaded: %s\n", path);
+//     s_pw_buf_lang = lang;
+//     bk_printf(TAG "[POPUP] password_popup preloaded: %s\n", path);
 }
 
 /* 버튼 dirty area 완전 차단:
@@ -175,7 +177,8 @@ static void _btn_make_transp(lv_obj_t *btn)
 }
 
 void init_page_popuppassword(bk_lv_ui_t * bk_ui) {
-    if (bk_ui->popuppassword != NULL && lv_obj_is_valid(bk_ui->popuppassword)) {
+    if (bk_ui->popuppassword != NULL && lv_obj_is_valid(bk_ui->popuppassword)) 
+    {
         destroy_page_popuppassword(bk_ui);
     }
     /* imageview1/pop_cautionim이 매번 새로 생성되므로, 다른 팝업들과 동일하게

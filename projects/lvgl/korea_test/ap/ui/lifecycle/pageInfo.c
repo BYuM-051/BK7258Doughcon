@@ -78,7 +78,8 @@ static const preRenderImageInfo_t SettingmodePreRenderImages[] =
     { "/images/setting_mode_test", true, false, ".png" },
     { "/images/setting_mode_record", true, false, ".png" },
     { "/images/setting_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" }
+    { "/images/exit_bt", true, false, ".png" },
+    { "/images/password_popup", true, false, ".png" }
 #endif
 };
 static const preRenderImageInfo_t ManualmodePreRenderImages[] =
@@ -152,9 +153,6 @@ static const preRenderImageInfo_t ManualmodestartPreRenderImages[] =
 };
 static const preRenderImageInfo_t SettingmodedetailsettingPreRenderImages[] =
 {
-#if UI_SETTINGMODEDETAILSETTING_COMBINED_BG_ENABLE
-    { "/images/advancedsetting", true, false, ".jpg" }
-#else
     { "/images/detail_humidity_bt", true, false, ".png" },
     { "/images/detail_time_bt", true, false, ".png" },
     { "/images/detail_defrost_bt", true, false, ".png" },
@@ -163,7 +161,6 @@ static const preRenderImageInfo_t SettingmodedetailsettingPreRenderImages[] =
     { "/images/detail_reset_bt", true, false, ".png" },
     { "/images/detail_title", true, false, ".png" },
     { "/images/exit_bt", true, false, ".png" }
-#endif
 };
 static const preRenderImageInfo_t SettingmodedegreePreRenderImages[] =
 {
@@ -566,7 +563,8 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
         .deinit_func = destroy_page_detailsettingtemp,
         .preRenderTargetPages = (const pageId_t[])
         {
-            PAGE_SETTINGMODEDETAILSETTING
+            PAGE_SETTINGMODEDETAILSETTING,
+            PAGE_SETTINGMODE
         },
         .preRenderTargetPageCount = 1,
         .preRenderImageCount = ARRAY_COUNT(DetailsettingtempPreRenderImages),
@@ -581,7 +579,8 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
         .deinit_func = destroy_page_detailsettinghumidity,
         .preRenderTargetPages = (const pageId_t[])
         {
-            PAGE_SETTINGMODEDETAILSETTING
+            PAGE_SETTINGMODEDETAILSETTING,
+            PAGE_SETTINGMODE
         },
         .preRenderTargetPageCount = 1,
         .preRenderImageCount = ARRAY_COUNT(DetailsettinghumidityPreRenderImages),
@@ -596,7 +595,8 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
         .deinit_func = destroy_page_detailsettingtime,
         .preRenderTargetPages = (const pageId_t[])
         {
-            PAGE_SETTINGMODEDETAILSETTING
+            PAGE_SETTINGMODEDETAILSETTING,
+            PAGE_SETTINGMODE
         },
         .preRenderTargetPageCount = 1,
         .preRenderImageCount = ARRAY_COUNT(DetailsettingtimePreRenderImages),
@@ -611,7 +611,8 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
         .deinit_func = destroy_page_detailsettingdamper,
         .preRenderTargetPages = (const pageId_t[])
         {
-            PAGE_SETTINGMODEDETAILSETTING
+            PAGE_SETTINGMODEDETAILSETTING,
+            PAGE_SETTINGMODE
         },
         .preRenderTargetPageCount = 1,
         .preRenderImageCount = ARRAY_COUNT(DetailsettingdamperPreRenderImages),
@@ -626,7 +627,8 @@ const preRendererPageConfig_t preRenderPageConfig[PAGE_COUNT] =
         .deinit_func = destroy_page_detailsettingdefrost,
         .preRenderTargetPages = (const pageId_t[])
         {
-            PAGE_SETTINGMODEDETAILSETTING
+            PAGE_SETTINGMODEDETAILSETTING,
+            PAGE_SETTINGMODE
         },
         .preRenderTargetPageCount = 1,
         .preRenderImageCount = ARRAY_COUNT(DetailsettingdefrostPreRenderImages),

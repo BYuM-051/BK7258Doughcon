@@ -80,39 +80,39 @@ void settingmodetest_canvas_free(void)
 
 void settingmodetest_bg_preload(void)
 {
-#if !UI_SETTINGMODETEST_PREWARM_ENABLE
-    return;
-#endif
-    int lang = settings_get_int("LANGUAGE");
-    if (s_tmbox_buf_lang == lang && s_tmbox_canvas) return;  /* 이미 decode됨 */
+// #if !UI_SETTINGMODETEST_PREWARM_ENABLE
+//     return;
+// #endif
+//     int lang = settings_get_int("LANGUAGE");
+//     if (s_tmbox_buf_lang == lang && s_tmbox_canvas) return;  /* 이미 decode됨 */
 
-    const char *lsuf = (lang == 1) ? "_china" : (lang == 2) ? "_english" : "";
-    char path[128];
-    snprintf(path, sizeof(path), "/images/testmode_box%s.jpg", lsuf);
+//     const char *lsuf = (lang == 1) ? "_china" : (lang == 2) ? "_english" : "";
+//     char path[128];
+//     snprintf(path, sizeof(path), "/images/testmode_box%s.jpg", lsuf);
 
-    if (!s_tmbox_canvas_buf) settingmodetest_canvas_buf_alloc();  /* 안전망 */
-    if (!s_tmbox_canvas_buf) return;  /* 힙 부족 — 진입 시 원본 JPG decode로 fallback */
+//     if (!s_tmbox_canvas_buf) settingmodetest_canvas_buf_alloc();  /* 안전망 */
+//     if (!s_tmbox_canvas_buf) return;  /* 힙 부족 — 진입 시 원본 JPG decode로 fallback */
 
-    uint32_t buf_sz = LV_CANVAS_BUF_SIZE(984, 433, 16, LV_DRAW_BUF_ALIGN);
+//     uint32_t buf_sz = LV_CANVAS_BUF_SIZE(984, 433, 16, LV_DRAW_BUF_ALIGN);
 
-    memset(s_tmbox_canvas_buf, 0, buf_sz);
+//     memset(s_tmbox_canvas_buf, 0, buf_sz);
 
-    if (s_tmbox_canvas && lv_obj_is_valid(s_tmbox_canvas)) lv_obj_del(s_tmbox_canvas);
-    s_tmbox_canvas = lv_canvas_create(lv_layer_top());
-    lv_canvas_set_buffer(s_tmbox_canvas, s_tmbox_canvas_buf, 984, 433, LV_COLOR_FORMAT_RGB565);
-    lv_obj_add_flag(s_tmbox_canvas, LV_OBJ_FLAG_HIDDEN);
+//     if (s_tmbox_canvas && lv_obj_is_valid(s_tmbox_canvas)) lv_obj_del(s_tmbox_canvas);
+//     s_tmbox_canvas = lv_canvas_create(lv_layer_top());
+//     lv_canvas_set_buffer(s_tmbox_canvas, s_tmbox_canvas_buf, 984, 433, LV_COLOR_FORMAT_RGB565);
+//     lv_obj_add_flag(s_tmbox_canvas, LV_OBJ_FLAG_HIDDEN);
 
-    lv_layer_t layer;
-    lv_canvas_init_layer(s_tmbox_canvas, &layer);
-    lv_draw_image_dsc_t img_dsc;
-    lv_draw_image_dsc_init(&img_dsc);
-    img_dsc.src = path;
-    lv_area_t area = {0, 0, 983, 432};
-    lv_draw_image(&layer, &img_dsc, &area);
-    lv_canvas_finish_layer(s_tmbox_canvas, &layer);
+//     lv_layer_t layer;
+//     lv_canvas_init_layer(s_tmbox_canvas, &layer);
+//     lv_draw_image_dsc_t img_dsc;
+//     lv_draw_image_dsc_init(&img_dsc);
+//     img_dsc.src = path;
+//     lv_area_t area = {0, 0, 983, 432};
+//     lv_draw_image(&layer, &img_dsc, &area);
+//     lv_canvas_finish_layer(s_tmbox_canvas, &layer);
 
-    s_tmbox_buf_lang = lang;
-    bk_printf(TAG "[PERF] testmode_box preloaded: %s\n", path);
+//     s_tmbox_buf_lang = lang;
+//     bk_printf(TAG "[PERF] testmode_box preloaded: %s\n", path);
 }
 
 /* settingmodetest는 keep-alive라 init_page_settingmodetest()의 1회성 src

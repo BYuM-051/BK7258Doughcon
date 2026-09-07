@@ -262,10 +262,10 @@ void settingmode_loaded_event_cb(lv_event_t *e)
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
 
     ui_title_anim(bk_ui->settingmode_title);
-
+#if 0 // deprecated preheat method.
     /* password_popup.png를 canvas 영구 버퍼에 1회 decode
      * (lv_image_cache_drop과 무관 — 팝업 열릴 때 즉시 렌더) */
-    popuppassword_bg_preload();
+    // popuppassword_bg_preload();
 
 #if UI_POPUPPASSWORD_KEYPAD_COMBINED_ENABLE
     /* 키패드 12장을 스프라이트 canvas에 1회 decode */
@@ -274,7 +274,8 @@ void settingmode_loaded_event_cb(lv_event_t *e)
 
     /* testmode_box.jpg를 전용 canvas에 1회 decode
      * — 고장진단 진입 시 즉시 렌더 */
-    settingmodetest_bg_preload();
+    // settingmodetest_bg_preload();
+#endif
 }
 
 void settingmode_unload_start_event_cb(lv_event_t *e)

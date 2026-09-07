@@ -130,7 +130,7 @@
  *    (fault addr 0x2a) 발생. lv_obj.c에 NULL 체크(lv_obj_style.c:303과 동일한
  *    방어패턴) 추가로 수정 완료.
  * 0: 기존처럼 active screen을 숨기지 않음 — 크래시 위험 없음. */
-#define UI_POPUPPASSWORD_HIDE_ACTIVE_SCREEN_ENABLE   1
+#define UI_POPUPPASSWORD_HIDE_ACTIVE_SCREEN_ENABLE   0
 
 /* ── 고장진단(settingmodetest) 진입 속도 개선 3종 세트 ────────────────────
  * memorymode에 이미 적용된 것과 동일한 패턴을 이식. */
@@ -196,7 +196,7 @@
  *    배경(advancedsetting.jpg) 위라 완전히 균일하진 않지만, 팝업 카드가 놓이는
  *    영역이 실측상 거의 단색(#6D6B68)이라 마찬가지로 안전하게 합성함.
  * 0: 기존처럼 알파 있는 .png 그대로 사용(reset_popup은 canvas+ARGB8888 유지). */
-#define UI_POPUP_DIALOG_JPG_ENABLE   1
+#define UI_POPUP_DIALOG_JPG_ENABLE   0
 
 /* 1: reset_popup / automodestart bg / testmode_box 캔버스 버퍼 3개(합계 ~2.18MB)를
  *    main_activity_on_create()에서 부팅 극초반 1회만 malloc하고 이후 절대 free하지

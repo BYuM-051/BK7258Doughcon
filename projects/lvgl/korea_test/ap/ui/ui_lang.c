@@ -878,7 +878,7 @@ void ui_lang_apply_popuppassword(bk_lv_ui_t *bk_ui)
      * settingmode 전체를 매번 재렌더하던 비용을 없애기 위한 것 (ui_config.h 참고) */
     _L(bk_ui->popuppassword_imageview1,    "/images/feature-setting_password", ".jpg");
 #else
-    _L(bk_ui->popuppassword_imageview1,    "/images/password_popup", ".jpg");
+    _L(bk_ui->popuppassword_imageview1,    "/images/password_popup", ".png");
 #endif
     _L(bk_ui->popuppassword_pop_cautionim, "/images/popup_caution",  ".png");
 }
