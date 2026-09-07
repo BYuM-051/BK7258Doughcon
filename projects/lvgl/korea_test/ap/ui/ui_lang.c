@@ -20,7 +20,9 @@
 #include <stdio.h>
 
 #include "pageManager.h"
+#include "pageManager.h"
 #define TAG "[ui_lang.c] "
+// #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 // #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 
 #define _DEGREE_F_STR  "\xc2\xb0""F"
@@ -895,8 +897,9 @@ void ui_lang_apply_all(bk_lv_ui_t *bk_ui)
 
     // _A(timebar,                  ui_lang_apply_timebar);
     // _A(main,                     ui_lang_apply_main);
+    // _A(main,                     ui_lang_apply_main);
     _A(manualmode,               ui_lang_apply_manualmode);
-    _A(manualmodestart,          ui_lang_apply_manualmodestart);
+    // _A(manualmodestart,          ui_lang_apply_manualmodestart);
     // _A(automode,                 ui_lang_apply_automode);
     _A(automodestart,            ui_lang_apply_automodestart);
     _A(automodeend,              ui_lang_apply_automodeend);

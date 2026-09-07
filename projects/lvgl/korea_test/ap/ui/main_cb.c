@@ -184,6 +184,7 @@ void main_automode_event_cb(lv_event_t *e)
     static uint32_t last_click_time = 0;
     bk_printf(TAG "[TOUCH] PRESSED t=%lu\n", (unsigned long)lv_tick_get());
     lv_event_code_t code = lv_event_get_code(e);
+    bk_printf(TAG "[SCREEN] main_automode_event_cb code=%d\n", code);
 
     if(state->lock || state->hard_lock)
     {return;}
@@ -206,12 +207,15 @@ void main_manualmode_event_cb(lv_event_t *e)
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
     if(lv_event_get_code(e) != LV_EVENT_PRESSED) return;
+    if(lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (state->lock || state->hard_lock) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
 
 #if UI_PRENDERING_ENABLE
+    bk_printf(TAG "[SCREEN] ── main→manualmode ────────────────\n");
     ui_page_change(PAGE_MANUALMODE);
+    hal_buzzer_beep();
     hal_buzzer_beep();
 #else
     init_page_manualmode(bk_ui);
@@ -220,8 +224,11 @@ void main_manualmode_event_cb(lv_event_t *e)
 
 // IMPORTANT NOTE : if you register a button callback with LV_EVENT_CLICKED, the first touch will be trigger the refresh of the screen.
 // So, do not use LV_EVENT_CLICKED for button callbacks, use LV_EVENT_PRESSED instead. (LVGL v9.3.0)
+// IMPORTANT NOTE : if you register a button callback with LV_EVENT_CLICKED, the first touch will be trigger the refresh of the screen.
+// So, do not use LV_EVENT_CLICKED for button callbacks, use LV_EVENT_PRESSED instead. (LVGL v9.3.0)
 void main_autodrymode_event_cb(lv_event_t *e)
 {
+    if(lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if(lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
@@ -231,6 +238,7 @@ void main_autodrymode_event_cb(lv_event_t *e)
 
 #if UI_PRENDERING_ENABLE
     ui_page_change(PAGE_AUTODRYMODE);
+    hal_buzzer_beep();
     hal_buzzer_beep();
 #else
     init_page_autodrymode(bk_ui);
@@ -242,6 +250,7 @@ void main_memorymode_event_cb(lv_event_t *e)
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
     if(lv_event_get_code(e) != LV_EVENT_PRESSED) return;
+    if(lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (state->lock || state->hard_lock) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
@@ -250,7 +259,9 @@ void main_memorymode_event_cb(lv_event_t *e)
      * 삭제 버튼 표시 로직(memorymode_load_event_cb)이 잘못 판단하므로 초기화 */
     state->memory_mode_check = MEMORY_MODE_NONE;
 #if UI_PRENDERING_ENABLE
+    bk_printf(TAG "[SCREEN] ── main→memorymode ────────────────\n");    
     ui_page_change(PAGE_MEMORYMODE);
+    hal_buzzer_beep();
     hal_buzzer_beep();
 #else
     uint32_t _t0 = lv_tick_get();
@@ -275,12 +286,15 @@ void main_settingmode_event_cb(lv_event_t *e)
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
     if(lv_event_get_code(e) != LV_EVENT_PRESSED) return;
+    if(lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (state->lock || state->hard_lock) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
 
 #if UI_PRENDERING_ENABLE
+    bk_printf(TAG "[SCREEN] ── main→settingmode ────────────────\n");
     ui_page_change(PAGE_SETTINGMODE);
+    hal_buzzer_beep();
     hal_buzzer_beep();
 #else
     uint32_t _t0 = lv_tick_get();
@@ -305,19 +319,23 @@ void main_load_start_event_cb(lv_event_t *e)
     device_state_t *state = &g_device_state;
     state->auto_mode = false;
     return;
+    return;
 }
 
 void main_loaded_event_cb(lv_event_t *e)
 {
+    return;
     return;
 }
 
 void main_unload_start_event_cb(lv_event_t *e)
 {
     return;
+    return;
 }
 
 void main_unloaded_event_cb(lv_event_t *e)
 {
+    return;
     return;
 }
