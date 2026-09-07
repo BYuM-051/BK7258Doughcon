@@ -481,9 +481,25 @@ static void _gif_anim_start_mms(bk_lv_ui_t *bk_ui)
     if (bk_ui->manualmodestart_manual_gif_basic)
         lv_obj_add_flag(bk_ui->manualmodestart_manual_gif_basic, LV_OBJ_FLAG_HIDDEN);
 
+
+    if (s_mms_drop_img && lv_obj_is_valid(s_mms_drop_img))
+    {
+        lv_obj_add_flag(s_mms_drop_img, LV_OBJ_FLAG_HIDDEN);
+    }
+
+    if (s_mms_ferm_inner && lv_obj_is_valid(s_mms_ferm_inner))
+    {
+        lv_obj_add_flag(s_mms_ferm_inner, LV_OBJ_FLAG_HIDDEN);
+    }
+
+    if (s_mms_ferm_btm_clip && lv_obj_is_valid(s_mms_ferm_btm_clip))
+    {
+        lv_obj_add_flag(s_mms_ferm_btm_clip, LV_OBJ_FLAG_HIDDEN);
+    }
     int mode = g_device_state.manual_current_mode;
 
-    if (mode == MANUAL_MODE_FREEZE) {
+    if (mode == MANUAL_MODE_FREEZE) 
+    {
         /* 냉동: 360° 무한 회전 */
         if (!bk_ui->manualmodestart_manual_gif) return;
         lv_obj_t *gif = bk_ui->manualmodestart_manual_gif;
@@ -497,14 +513,42 @@ static void _gif_anim_start_mms(bk_lv_ui_t *bk_ui)
         lv_anim_set_duration(&a, 4000);
         lv_anim_set_repeat_count(&a, LV_ANIM_REPEAT_INFINITE);
         lv_anim_start(&a);
-    } else {
+    } 
+    else 
+    {
         /* 해동: 위→아래 낙하 (76×55) / 발효: 아래→위 상승 (76×24, 상단 24px만) */
         if (!s_mms_drop_clip || !lv_obj_is_valid(s_mms_drop_clip)) return;
         lv_anim_t a;
         lv_anim_init(&a);
         lv_anim_set_exec_cb(&a, _drop_anim_cb_mms);
         lv_anim_set_repeat_count(&a, LV_ANIM_REPEAT_INFINITE);
-        if (mode == MANUAL_MODE_DEFROST) {
+        // setup animation parameters based on mode
+        if(mode == MANUAL_MODE_DEFROST)
+        {
+            lv_obj_clear_flag(s_mms_drop_img, LV_OBJ_FLAG_HIDDEN);
+
+            lv_obj_set_size(s_mms_drop_clip, 76, 55);
+            lv_anim_set_var(&a, s_mms_drop_img);
+            lv_anim_set_values(&a, -55, 55);
+            lv_anim_set_duration(&a, 2000);
+        }
+        else
+        {
+            lv_obj_clear_flag(s_mms_ferm_inner, LV_OBJ_FLAG_HIDDEN);
+
+            lv_obj_set_size(s_mms_drop_clip, 76, 24);
+            lv_anim_set_var(&a, s_mms_ferm_inner);
+            lv_anim_set_values(&a, 25, -25);
+            lv_anim_set_duration(&a, 2400);
+
+            if (s_mms_ferm_btm_clip && lv_obj_is_valid(s_mms_ferm_btm_clip))
+            {
+                lv_obj_clear_flag(s_mms_ferm_btm_clip, LV_OBJ_FLAG_HIDDEN);
+            }
+        }
+        // animation
+        if (mode == MANUAL_MODE_DEFROST) 
+        {
             /* 해동: 76×55 창, 물방울 전체 위→아래 낙하 */
             lv_obj_set_size(s_mms_drop_clip, 76, 55);
             lv_anim_set_var(&a, s_mms_drop_img);
@@ -558,6 +602,19 @@ static void _gif_anim_stop_mms(bk_lv_ui_t *bk_ui)
     if (bk_ui->manualmodestart_manual_gif_basic) {
         _img_ensure_src(bk_ui->manualmodestart_manual_gif_basic);
         lv_obj_clear_flag(bk_ui->manualmodestart_manual_gif_basic, LV_OBJ_FLAG_HIDDEN);
+    }
+    if (s_mms_drop_img && lv_obj_is_valid(s_mms_drop_img))
+    {
+        lv_anim_delete(s_mms_drop_img, _drop_anim_cb_mms);
+        lv_obj_set_y(s_mms_drop_img, 0);
+        lv_obj_add_flag(s_mms_drop_img, LV_OBJ_FLAG_HIDDEN);
+    }
+
+    if (s_mms_ferm_inner && lv_obj_is_valid(s_mms_ferm_inner))
+    {
+        lv_anim_delete(s_mms_ferm_inner, _drop_anim_cb_mms);
+        lv_obj_set_y(s_mms_ferm_inner, 0);
+        lv_obj_add_flag(s_mms_ferm_inner, LV_OBJ_FLAG_HIDDEN);
     }
 }
 
