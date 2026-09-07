@@ -35,12 +35,22 @@ extern void popupreset_load_event_cb(lv_event_t *e);
 #define _RP_W    498
 #define _RP_H    328
 #else
+#if 0 // 현재 사용중인 asset은 jpg를 다시 png로 변환한 상태, 보정은 그대로.
 #define _RP_BPP  32
 #define _RP_FMT  LV_COLOR_FORMAT_ARGB8888
 #define _RP_EXT  ".png"
 #define _RP_W    520
 #define _RP_H    350
+#else
+#define _RP_BPP  24
+#define _RP_FMT  LV_COLOR_FORMAT_RGB565A8
+#define _RP_EXT  ".png"
+/* jpg는 투명 여백을 잘라내고 배경색으로 합성한 498x328 에셋(원본 520x350에서
+ * 상하좌우 ~11px 투명 마진을 trim) — 화면 배치 좌표는 그만큼 +11,+11 보정 */
+#define _RP_W    498
+#define _RP_H    328
 #endif
+#endif // UI_POPUP_DIALOG_JPG_ENABLE
 
 static void     *s_rp_canvas_buf = NULL;
 static lv_obj_t *s_rp_canvas     = NULL;
@@ -146,7 +156,8 @@ void init_page_popupreset(bk_lv_ui_t * bk_ui) {
      * +11,+11 보정해 화면상 위치가 기존 png(239,82)와 동일하게 유지되게 함 */
     lv_obj_set_pos(bk_ui->popupreset_imageview1, 239 + 11, 82 + 11);
 #else
-    lv_obj_set_pos(bk_ui->popupreset_imageview1, 239, 82);
+    // 현재 적용중인 asset은 jpg를 다시 png로 교체한 상태. trim 보정은 그대로 유지.
+    lv_obj_set_pos(bk_ui->popupreset_imageview1, 239 + 11, 82 + 11); 
 #endif
     lv_obj_set_size(bk_ui->popupreset_imageview1, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 

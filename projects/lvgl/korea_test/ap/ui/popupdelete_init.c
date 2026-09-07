@@ -53,7 +53,8 @@ void init_page_popupdelete(bk_lv_ui_t *bk_ui)
      * +11,+11 보정해 화면상 위치가 기존 png(239,82)와 동일하게 유지되게 함 */
     lv_obj_set_pos(bk_ui->popupdelete_imageview1, 239 + 11, 82 + 11);
 #else
-    lv_obj_set_pos(bk_ui->popupdelete_imageview1, 239, 82);
+    // 현재 적용중인 asset은 jpg를 다시 png로 교체한 상태. trim 보정은 그대로 유지.
+    lv_obj_set_pos(bk_ui->popupdelete_imageview1, 239 + 11, 82 + 11);
 #endif
     lv_obj_set_size(bk_ui->popupdelete_imageview1, 0, 0);
 
