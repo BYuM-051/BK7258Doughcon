@@ -1177,16 +1177,11 @@ void automode_loadbt_event_cb(lv_event_t *e)
     s_last_click_automode = lv_tick_get();
     hal_buzzer_beep();
 
+    bk_printf(TAG "[AUTO] memory load bt PRESSED tick=%u\n", lv_tick_get());
     state->memory_mode_check   = MEMORY_MODE_LOAD;
     state->memory_slot_page    = 0;
     state->memory_slot_checking = 0;   /* no initial selection */
-#if UI_PRENDERING_ENABLE
-    ui_page_change(PAGE_MEMORYMODE);
-#else
-    if (bk_ui->memorymode == NULL || !lv_obj_is_valid(bk_ui->memorymode))
-        init_page_memorymode(bk_ui);
-    lv_scr_load(bk_ui->memorymode);
-#endif /* UI_PRENDERING_ENABLE */
+    ui_page_change_ShowOption(PAGE_MEMORYMODE, false);
 }
 
 // #include <time.h>
@@ -1413,13 +1408,7 @@ void automode_savebt_event_cb(lv_event_t *e)
     g_device_state.memory_slot_page     = 0;
     g_device_state.memory_slot_checking = 1;
     bk_printf(TAG "[SAVE] navigate to memorymode for slot selection\n");
-#if UI_PRENDERING_ENABLE
-    ui_page_change(PAGE_MEMORYMODE);
-#else
-    if (bk_ui->memorymode == NULL || !lv_obj_is_valid(bk_ui->memorymode))
-        init_page_memorymode(bk_ui);
-    lv_scr_load(bk_ui->memorymode);
-#endif /* UI_PRENDERING_ENABLE */
+    ui_page_change_ShowOption(PAGE_MEMORYMODE, false);
 }
 
 void automode_AutoFreezeTempBt_event_cb(lv_event_t *e)
