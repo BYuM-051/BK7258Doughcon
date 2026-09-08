@@ -726,7 +726,7 @@ static void _ui_timer_cb_mms(lv_timer_t *timer)
     (void)timer;
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     if (!bk_ui->manualmodestart || !lv_obj_is_valid(bk_ui->manualmodestart)) return;
-    if (lv_scr_act() != bk_ui->manualmodestart) return;
+    if (ui_get_current_page() != bk_ui->manualmodestart) return;
     /* UART 신규 패킷 없으면 건너뜀 */
     static uint32_t s_last_rx_seq_mms = 0;
     uint32_t _cur_seq = g_uart_rx_seq;

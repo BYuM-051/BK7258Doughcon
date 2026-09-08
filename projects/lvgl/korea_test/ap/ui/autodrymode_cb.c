@@ -521,7 +521,7 @@ static void _ui_timer_cb_adm(lv_timer_t *timer)
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
     if (!bk_ui->autodrymode || !lv_obj_is_valid(bk_ui->autodrymode)) return;
-    if (lv_scr_act() != bk_ui->autodrymode) return;
+    if (ui_get_current_page() != bk_ui->autodrymode) return;
     /* UART 신규 패킷 없으면 모든 처리 건너뜀 — g_device_state 불변 */
     static uint32_t s_last_rx_seq_adm = 0;
     uint32_t _cur_seq = g_uart_rx_seq;
