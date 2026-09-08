@@ -515,8 +515,7 @@ void memorymode_deletebt_event_cb(lv_event_t *e)
 
     if (s_checking < 1 || s_checking > 4) return;   /* 선택 없으면 무시 */
     s_slot_to_delete = s_page * 4 + (s_checking - 1);
-    bk_printf(TAG "[DEL] pending slot=%d (page=%d checking=%d)\n",
-           s_slot_to_delete, s_page, s_checking);
+    bk_printf(TAG "[DEL] pending slot=%d (page=%d checking=%d)\n", s_slot_to_delete, s_page, s_checking);
     init_page_popupdelete(bk_ui);   /* memorymode 위에 오버레이 — 화면 전환 없음 */
 }
 
@@ -540,7 +539,6 @@ void memorymode_loaded_event_cb(lv_event_t *e)
     bk_printf(TAG "memorymode loaded at tick=%u\n", lv_tick_get());
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
 
-    ui_title_anim(bk_ui->memorymode_title);
     /* Ensure deferred static images — 0ms cache hit if prewarm completed */
     _img_ensure_src(bk_ui->memorymode_title);
     _img_ensure_src(bk_ui->memorymode_imageview4);   /* memory_title_line */
@@ -559,7 +557,8 @@ void memorymode_loaded_event_cb(lv_event_t *e)
         lv_obj_add_flag(bk_ui->memorymode_deletebt, LV_OBJ_FLAG_HIDDEN);
     }
     /* memorybox1-3: init에서 deferred 없이 생성 — 첫 로드 시 설정 (cache hit) */
-    if (!lv_image_get_src(bk_ui->memorymode_memorybox1)) {
+    if (!lv_image_get_src(bk_ui->memorymode_memorybox1)) 
+    {
         _img_set_src_timed(bk_ui->memorymode_memorybox1, "/images/memory_box.png");
         _img_set_src_timed(bk_ui->memorymode_memorybox2, "/images/memory_box.png");
         _img_set_src_timed(bk_ui->memorymode_memorybox3, "/images/memory_box.png");
@@ -568,8 +567,12 @@ void memorymode_loaded_event_cb(lv_event_t *e)
     _refresh_display(bk_ui);
     ui_lang_apply_memorymode(bk_ui);
     bk_printf(TAG "memorymode loaded event done at tick=%u\n", lv_tick_get());
-
+    
+    lv_obj_remove_flag(bk_ui->memorymode, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_move_to_index(bk_ui->memorymode, -1);
     lv_refr_now(NULL);
+
+    ui_title_anim(bk_ui->memorymode_title);
 }
 
 void memorymode_unload_start_event_cb(lv_event_t *e)
