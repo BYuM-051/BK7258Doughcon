@@ -864,7 +864,7 @@ static void _ui_timer_cb(lv_timer_t *timer)
     (void)timer;
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     if (!bk_ui->automodestart || !lv_obj_is_valid(bk_ui->automodestart)) return;
-    if (lv_scr_act() != bk_ui->automodestart) return;
+    if (ui_get_current_page() != bk_ui->automodestart) return;
     _refresh_running_ui(bk_ui);
 }
 
