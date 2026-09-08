@@ -515,8 +515,7 @@ void memorymode_deletebt_event_cb(lv_event_t *e)
 
     if (s_checking < 1 || s_checking > 4) return;   /* 선택 없으면 무시 */
     s_slot_to_delete = s_page * 4 + (s_checking - 1);
-    bk_printf(TAG "[DEL] pending slot=%d (page=%d checking=%d)\n",
-           s_slot_to_delete, s_page, s_checking);
+    bk_printf(TAG "[DEL] pending slot=%d (page=%d checking=%d)\n", s_slot_to_delete, s_page, s_checking);
     init_page_popupdelete(bk_ui);   /* memorymode 위에 오버레이 — 화면 전환 없음 */
 }
 
@@ -558,7 +557,8 @@ void memorymode_loaded_event_cb(lv_event_t *e)
         lv_obj_add_flag(bk_ui->memorymode_deletebt, LV_OBJ_FLAG_HIDDEN);
     }
     /* memorybox1-3: init에서 deferred 없이 생성 — 첫 로드 시 설정 (cache hit) */
-    if (!lv_image_get_src(bk_ui->memorymode_memorybox1)) {
+    if (!lv_image_get_src(bk_ui->memorymode_memorybox1)) 
+    {
         _img_set_src_timed(bk_ui->memorymode_memorybox1, "/images/memory_box.png");
         _img_set_src_timed(bk_ui->memorymode_memorybox2, "/images/memory_box.png");
         _img_set_src_timed(bk_ui->memorymode_memorybox3, "/images/memory_box.png");
