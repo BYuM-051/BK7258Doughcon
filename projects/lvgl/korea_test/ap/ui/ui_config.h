@@ -240,7 +240,7 @@
 #define UI_PRENDERING_ENABLE 1
 #endif
 
-#define _BUZZER_ENABLED 0
+#define _BUZZER_ENABLED 1
 
 /* 
 * 0 : timebar도 preRenderRoot의 child로 만들기
