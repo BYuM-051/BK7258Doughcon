@@ -945,15 +945,17 @@ extern void automodestart_lang_invalidate(bk_lv_ui_t *bk_ui);
 // TODO : preProcessor로 옮기고 이 파일을 없애기.
 void ui_lang_invalidate_cached_screens(bk_lv_ui_t *bk_ui)
 {
-    lv_obj_t *current_page = ui_get_current_page();
-    lv_obj_t *active = current_page;
+    pageId_t current_page_id = ui_get_current_page_id();
     automodestart_lang_invalidate(bk_ui); // TODO : 이거 없앨거임.
-
+    
+    update_shared_image_asset();
+    
     uiResetPreprocessQueue();
     uiResetPreprocessedPages(PAGE_SETTINGMODELANGUAGE);
     lv_image_cache_drop(NULL);
-    for(int i = 0 ; i < preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderTargetPageCount ; i++)
-    {
-        uiEnqueuePreloadTargets(preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderTargetPages[i]);
-    }
+
+    uiEnqueuePreloadTargets(current_page_id);
+
+    lv_obj_invalidate(lv_screen_active());
+    lv_refr_now(NULL);
 }

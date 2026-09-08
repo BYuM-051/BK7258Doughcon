@@ -131,6 +131,7 @@ void settingmodedegree_degree_c_bt_event_cb(lv_event_t *e)
 
 void settingmodedegree_degree_f_bt_event_cb(lv_event_t *e)
 {
+    bk_printf(TAG " change to farenheit\n");
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
     if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
