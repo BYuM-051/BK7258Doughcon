@@ -224,47 +224,37 @@ rendererFuncStatus_t init_shared_image_asset()
 
 rendererFuncStatus_t update_shared_image_asset(void)
 {
-    for(int i = SHARED_IMAGE_NONE + 1;
-        i < SHARED_IMAGE_COUNT;
-        i++)
+    for(int i = SHARED_IMAGE_NONE + 1 ; i < SHARED_IMAGE_COUNT ; i++)
     {
-        const preRenderImageInfo_t *info =
-            &sharedImageAssetInfo[i];
+        const preRenderImageInfo_t *info = &sharedImageAssetInfo[i];
 
-        if(!info->hasLanguageVariant &&
-           !info->hasDegreeVariant)
-        {
-            continue;
-        }
+        if(!info->hasLanguageVariant && !info->hasDegreeVariant)
+        {continue;}
 
-        lv_draw_buf_t *buffer =
-            sharedImageAssetState[i].imageBuffer;
-
+        lv_draw_buf_t *buffer = sharedImageAssetState[i].imageBuffer;
         if(buffer == NULL)
-        {
-            return RENDERER_FUNC_FAILED;
-        }
+        {goto fatal;}
 
         char imagePath[128];
-
-        if(!getImageFullPath(
-                info->imagePath,
-                info->hasLanguageVariant,
-                info->hasDegreeVariant,
-                info->fileExtension,
-                imagePath,
-                sizeof(imagePath)))
+        if(!getImageFullPath(info->imagePath, info->hasLanguageVariant, info->hasDegreeVariant, info->fileExtension, imagePath, sizeof(imagePath)))
         {
-            return RENDERER_FUNC_FAILED;
+            goto fatal;
         }
-
-        if(lv_image_decoder_prewarm_update(
-                imagePath,
-                buffer) != LV_RESULT_OK)
+        if(lv_image_decoder_prewarm_update(imagePath, buffer) != LV_RESULT_OK)
         {
-            return RENDERER_FUNC_FAILED;
+            bk_printf(TAG "[SHARED_IMAGE] update_shared_image_asset: Failed to update image for assetId %d from path: %s\n", i, imagePath);
+            goto acceptable;
         }
     }
 
     return RENDERER_FUNC_DONE;
+
+    fatal:
+    bk_printf(TAG "[SHARED_IMAGE] update_shared_image_asset: Failed to update shared image asset\n");
+    lv_delay_ms(2000);
+    LV_ASSERT(0);
+    return RENDERER_FUNC_FAILED;
+
+    acceptable:
+    return RENDERER_FUNC_FAILED;
 }

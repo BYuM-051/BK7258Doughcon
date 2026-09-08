@@ -90,10 +90,6 @@ static void _apply_language_change(bk_lv_ui_t *bk_ui)
     lv_image_set_src(bk_ui->timebar_defrost_checkim, fullPath);
 
     ui_lang_invalidate_cached_screens(bk_ui);
-    lv_lock();
-    lv_obj_invalidate(bk_ui->settingmodelanguage);
-    lv_refr_now(NULL);
-    lv_unlock();
     /* 현재 화면(언어선택)의 타이틀·나가기 버튼을 새 언어로 즉시 갱신 */
 }
 
