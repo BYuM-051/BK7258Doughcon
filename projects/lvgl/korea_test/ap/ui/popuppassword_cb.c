@@ -36,9 +36,10 @@ static const int16_t CT_CY[4] = {124, 384, 124, 384};
 
 static void _ct_async_del(void *arg)
 {
-    lv_obj_t *obj = (lv_obj_t *)arg;
-    if (obj && lv_obj_is_valid(obj))
-        lv_obj_del(obj);
+    // lv_obj_t *obj = (lv_obj_t *)arg;
+    // if (obj && lv_obj_is_valid(obj))
+    //     lv_obj_del(obj);
+    destroy_page_popuppassword(&bk_lv_tool_ui);
 }
 
 static void _ct_corner_cb(lv_event_t *e)
@@ -58,7 +59,11 @@ static void _ct_corner_cb(lv_event_t *e)
         s_ct_screen = NULL; s_ct_bg = NULL;
         s_ct_phase = 0;     s_ct_cidx = 0;
 #if UI_PRENDERING_ENABLE
+        hal_buzzer_beep();
         ui_page_change(PAGE_MAIN);
+        lv_scr_load(preRenderRoot);
+        lv_refr_now(NULL);
+        lv_async_call(_ct_async_del, old);
 #else
         if (bk_ui->main == NULL || !lv_obj_is_valid(bk_ui->main))
             init_page_main(bk_ui);
