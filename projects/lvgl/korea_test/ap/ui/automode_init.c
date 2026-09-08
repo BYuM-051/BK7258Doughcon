@@ -73,6 +73,7 @@ void destroy_page_automode(bk_lv_ui_t *bk_ui)
         bk_ui->automode_KeyPadBt[i] = NULL;
         bk_ui->automode_KeyPadIm[i] = NULL;
     }
+    bk_ui->automode_keypadhide = NULL;
     bk_ui->automode_AutoModeCompleteYearUnderBarIm       = NULL;
     bk_ui->automode_AutoModeCompleteMonthUnderBarIm      = NULL;
     bk_ui->automode_AutoModeCompleteDayUnderBarIm        = NULL;
