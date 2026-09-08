@@ -47,7 +47,7 @@ static void _select_mode(bk_lv_ui_t *bk_ui,
 void settingmodemanual_backbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -64,7 +64,7 @@ void settingmodemanual_backbt_event_cb(lv_event_t *e)
 void settingmodemanual_setting_manual_autobt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -74,7 +74,7 @@ void settingmodemanual_setting_manual_autobt_event_cb(lv_event_t *e)
 void settingmodemanual_setting_manual_manualbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -84,7 +84,7 @@ void settingmodemanual_setting_manual_manualbt_event_cb(lv_event_t *e)
 void settingmodemanual_setting_manual_drybt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -94,7 +94,7 @@ void settingmodemanual_setting_manual_drybt_event_cb(lv_event_t *e)
 void settingmodemanual_setting_manual_memorybt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -104,7 +104,7 @@ void settingmodemanual_setting_manual_memorybt_event_cb(lv_event_t *e)
 void settingmodemanual_setting_manual_settingbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();

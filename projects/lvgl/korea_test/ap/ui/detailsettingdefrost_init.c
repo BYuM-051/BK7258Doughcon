@@ -117,7 +117,7 @@ create_children:
     // Button: backbt
     bk_ui->detailsettingdefrost_backbt = lv_button_create(bk_ui->detailsettingdefrost);
     lv_obj_add_flag(bk_ui->detailsettingdefrost_backbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingdefrost_backbt, detailsettingdefrost_backbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdefrost_backbt, detailsettingdefrost_backbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingdefrost_backbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingdefrost_backbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingdefrost_backbt, 0, 0);
@@ -147,7 +147,7 @@ create_children:
     // Button: settingbt1
     bk_ui->detailsettingdefrost_settingbt1 = lv_button_create(bk_ui->detailsettingdefrost);
     lv_obj_add_flag(bk_ui->detailsettingdefrost_settingbt1, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingdefrost_settingbt1, detailsettingdefrost_settingbt1_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdefrost_settingbt1, detailsettingdefrost_settingbt1_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingdefrost_settingbt1, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingdefrost_settingbt1, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingdefrost_settingbt1, 0, 0);
@@ -172,7 +172,7 @@ create_children:
     // Button: settingbt2
     bk_ui->detailsettingdefrost_settingbt2 = lv_button_create(bk_ui->detailsettingdefrost);
     lv_obj_add_flag(bk_ui->detailsettingdefrost_settingbt2, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingdefrost_settingbt2, detailsettingdefrost_settingbt2_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdefrost_settingbt2, detailsettingdefrost_settingbt2_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingdefrost_settingbt2, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingdefrost_settingbt2, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingdefrost_settingbt2, 0, 0);
@@ -197,7 +197,7 @@ create_children:
     // Button: settingbt3
     bk_ui->detailsettingdefrost_settingbt3 = lv_button_create(bk_ui->detailsettingdefrost);
     lv_obj_add_flag(bk_ui->detailsettingdefrost_settingbt3, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingdefrost_settingbt3, detailsettingdefrost_settingbt3_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdefrost_settingbt3, detailsettingdefrost_settingbt3_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingdefrost_settingbt3, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingdefrost_settingbt3, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingdefrost_settingbt3, 0, 0);
@@ -233,7 +233,7 @@ create_children:
     // Button: changebt
     bk_ui->detailsettingdefrost_changebt = lv_button_create(bk_ui->detailsettingdefrost);
     lv_obj_add_flag(bk_ui->detailsettingdefrost_changebt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingdefrost_changebt, detailsettingdefrost_changebt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdefrost_changebt, detailsettingdefrost_changebt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingdefrost_changebt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingdefrost_changebt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingdefrost_changebt, 0, 0);

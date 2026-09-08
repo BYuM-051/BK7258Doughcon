@@ -59,8 +59,7 @@ static lv_obj_t *_mk_field_lbl(lv_obj_t *parent, const char *text,
     lv_obj_add_flag(o, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_remove_flag(o, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(o, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_event_cb(o, settingmodetime_field_tap_event_cb,
-                        LV_EVENT_ALL, (void *)(intptr_t)field_idx);
+    lv_obj_add_event_cb(o, settingmodetime_field_tap_event_cb, LV_EVENT_PRESSED, (void *)(intptr_t)field_idx);
     return o;
 }
 
@@ -148,28 +147,16 @@ void init_page_settingmodetime(bk_lv_ui_t *bk_ui)
 
     ui_lang_reset_settingmodetime_cache();
 
-#if UI_PRENDERING_ENABLE
     bk_ui->settingmodetime = lv_obj_create(preRenderRoot);
     lv_obj_remove_style_all(bk_ui->settingmodetime);
     lv_obj_set_size(bk_ui->settingmodetime, 1024, 600);
     lv_obj_set_pos(bk_ui->settingmodetime, 0, 0);
     lv_obj_set_style_radius(bk_ui->settingmodetime, 0, LV_PART_MAIN);
     lv_obj_set_scrollbar_mode(bk_ui->settingmodetime, LV_SCROLLBAR_MODE_OFF);
-    // 원래 LV_EVENT_ALL로 등록되어 있었음
     lv_obj_add_event_cb(bk_ui->settingmodetime, settingmodetime_load_start_event_cb, UI_EVENT_PAGE_SHOW_START, NULL);
     lv_obj_add_event_cb(bk_ui->settingmodetime, settingmodetime_loaded_event_cb, UI_EVENT_PAGE_SHOWN,     NULL);
     lv_obj_add_event_cb(bk_ui->settingmodetime, settingmodetime_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
     lv_obj_add_event_cb(bk_ui->settingmodetime, settingmodetime_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN,     NULL);
-#else
-    bk_ui->settingmodetime = lv_obj_create(NULL);
-    lv_obj_set_size(bk_ui->settingmodetime, 1024, 600);
-    lv_obj_set_scrollbar_mode(bk_ui->settingmodetime, LV_SCROLLBAR_MODE_OFF);
-    // 원래 LV_EVENT_ALL로 등록되어 있었음
-    lv_obj_add_event_cb(bk_ui->settingmodetime, settingmodetime_load_start_event_cb, LV_EVENT_SCREEN_LOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodetime, settingmodetime_loaded_event_cb, LV_EVENT_SCREEN_LOADED,     NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodetime, settingmodetime_unload_start_event_cb, LV_EVENT_SCREEN_UNLOAD_START, NULL);
-    lv_obj_add_event_cb(bk_ui->settingmodetime, settingmodetime_unloaded_event_cb, LV_EVENT_SCREEN_UNLOADED,     NULL);
-#endif /* UI_PRENDERING_ENABLE */
 
     if(stepInitMode)
     {
@@ -195,7 +182,7 @@ create_children:
     /* 뒤로 버튼 */
     bk_ui->settingmodetime_backbt = lv_button_create(bk_ui->settingmodetime);
     lv_obj_add_flag(bk_ui->settingmodetime_backbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodetime_backbt, settingmodetime_backbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetime_backbt, settingmodetime_backbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetime_backbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetime_backbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetime_backbt, 0, 0);
@@ -231,7 +218,7 @@ create_children:
     bk_ui->settingmodetime_setting_time_setdatebt = lv_button_create(bk_ui->settingmodetime);
     lv_obj_add_flag(bk_ui->settingmodetime_setting_time_setdatebt, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(bk_ui->settingmodetime_setting_time_setdatebt,
-                        settingmodetime_setting_time_setdatebt_event_cb, LV_EVENT_ALL, NULL);
+                        settingmodetime_setting_time_setdatebt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetime_setting_time_setdatebt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetime_setting_time_setdatebt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetime_setting_time_setdatebt, 0, 0);
@@ -282,7 +269,7 @@ create_children:
     bk_ui->settingmodetime_setting_time_settimebt = lv_button_create(bk_ui->settingmodetime);
     lv_obj_add_flag(bk_ui->settingmodetime_setting_time_settimebt, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(bk_ui->settingmodetime_setting_time_settimebt,
-                        settingmodetime_setting_time_settimebt_event_cb, LV_EVENT_ALL, NULL);
+                        settingmodetime_setting_time_settimebt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetime_setting_time_settimebt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetime_setting_time_settimebt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetime_setting_time_settimebt, 0, 0);
@@ -300,8 +287,7 @@ create_children:
     lv_obj_set_style_bg_opa(bk_ui->settingmodetime_ampm_bt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetime_ampm_bt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetime_ampm_bt, 0, 0);
-    lv_obj_add_event_cb(bk_ui->settingmodetime_ampm_bt,
-                        settingmodetime_ampm_bt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetime_ampm_bt, settingmodetime_ampm_bt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_add_flag(bk_ui->settingmodetime_ampm_bt, LV_OBJ_FLAG_HIDDEN);
 
     /* AM/PM 텍스트 라벨 (검정색) */

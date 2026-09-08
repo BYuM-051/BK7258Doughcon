@@ -388,7 +388,7 @@ void detailsettingtime_roller_event_cb(lv_event_t *e) { (void)e; }
 void detailsettingtime_backbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -413,25 +413,25 @@ static void _settingbt(int field)
 }
 
 void detailsettingtime_settingbt1_event_cb(lv_event_t *e)
-{ if (lv_event_get_code(e) != LV_EVENT_CLICKED) return; _settingbt(0); }
+{ if (lv_event_get_code(e) != LV_EVENT_PRESSED) return; _settingbt(0); }
 
 void detailsettingtime_settingbt2_event_cb(lv_event_t *e)
-{ if (lv_event_get_code(e) != LV_EVENT_CLICKED) return; _settingbt(1); }
+{ if (lv_event_get_code(e) != LV_EVENT_PRESSED) return; _settingbt(1); }
 
 void detailsettingtime_settingbt3_event_cb(lv_event_t *e)
-{ if (lv_event_get_code(e) != LV_EVENT_CLICKED) return; _settingbt(2); }
+{ if (lv_event_get_code(e) != LV_EVENT_PRESSED) return; _settingbt(2); }
 
 void detailsettingtime_settingbt4_event_cb(lv_event_t *e)
-{ if (lv_event_get_code(e) != LV_EVENT_CLICKED) return; _settingbt(3); }
+{ if (lv_event_get_code(e) != LV_EVENT_PRESSED) return; _settingbt(3); }
 
 void detailsettingtime_settingbt5_event_cb(lv_event_t *e)
-{ if (lv_event_get_code(e) != LV_EVENT_CLICKED) return; _settingbt(4); }
+{ if (lv_event_get_code(e) != LV_EVENT_PRESSED) return; _settingbt(4); }
 
 void detailsettingtime_changebt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();

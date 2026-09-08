@@ -63,7 +63,7 @@ void settingmodedetailsetting_load_event_cb(lv_event_t *e);
 void settingmodedetailsetting_backbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -80,7 +80,7 @@ void settingmodedetailsetting_backbt_event_cb(lv_event_t *e)
 void settingmodedetailsetting_detail_temp_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -104,7 +104,7 @@ void settingmodedetailsetting_detail_temp_bt_event_cb(lv_event_t *e)
 void settingmodedetailsetting_detail_humidity_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -128,7 +128,7 @@ void settingmodedetailsetting_detail_humidity_bt_event_cb(lv_event_t *e)
 void settingmodedetailsetting_detail_time_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -152,7 +152,7 @@ void settingmodedetailsetting_detail_time_bt_event_cb(lv_event_t *e)
 void settingmodedetailsetting_detail_damper_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -176,7 +176,7 @@ void settingmodedetailsetting_detail_damper_bt_event_cb(lv_event_t *e)
 void settingmodedetailsetting_detail_defrost_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
     hal_buzzer_beep();
@@ -200,7 +200,7 @@ void settingmodedetailsetting_detail_defrost_bt_event_cb(lv_event_t *e)
 void settingmodedetailsetting_detail_reset_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
 

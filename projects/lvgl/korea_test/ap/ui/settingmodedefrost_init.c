@@ -111,7 +111,7 @@ create_children:
     // Button: backbt
     bk_ui->settingmodedefrost_backbt = lv_button_create(bk_ui->settingmodedefrost);
     lv_obj_add_flag(bk_ui->settingmodedefrost_backbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodedefrost_backbt, settingmodedefrost_backbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedefrost_backbt, settingmodedefrost_backbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodedefrost_backbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodedefrost_backbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodedefrost_backbt, 0, 0);

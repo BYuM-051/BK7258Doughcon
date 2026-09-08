@@ -131,7 +131,7 @@ create_children:
     // Button: stopbt
     bk_ui->automodeend_stopbt = lv_button_create(bk_ui->automodeend);
     lv_obj_add_flag(bk_ui->automodeend_stopbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->automodeend_stopbt, automodeend_stopbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->automodeend_stopbt, automodeend_stopbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->automodeend_stopbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->automodeend_stopbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->automodeend_stopbt, 0, 0);

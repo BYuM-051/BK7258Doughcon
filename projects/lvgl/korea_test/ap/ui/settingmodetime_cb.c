@@ -451,7 +451,7 @@ static void _open_time_edit(bk_lv_ui_t *bk_ui)
 void settingmodetime_backbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_smt) < 250) return;
     s_last_click_smt = lv_tick_get();
     hal_buzzer_beep();
@@ -476,7 +476,7 @@ void settingmodetime_backbt_event_cb(lv_event_t *e)
 /* 입력 필드 직접 탭 → 해당 필드로 포커스 이동 */
 void settingmodetime_field_tap_event_cb(lv_event_t *e)
 {
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_smt) < 250) return;
     s_last_click_smt = lv_tick_get();
     hal_buzzer_beep();
@@ -496,7 +496,7 @@ void settingmodetime_field_tap_event_cb(lv_event_t *e)
 void settingmodetime_setting_time_setdatebt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_smt) < 250) return;
     s_last_click_smt = lv_tick_get();
     hal_buzzer_beep();
@@ -506,7 +506,7 @@ void settingmodetime_setting_time_setdatebt_event_cb(lv_event_t *e)
 void settingmodetime_setting_time_settimebt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_smt) < 250) return;
     s_last_click_smt = lv_tick_get();
     hal_buzzer_beep();
@@ -517,7 +517,7 @@ void settingmodetime_setting_time_settimebt_event_cb(lv_event_t *e)
 void settingmodetime_ampm_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_smt) < 250) return;
     s_last_click_smt = lv_tick_get();
     hal_buzzer_beep();

@@ -643,12 +643,12 @@ rendererFuncStatus_t init_page_manualmodestart_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_unload_start_event_cb, UI_EVENT_PAGE_HIDE_START, NULL);
             lv_obj_add_event_cb(bk_ui->manualmodestart, manualmodestart_unloaded_event_cb, UI_EVENT_PAGE_HIDDEN, NULL);
 
-            lv_obj_add_event_cb(bk_ui->manualmodestart_backbt, manualmodestart_backbt_event_cb, LV_EVENT_CLICKED, NULL);
-            lv_obj_add_event_cb(bk_ui->manualmodestart_startbt, manualmodestart_startbt_event_cb, LV_EVENT_CLICKED, NULL);
-            lv_obj_add_event_cb(bk_ui->manualmodestart_manual_freeze_temp_bt, manualmodestart_manual_freeze_temp_bt_event_cb, LV_EVENT_CLICKED, NULL);
-            lv_obj_add_event_cb(bk_ui->manualmodestart_manual_defrost_temp_bt, manualmodestart_manual_defrost_temp_bt_event_cb, LV_EVENT_CLICKED, NULL);
-            lv_obj_add_event_cb(bk_ui->manualmodestart_manual_fermentation_temp_bt, manualmodestart_manual_fermentation_temp_bt_event_cb, LV_EVENT_CLICKED, NULL);
-            lv_obj_add_event_cb(bk_ui->manualmodestart_manual_fermentation_humidity_bt, manualmodestart_manual_fermentation_humidity_bt_event_cb, LV_EVENT_CLICKED, NULL);
+            lv_obj_add_event_cb(bk_ui->manualmodestart_backbt, manualmodestart_backbt_event_cb, LV_EVENT_PRESSED, NULL);
+            lv_obj_add_event_cb(bk_ui->manualmodestart_startbt, manualmodestart_startbt_event_cb, LV_EVENT_PRESSED, NULL);
+            lv_obj_add_event_cb(bk_ui->manualmodestart_manual_freeze_temp_bt, manualmodestart_manual_freeze_temp_bt_event_cb, LV_EVENT_PRESSED, NULL);
+            lv_obj_add_event_cb(bk_ui->manualmodestart_manual_defrost_temp_bt, manualmodestart_manual_defrost_temp_bt_event_cb, LV_EVENT_PRESSED, NULL);
+            lv_obj_add_event_cb(bk_ui->manualmodestart_manual_fermentation_temp_bt, manualmodestart_manual_fermentation_temp_bt_event_cb, LV_EVENT_PRESSED, NULL);
+            lv_obj_add_event_cb(bk_ui->manualmodestart_manual_fermentation_humidity_bt, manualmodestart_manual_fermentation_humidity_bt_event_cb, LV_EVENT_PRESSED, NULL);
 
             lv_obj_t *keypadButtons[12] =
             {

@@ -222,13 +222,8 @@ void main_manualmode_event_cb(lv_event_t *e)
 #endif /* PRENDERING_ENABLE */
 }
 
-// IMPORTANT NOTE : if you register a button callback with LV_EVENT_CLICKED, the first touch will be trigger the refresh of the screen.
-// So, do not use LV_EVENT_CLICKED for button callbacks, use LV_EVENT_PRESSED instead. (LVGL v9.3.0)
-// IMPORTANT NOTE : if you register a button callback with LV_EVENT_CLICKED, the first touch will be trigger the refresh of the screen.
-// So, do not use LV_EVENT_CLICKED for button callbacks, use LV_EVENT_PRESSED instead. (LVGL v9.3.0)
 void main_autodrymode_event_cb(lv_event_t *e)
 {
-    if(lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if(lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;

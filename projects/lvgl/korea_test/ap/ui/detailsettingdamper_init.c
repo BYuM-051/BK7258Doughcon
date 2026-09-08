@@ -118,7 +118,7 @@ create_children:
     // Button: backbt
     bk_ui->detailsettingdamper_backbt = lv_button_create(bk_ui->detailsettingdamper);
     lv_obj_add_flag(bk_ui->detailsettingdamper_backbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingdamper_backbt, detailsettingdamper_backbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdamper_backbt, detailsettingdamper_backbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingdamper_backbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingdamper_backbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingdamper_backbt, 0, 0);
@@ -148,7 +148,7 @@ create_children:
     // Button: settingbt1
     bk_ui->detailsettingdamper_settingbt1 = lv_button_create(bk_ui->detailsettingdamper);
     lv_obj_add_flag(bk_ui->detailsettingdamper_settingbt1, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settingbt1, detailsettingdamper_settingbt1_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settingbt1, detailsettingdamper_settingbt1_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingdamper_settingbt1, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingdamper_settingbt1, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingdamper_settingbt1, 0, 0);
@@ -173,7 +173,7 @@ create_children:
     // Button: settingbt2
     bk_ui->detailsettingdamper_settingbt2 = lv_button_create(bk_ui->detailsettingdamper);
     lv_obj_add_flag(bk_ui->detailsettingdamper_settingbt2, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settingbt2, detailsettingdamper_settingbt2_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settingbt2, detailsettingdamper_settingbt2_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingdamper_settingbt2, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingdamper_settingbt2, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingdamper_settingbt2, 0, 0);
@@ -198,7 +198,7 @@ create_children:
     // Button: settingbt3
     bk_ui->detailsettingdamper_settingbt3 = lv_button_create(bk_ui->detailsettingdamper);
     lv_obj_add_flag(bk_ui->detailsettingdamper_settingbt3, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settingbt3, detailsettingdamper_settingbt3_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settingbt3, detailsettingdamper_settingbt3_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingdamper_settingbt3, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingdamper_settingbt3, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingdamper_settingbt3, 0, 0);
@@ -223,7 +223,7 @@ create_children:
     // Button: settingbt4
     bk_ui->detailsettingdamper_settingbt4 = lv_button_create(bk_ui->detailsettingdamper);
     lv_obj_add_flag(bk_ui->detailsettingdamper_settingbt4, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settingbt4, detailsettingdamper_settingbt4_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settingbt4, detailsettingdamper_settingbt4_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingdamper_settingbt4, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingdamper_settingbt4, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingdamper_settingbt4, 0, 0);
@@ -256,7 +256,7 @@ create_children:
      * → 3개 행이 서로 겹쳐 항상 "0"만 보이는 것처럼 보이던 문제의 원인. */
     _DAMPER_ROLLER_STYLE(bk_ui->detailsettingdamper_settemp_setn1);
     lv_roller_set_visible_row_count(bk_ui->detailsettingdamper_settemp_setn1, 3);
-    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settemp_setn1, detailsettingdamper_roller_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settemp_setn1, detailsettingdamper_roller_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_add_flag(bk_ui->detailsettingdamper_settemp_setn1, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_pos(bk_ui->detailsettingdamper_settemp_setn1, 651, 136-2-1-5);
     lv_obj_set_width(bk_ui->detailsettingdamper_settemp_setn1, 90);
@@ -266,7 +266,7 @@ create_children:
     lv_roller_set_options(bk_ui->detailsettingdamper_settemp_setn2, "0", LV_ROLLER_MODE_NORMAL);
     _DAMPER_ROLLER_STYLE(bk_ui->detailsettingdamper_settemp_setn2);
     lv_roller_set_visible_row_count(bk_ui->detailsettingdamper_settemp_setn2, 3);
-    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settemp_setn2, detailsettingdamper_roller_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settemp_setn2, detailsettingdamper_roller_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_add_flag(bk_ui->detailsettingdamper_settemp_setn2, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_pos(bk_ui->detailsettingdamper_settemp_setn2, 766, 136-2-1-5);
     lv_obj_set_width(bk_ui->detailsettingdamper_settemp_setn2, 90);
@@ -276,7 +276,7 @@ create_children:
     lv_roller_set_options(bk_ui->detailsettingdamper_settemp_setn3, "0", LV_ROLLER_MODE_NORMAL);
     _DAMPER_ROLLER_STYLE(bk_ui->detailsettingdamper_settemp_setn3);
     lv_roller_set_visible_row_count(bk_ui->detailsettingdamper_settemp_setn3, 3);
-    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settemp_setn3, detailsettingdamper_roller_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settemp_setn3, detailsettingdamper_roller_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_add_flag(bk_ui->detailsettingdamper_settemp_setn3, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_pos(bk_ui->detailsettingdamper_settemp_setn3, 882, 136-2-1-5);
     lv_obj_set_width(bk_ui->detailsettingdamper_settemp_setn3, 90);
@@ -286,7 +286,7 @@ create_children:
     lv_roller_set_options(bk_ui->detailsettingdamper_settemp_setn4, "0", LV_ROLLER_MODE_NORMAL);
     _DAMPER_ROLLER_STYLE(bk_ui->detailsettingdamper_settemp_setn4);
     lv_roller_set_visible_row_count(bk_ui->detailsettingdamper_settemp_setn4, 3);
-    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settemp_setn4, detailsettingdamper_roller_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdamper_settemp_setn4, detailsettingdamper_roller_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_add_flag(bk_ui->detailsettingdamper_settemp_setn4, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_pos(bk_ui->detailsettingdamper_settemp_setn4, 700-10, 136-2-5-1);
     lv_obj_set_width(bk_ui->detailsettingdamper_settemp_setn4, 240);
@@ -301,7 +301,7 @@ create_children:
     // Button: changebt
     bk_ui->detailsettingdamper_changebt = lv_button_create(bk_ui->detailsettingdamper);
     lv_obj_add_flag(bk_ui->detailsettingdamper_changebt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingdamper_changebt, detailsettingdamper_changebt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingdamper_changebt, detailsettingdamper_changebt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingdamper_changebt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingdamper_changebt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingdamper_changebt, 0, 0);

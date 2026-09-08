@@ -228,7 +228,7 @@ create_children:
     // Button: backbt
     bk_ui->settingmodetest_backbt = lv_button_create(bk_ui->settingmodetest);
     lv_obj_add_flag(bk_ui->settingmodetest_backbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodetest_backbt, settingmodetest_backbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest_backbt, settingmodetest_backbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetest_backbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetest_backbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetest_backbt, 0, 0);
@@ -250,7 +250,7 @@ create_children:
     // Button: compbt
     bk_ui->settingmodetest_compbt = lv_button_create(bk_ui->settingmodetest);
     lv_obj_add_flag(bk_ui->settingmodetest_compbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodetest_compbt, settingmodetest_compbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest_compbt, settingmodetest_compbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetest_compbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetest_compbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetest_compbt, 0, 0);
@@ -265,7 +265,7 @@ create_children:
     // Button: roomfanbt
     bk_ui->settingmodetest_roomfanbt = lv_button_create(bk_ui->settingmodetest);
     lv_obj_add_flag(bk_ui->settingmodetest_roomfanbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodetest_roomfanbt, settingmodetest_roomfanbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest_roomfanbt, settingmodetest_roomfanbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetest_roomfanbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetest_roomfanbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetest_roomfanbt, 0, 0);
@@ -280,7 +280,7 @@ create_children:
     // Button: fireheaterbt
     bk_ui->settingmodetest_fireheaterbt = lv_button_create(bk_ui->settingmodetest);
     lv_obj_add_flag(bk_ui->settingmodetest_fireheaterbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodetest_fireheaterbt, settingmodetest_fireheaterbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest_fireheaterbt, settingmodetest_fireheaterbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetest_fireheaterbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetest_fireheaterbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetest_fireheaterbt, 0, 0);
@@ -295,7 +295,7 @@ create_children:
     // Button: humidityheaterbt
     bk_ui->settingmodetest_humidityheaterbt = lv_button_create(bk_ui->settingmodetest);
     lv_obj_add_flag(bk_ui->settingmodetest_humidityheaterbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodetest_humidityheaterbt, settingmodetest_humidityheaterbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest_humidityheaterbt, settingmodetest_humidityheaterbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetest_humidityheaterbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetest_humidityheaterbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetest_humidityheaterbt, 0, 0);
@@ -310,7 +310,7 @@ create_children:
     // Button: watervalvebt
     bk_ui->settingmodetest_watervalvebt = lv_button_create(bk_ui->settingmodetest);
     lv_obj_add_flag(bk_ui->settingmodetest_watervalvebt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodetest_watervalvebt, settingmodetest_watervalvebt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest_watervalvebt, settingmodetest_watervalvebt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetest_watervalvebt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetest_watervalvebt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetest_watervalvebt, 0, 0);
@@ -325,7 +325,7 @@ create_children:
     // Button: defrostheaterbt
     bk_ui->settingmodetest_defrostheaterbt = lv_button_create(bk_ui->settingmodetest);
     lv_obj_add_flag(bk_ui->settingmodetest_defrostheaterbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodetest_defrostheaterbt, settingmodetest_defrostheaterbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest_defrostheaterbt, settingmodetest_defrostheaterbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetest_defrostheaterbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetest_defrostheaterbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetest_defrostheaterbt, 0, 0);
@@ -340,7 +340,7 @@ create_children:
     // Button: ledbt
     bk_ui->settingmodetest_ledbt = lv_button_create(bk_ui->settingmodetest);
     lv_obj_add_flag(bk_ui->settingmodetest_ledbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodetest_ledbt, settingmodetest_ledbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest_ledbt, settingmodetest_ledbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetest_ledbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetest_ledbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetest_ledbt, 0, 0);
@@ -355,7 +355,7 @@ create_children:
     // Button: cabinetheaterbt
     bk_ui->settingmodetest_cabinetheaterbt = lv_button_create(bk_ui->settingmodetest);
     lv_obj_add_flag(bk_ui->settingmodetest_cabinetheaterbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodetest_cabinetheaterbt, settingmodetest_cabinetheaterbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest_cabinetheaterbt, settingmodetest_cabinetheaterbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetest_cabinetheaterbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetest_cabinetheaterbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetest_cabinetheaterbt, 0, 0);
@@ -370,7 +370,7 @@ create_children:
     // Button: damperbt
     bk_ui->settingmodetest_damperbt = lv_button_create(bk_ui->settingmodetest);
     lv_obj_add_flag(bk_ui->settingmodetest_damperbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodetest_damperbt, settingmodetest_damperbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest_damperbt, settingmodetest_damperbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetest_damperbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetest_damperbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetest_damperbt, 0, 0);
@@ -526,7 +526,7 @@ create_children:
     // 클릭 시 popuperror_toggle)
     bk_ui->settingmodetest_test_error_check_bt = lv_button_create(bk_ui->settingmodetest);
     lv_obj_add_flag(bk_ui->settingmodetest_test_error_check_bt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodetest_test_error_check_bt, settingmodetest_test_error_check_bt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodetest_test_error_check_bt, settingmodetest_test_error_check_bt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodetest_test_error_check_bt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodetest_test_error_check_bt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodetest_test_error_check_bt, 0, 0);

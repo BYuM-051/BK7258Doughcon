@@ -111,7 +111,7 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui)
     // Button: setting_detailsettingbt
     bk_ui->settingmode_setting_detailsettingbt = lv_button_create(bk_ui->settingmode);
     lv_obj_add_flag(bk_ui->settingmode_setting_detailsettingbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmode_setting_detailsettingbt, settingmode_setting_detailsettingbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmode_setting_detailsettingbt, settingmode_setting_detailsettingbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmode_setting_detailsettingbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmode_setting_detailsettingbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmode_setting_detailsettingbt, 0, 0);
@@ -129,7 +129,7 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui)
     // Button: setting_degreebt
     bk_ui->settingmode_setting_degreebt = lv_button_create(bk_ui->settingmode);
     lv_obj_add_flag(bk_ui->settingmode_setting_degreebt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmode_setting_degreebt, settingmode_setting_degreebt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmode_setting_degreebt, settingmode_setting_degreebt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmode_setting_degreebt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmode_setting_degreebt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmode_setting_degreebt, 0, 0);
@@ -147,7 +147,7 @@ void init_page_settingmode(bk_lv_ui_t * bk_ui)
     // Button: setting_recordbt
     bk_ui->settingmode_setting_recordbt = lv_button_create(bk_ui->settingmode);
     lv_obj_add_flag(bk_ui->settingmode_setting_recordbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmode_setting_recordbt, settingmode_setting_recordbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmode_setting_recordbt, settingmode_setting_recordbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmode_setting_recordbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmode_setting_recordbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmode_setting_recordbt, 0, 0);

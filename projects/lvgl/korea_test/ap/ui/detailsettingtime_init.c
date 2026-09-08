@@ -119,7 +119,7 @@ create_children:
     // Button: backbt
     bk_ui->detailsettingtime_backbt = lv_button_create(bk_ui->detailsettingtime);
     lv_obj_add_flag(bk_ui->detailsettingtime_backbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingtime_backbt, detailsettingtime_backbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingtime_backbt, detailsettingtime_backbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingtime_backbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingtime_backbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingtime_backbt, 0, 0);
@@ -159,7 +159,7 @@ create_children:
     // Button: settingbt1
     bk_ui->detailsettingtime_settingbt1 = lv_button_create(bk_ui->detailsettingtime);
     lv_obj_add_flag(bk_ui->detailsettingtime_settingbt1, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingtime_settingbt1, detailsettingtime_settingbt1_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingtime_settingbt1, detailsettingtime_settingbt1_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingtime_settingbt1, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingtime_settingbt1, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingtime_settingbt1, 0, 0);
@@ -194,7 +194,7 @@ create_children:
     // Button: settingbt2
     bk_ui->detailsettingtime_settingbt2 = lv_button_create(bk_ui->detailsettingtime);
     lv_obj_add_flag(bk_ui->detailsettingtime_settingbt2, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingtime_settingbt2, detailsettingtime_settingbt2_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingtime_settingbt2, detailsettingtime_settingbt2_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingtime_settingbt2, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingtime_settingbt2, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingtime_settingbt2, 0, 0);
@@ -219,7 +219,7 @@ create_children:
     // Button: settingbt3
     bk_ui->detailsettingtime_settingbt3 = lv_button_create(bk_ui->detailsettingtime);
     lv_obj_add_flag(bk_ui->detailsettingtime_settingbt3, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingtime_settingbt3, detailsettingtime_settingbt3_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingtime_settingbt3, detailsettingtime_settingbt3_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingtime_settingbt3, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingtime_settingbt3, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingtime_settingbt3, 0, 0);
@@ -247,7 +247,7 @@ create_children:
     // Button: settingbt4
     bk_ui->detailsettingtime_settingbt4 = lv_button_create(bk_ui->detailsettingtime);
     lv_obj_add_flag(bk_ui->detailsettingtime_settingbt4, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingtime_settingbt4, detailsettingtime_settingbt4_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingtime_settingbt4, detailsettingtime_settingbt4_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingtime_settingbt4, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingtime_settingbt4, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingtime_settingbt4, 0, 0);
@@ -272,7 +272,7 @@ create_children:
     // Button: settingbt5
     bk_ui->detailsettingtime_settingbt5 = lv_button_create(bk_ui->detailsettingtime);
     lv_obj_add_flag(bk_ui->detailsettingtime_settingbt5, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingtime_settingbt5, detailsettingtime_settingbt5_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingtime_settingbt5, detailsettingtime_settingbt5_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingtime_settingbt5, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingtime_settingbt5, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingtime_settingbt5, 0, 0);
@@ -378,7 +378,7 @@ create_children:
     // Button: changebt
     bk_ui->detailsettingtime_changebt = lv_button_create(bk_ui->detailsettingtime);
     lv_obj_add_flag(bk_ui->detailsettingtime_changebt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->detailsettingtime_changebt, detailsettingtime_changebt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->detailsettingtime_changebt, detailsettingtime_changebt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->detailsettingtime_changebt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->detailsettingtime_changebt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->detailsettingtime_changebt, 0, 0);

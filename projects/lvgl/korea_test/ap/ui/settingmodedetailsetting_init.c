@@ -121,7 +121,7 @@ create_children:
     // Button: backbt
     bk_ui->settingmodedetailsetting_backbt = lv_button_create(bk_ui->settingmodedetailsetting);
     lv_obj_add_flag(bk_ui->settingmodedetailsetting_backbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_backbt, settingmodedetailsetting_backbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_backbt, settingmodedetailsetting_backbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodedetailsetting_backbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodedetailsetting_backbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodedetailsetting_backbt, 0, 0);
@@ -147,7 +147,7 @@ create_children:
     // Button: detail_temp_bt
     bk_ui->settingmodedetailsetting_detail_temp_bt = lv_button_create(bk_ui->settingmodedetailsetting);
     lv_obj_add_flag(bk_ui->settingmodedetailsetting_detail_temp_bt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_detail_temp_bt, settingmodedetailsetting_detail_temp_bt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_detail_temp_bt, settingmodedetailsetting_detail_temp_bt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodedetailsetting_detail_temp_bt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodedetailsetting_detail_temp_bt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodedetailsetting_detail_temp_bt, 0, 0);
@@ -165,7 +165,7 @@ create_children:
     // Button: detail_humidity_bt
     bk_ui->settingmodedetailsetting_detail_humidity_bt = lv_button_create(bk_ui->settingmodedetailsetting);
     lv_obj_add_flag(bk_ui->settingmodedetailsetting_detail_humidity_bt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_detail_humidity_bt, settingmodedetailsetting_detail_humidity_bt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_detail_humidity_bt, settingmodedetailsetting_detail_humidity_bt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodedetailsetting_detail_humidity_bt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodedetailsetting_detail_humidity_bt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodedetailsetting_detail_humidity_bt, 0, 0);
@@ -183,7 +183,7 @@ create_children:
     // Button: detail_time_bt
     bk_ui->settingmodedetailsetting_detail_time_bt = lv_button_create(bk_ui->settingmodedetailsetting);
     lv_obj_add_flag(bk_ui->settingmodedetailsetting_detail_time_bt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_detail_time_bt, settingmodedetailsetting_detail_time_bt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_detail_time_bt, settingmodedetailsetting_detail_time_bt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodedetailsetting_detail_time_bt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodedetailsetting_detail_time_bt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodedetailsetting_detail_time_bt, 0, 0);
@@ -201,7 +201,7 @@ create_children:
     // Button: detail_damper_bt
     bk_ui->settingmodedetailsetting_detail_damper_bt = lv_button_create(bk_ui->settingmodedetailsetting);
     lv_obj_add_flag(bk_ui->settingmodedetailsetting_detail_damper_bt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_detail_damper_bt, settingmodedetailsetting_detail_damper_bt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_detail_damper_bt, settingmodedetailsetting_detail_damper_bt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodedetailsetting_detail_damper_bt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodedetailsetting_detail_damper_bt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodedetailsetting_detail_damper_bt, 0, 0);
@@ -219,7 +219,7 @@ create_children:
     // Button: detail_defrost_bt
     bk_ui->settingmodedetailsetting_detail_defrost_bt = lv_button_create(bk_ui->settingmodedetailsetting);
     lv_obj_add_flag(bk_ui->settingmodedetailsetting_detail_defrost_bt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_detail_defrost_bt, settingmodedetailsetting_detail_defrost_bt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_detail_defrost_bt, settingmodedetailsetting_detail_defrost_bt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodedetailsetting_detail_defrost_bt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodedetailsetting_detail_defrost_bt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodedetailsetting_detail_defrost_bt, 0, 0);
@@ -237,7 +237,7 @@ create_children:
     // Button: detail_reset_bt
     bk_ui->settingmodedetailsetting_detail_reset_bt = lv_button_create(bk_ui->settingmodedetailsetting);
     lv_obj_add_flag(bk_ui->settingmodedetailsetting_detail_reset_bt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_detail_reset_bt, settingmodedetailsetting_detail_reset_bt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodedetailsetting_detail_reset_bt, settingmodedetailsetting_detail_reset_bt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodedetailsetting_detail_reset_bt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodedetailsetting_detail_reset_bt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodedetailsetting_detail_reset_bt, 0, 0);

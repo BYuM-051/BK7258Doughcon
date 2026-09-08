@@ -872,7 +872,7 @@ void automodestart_startbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
 
@@ -1281,20 +1281,21 @@ clip_alloc_done:;
     }
 
     /* 애니메이션 ON/OFF 토글 버튼 (속도 비교용, lazy-create) */
-    if (!s_anim_toggle_btn) {
-        s_anim_toggle_btn = lv_button_create(bk_ui->automodestart);
-        lv_obj_set_pos(s_anim_toggle_btn, 5, 555);
-        lv_obj_set_size(s_anim_toggle_btn, 130, 38);
-        lv_obj_set_style_bg_color(s_anim_toggle_btn, lv_color_hex(0x222222), 0);
-        lv_obj_set_style_bg_opa(s_anim_toggle_btn, LV_OPA_70, 0);
-        lv_obj_set_style_border_width(s_anim_toggle_btn, 0, 0);
-        lv_obj_set_style_radius(s_anim_toggle_btn, 6, 0);
-        lv_obj_add_event_cb(s_anim_toggle_btn, _anim_toggle_event_cb, LV_EVENT_ALL, NULL);
-        s_anim_toggle_label = lv_label_create(s_anim_toggle_btn);
-        lv_obj_set_style_text_color(s_anim_toggle_label, lv_color_hex(0xFFFFFF), 0);
-        lv_obj_center(s_anim_toggle_label);
-    }
-    lv_label_set_text(s_anim_toggle_label, s_anim_enabled ? "ANIM:ON" : "ANIM:OFF");
+    // if (!s_anim_toggle_btn) {
+    //     s_anim_toggle_btn = lv_button_create(bk_ui->automodestart);
+    //     lv_obj_set_pos(s_anim_toggle_btn, 5, 50);
+    //     lv_obj_set_size(s_anim_toggle_btn, 130, 38);
+    //     lv_obj_set_style_bg_color(s_anim_toggle_btn, lv_color_hex(0x222222), 0);
+    //     lv_obj_set_style_bg_opa(s_anim_toggle_btn, LV_OPA_70, 0);
+    //     lv_obj_set_style_border_width(s_anim_toggle_btn, 0, 0);
+    //     lv_obj_set_style_radius(s_anim_toggle_btn, 6, 0);
+    //     lv_obj_add_event_cb(s_anim_toggle_btn, _anim_toggle_event_cb, LV_EVENT_ALL, NULL);
+    //     s_anim_toggle_label = lv_label_create(s_anim_toggle_btn);
+    //     lv_obj_set_style_text_color(s_anim_toggle_label, lv_color_hex(0xFFFFFF), 0);
+    //     lv_obj_center(s_anim_toggle_label);
+    //     lv_refr_now(NULL);
+    // }
+    // lv_label_set_text(s_anim_toggle_label, s_anim_enabled ? "ANIM:ON" : "ANIM:OFF");
 
     /* 정전 복구 아이콘 */
     if (g_device_state.black_out_checking) {

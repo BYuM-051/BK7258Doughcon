@@ -1075,7 +1075,7 @@ void manualmodestart_backbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_manualmodestart) < 250) return;
     s_last_click_manualmodestart = lv_tick_get();
     hal_buzzer_beep();
@@ -1129,7 +1129,7 @@ void manualmodestart_startbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_manualmodestart) < 250) return;
     s_last_click_manualmodestart = lv_tick_get();
 
@@ -1225,7 +1225,7 @@ void manualmodestart_startbt_event_cb(lv_event_t *e)
 void manualmodestart_manual_freeze_temp_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_manualmodestart = 1;
     _common_click_mms(bk_ui);
 }
@@ -1233,7 +1233,7 @@ void manualmodestart_manual_freeze_temp_bt_event_cb(lv_event_t *e)
 void manualmodestart_manual_defrost_temp_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_manualmodestart = 2;
     _common_click_mms(bk_ui);
 }
@@ -1241,7 +1241,7 @@ void manualmodestart_manual_defrost_temp_bt_event_cb(lv_event_t *e)
 void manualmodestart_manual_fermentation_temp_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_manualmodestart = 3;
     _common_click_mms(bk_ui);
 }
@@ -1249,7 +1249,7 @@ void manualmodestart_manual_fermentation_temp_bt_event_cb(lv_event_t *e)
 void manualmodestart_manual_fermentation_humidity_bt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     s_tci_manualmodestart = 4;
     _common_click_mms(bk_ui);
 }

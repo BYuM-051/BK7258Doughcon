@@ -116,7 +116,7 @@ create_children:
     // Button: backbt
     bk_ui->settingmodemanual_backbt = lv_button_create(bk_ui->settingmodemanual);
     lv_obj_add_flag(bk_ui->settingmodemanual_backbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodemanual_backbt, settingmodemanual_backbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodemanual_backbt, settingmodemanual_backbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodemanual_backbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodemanual_backbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodemanual_backbt, 0, 0);
@@ -138,7 +138,7 @@ create_children:
     // Button: setting_manual_autobt
     bk_ui->settingmodemanual_setting_manual_autobt = lv_button_create(bk_ui->settingmodemanual);
     lv_obj_add_flag(bk_ui->settingmodemanual_setting_manual_autobt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodemanual_setting_manual_autobt, settingmodemanual_setting_manual_autobt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodemanual_setting_manual_autobt, settingmodemanual_setting_manual_autobt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodemanual_setting_manual_autobt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodemanual_setting_manual_autobt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodemanual_setting_manual_autobt, 0, 0);
@@ -154,7 +154,7 @@ create_children:
     // Button: setting_manual_manualbt
     bk_ui->settingmodemanual_setting_manual_manualbt = lv_button_create(bk_ui->settingmodemanual);
     lv_obj_add_flag(bk_ui->settingmodemanual_setting_manual_manualbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodemanual_setting_manual_manualbt, settingmodemanual_setting_manual_manualbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodemanual_setting_manual_manualbt, settingmodemanual_setting_manual_manualbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodemanual_setting_manual_manualbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodemanual_setting_manual_manualbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodemanual_setting_manual_manualbt, 0, 0);
@@ -170,7 +170,7 @@ create_children:
     // Button: setting_manual_drybt
     bk_ui->settingmodemanual_setting_manual_drybt = lv_button_create(bk_ui->settingmodemanual);
     lv_obj_add_flag(bk_ui->settingmodemanual_setting_manual_drybt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodemanual_setting_manual_drybt, settingmodemanual_setting_manual_drybt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodemanual_setting_manual_drybt, settingmodemanual_setting_manual_drybt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodemanual_setting_manual_drybt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodemanual_setting_manual_drybt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodemanual_setting_manual_drybt, 0, 0);
@@ -186,7 +186,7 @@ create_children:
     // Button: setting_manual_memorybt
     bk_ui->settingmodemanual_setting_manual_memorybt = lv_button_create(bk_ui->settingmodemanual);
     lv_obj_add_flag(bk_ui->settingmodemanual_setting_manual_memorybt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodemanual_setting_manual_memorybt, settingmodemanual_setting_manual_memorybt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodemanual_setting_manual_memorybt, settingmodemanual_setting_manual_memorybt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodemanual_setting_manual_memorybt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodemanual_setting_manual_memorybt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodemanual_setting_manual_memorybt, 0, 0);
@@ -202,7 +202,7 @@ create_children:
     // Button: setting_manual_settingbt
     bk_ui->settingmodemanual_setting_manual_settingbt = lv_button_create(bk_ui->settingmodemanual);
     lv_obj_add_flag(bk_ui->settingmodemanual_setting_manual_settingbt, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(bk_ui->settingmodemanual_setting_manual_settingbt, settingmodemanual_setting_manual_settingbt_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(bk_ui->settingmodemanual_setting_manual_settingbt, settingmodemanual_setting_manual_settingbt_event_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_set_style_bg_opa(bk_ui->settingmodemanual_setting_manual_settingbt, 0, 0);
     lv_obj_set_style_border_width(bk_ui->settingmodemanual_setting_manual_settingbt, 0, 0);
     lv_obj_set_style_shadow_width(bk_ui->settingmodemanual_setting_manual_settingbt, 0, 0);
