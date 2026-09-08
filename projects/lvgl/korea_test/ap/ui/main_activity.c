@@ -94,7 +94,10 @@ static void _key_driver_start(void)
     bk_printf(TAG "[KEY] bk_key_driver_init done (GPIO 27/28/29, active_level=0)\n");
 }
 
-
+static void async_page_change(void *arg) 
+{
+    ui_page_change(PAGE_MAIN);
+}
 // char* DetailPassword = "0603";
 // char* NeurosysPassword = "71960";
 
@@ -266,7 +269,8 @@ static void _toggle_lock(void)
 {
     main_activity_t *ma = &g_main_activity;
     hal_buzzer_beep();
-    if (ma->lock) {
+    if (ma->lock) 
+    {
         hal_led_lock_set(false);
         ma->lock      = false;
         ma->hard_lock = false;
@@ -281,7 +285,9 @@ static void _toggle_lock(void)
         /* 그래도 남아있을 수 있는 진행 중 press 상태에 대한 방어선 — 다음 "진짜"
          * release를 볼 때까지는 아무 것도 처리하지 않는다. */
         lv_indev_wait_release(indev_touchpad);
-    } else {
+    }
+    else 
+    {
         hal_led_lock_set(true);
         ma->lock      = true;
         ma->hard_lock = true;
@@ -308,7 +314,8 @@ static void _screen_toggle(void)
     main_activity_t *ma = &g_main_activity;
     device_state_t *state = &g_device_state;
     hal_buzzer_beep();
-    if (ma->screen_on) {
+    if (ma->screen_on) 
+    {
         /* OFF: 실제 운전(자동/수동/자동건조)도 정지시켜 MCU를 op=00(정지/메인메뉴)
          * 상태로 보낸다 — automodestart_startbt_event_cb()(실제 "정지" 버튼)와
          * 동일한 플래그 조합. uart_comm.c의 0x33 STATUS 송신 로직상
@@ -330,17 +337,55 @@ static void _screen_toggle(void)
          * 다른 자동 화면전환 로직과 겹칠 타이밍 창이 줄어든다. */
         hal_led_power_set(false);
         hal_backlight_set(0);
-#if UI_PRENDERING_ENABLE
-        ui_page_change(PAGE_MAIN);
+        if(ui_get_current_page_id() != PAGE_MAIN)
+        {
+#define AsyncPageChange 1 // key thread stack은 콩만한데 ui_page_change를 돌리면 무거워서 ASSERT남
+#if AsyncPageChange
+        
+            lv_async_call(async_page_change, NULL);
 #else
-        _load_screen(SCR_MAIN);
-#endif /* UI_PRENDERING_ENABLE */
+            ui_page_change(PAGE_MAIN);
+#endif
+        }
         ma->screen_on = false;
-    } else {
+        if(!ma->lock)
+        {
+            ma->lock      = true;
+            ma->hard_lock = true;
+            g_device_state.lock      = true;
+            g_device_state.hard_lock = true;
+            /* 잠그는 순간 이미 눌려 있던/처리 중이던 터치를 즉시 무효화 — disable만으로는
+            * 진행 중이던 press/click 처리가 끝까지 이어질 수 있어 reset으로 강제 중단 */
+            lv_indev_reset(indev_touchpad, NULL);
+            lv_indev_enable(indev_touchpad, false);
+            /* 터치 드라이버 자체(HW 인터럽트 + 스캔 스레드)를 완전히 닫는다 — 잠금
+            * 중에는 터치 좌표가 물리적으로 큐에 쌓일 수 없어, 해제 시 stale 터치가
+            * 한꺼번에 처리되는 문제의 근본 원인을 제거한다. */
+            hal_touch_set_enabled(false);
+            }
+    }
+    else 
+    {
         /* ON: 백라이트만 켠다 — 화면 전환 없음 (OFF 때 이미 선택화면으로 가 있음) */
         hal_led_power_set(true);
         hal_backlight_set(100);
         ma->screen_on = true;
+        if(ma->lock)
+        {
+            ma->lock      = false;
+            ma->hard_lock = false;
+            g_device_state.lock      = false;   /* main_cb.c 등 기존 화면별 가드와 동기화 */
+            g_device_state.hard_lock = false;
+            /* 큐를 비우는(flush) 방식은 flush 직후에도 HW 인터럽트가 계속 큐를 채울 수
+            * 있어 근본적인 경쟁 상태가 남아있었다. 대신 잠금 해제 시 터치 드라이버를
+            * 다시 열어(drv_tp_open) 큐 자체를 새로 만든다 — 항상 빈 상태로 시작하므로
+            * 잠금 중 눌렸던 stale 터치가 남아있을 수 없다. */
+            hal_touch_set_enabled(true);
+            lv_indev_enable(indev_touchpad, true);
+            /* 그래도 남아있을 수 있는 진행 중 press 상태에 대한 방어선 — 다음 "진짜"
+            * release를 볼 때까지는 아무 것도 처리하지 않는다. */
+            lv_indev_wait_release(indev_touchpad);
+        }
     }
     bk_printf(TAG "[KEY] POWER short-press -> screen %s\n", ma->screen_on ? "ON" : "OFF");
 }
