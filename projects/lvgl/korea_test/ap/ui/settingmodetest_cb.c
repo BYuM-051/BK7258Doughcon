@@ -268,6 +268,7 @@ void settingmodetest_unload_start_event_cb(lv_event_t *e)
     /* testmode_box canvas는 이 화면을 보는 동안만 필요 — 나갈 때 반납.
      * settingmode로 복귀하면 그 화면의 SCREEN_LOADED가 다시 preload한다. */
     settingmodetest_canvas_free();
+    g_device_state.test_mode = false;
 }
 
 void settingmodetest_unloaded_event_cb(lv_event_t *e)

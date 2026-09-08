@@ -1455,5 +1455,6 @@ void init_keypad_group(bk_lv_ui_t *bk_ui)
     lv_obj_add_event_cb(bk_ui->automode_keypadhide, automode_keypadhide_event_cb, LV_EVENT_ALL, NULL);
     lv_obj_set_pos(bk_ui->automode_keypadhide, 884, 453);
     lv_obj_set_size(bk_ui->automode_keypadhide, 120, 75);
+    lv_obj_add_flag(bk_ui->automode_keypadhide, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(bk_ui->automode_keypadhide, LV_OBJ_FLAG_CLICKABLE);
 }
