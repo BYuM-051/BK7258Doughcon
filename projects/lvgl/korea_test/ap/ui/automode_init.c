@@ -708,11 +708,6 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
     {
         return RENDERER_FUNC_DONE;
     }
-    
-    lv_style_init(&style_transp);
-    lv_style_set_bg_opa(&style_transp, LV_OPA_TRANSP);
-    lv_style_set_border_width(&style_transp, 0);
-    lv_style_set_shadow_width(&style_transp, 0);
 
     switch (currentStep)
     {
@@ -732,6 +727,11 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_set_scrollbar_mode(bk_ui->automode, LV_SCROLLBAR_MODE_OFF);
             lv_obj_set_style_bg_opa(bk_ui->automode, LV_OPA_COVER, 0);
             lv_obj_set_style_bg_color(bk_ui->automode, lv_color_hex(0xD9D9D9), LV_PART_MAIN);
+
+            lv_style_init(&style_transp);
+            lv_style_set_bg_opa(&style_transp, LV_OPA_TRANSP);
+            lv_style_set_border_width(&style_transp, 0);
+            lv_style_set_shadow_width(&style_transp, 0);
 
             bk_printf(TAG "[RENDER][AUTOMODE] CREATE_PAGE done elapsed=%lu ms\n", (unsigned long)lv_tick_elaps(stepStartTick));
 
