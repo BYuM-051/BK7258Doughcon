@@ -1377,8 +1377,10 @@ rendererFuncStatus_t init_page_automode_with_step(bk_lv_ui_t *bk_ui)
             lv_obj_add_event_cb(bk_ui->automode_AutoModeCompleteDayBt, automode_AutoModeCompleteDayBt_event_cb, LV_EVENT_PRESSED, NULL);
             lv_obj_add_event_cb(bk_ui->automode_AutoModeCompleteHourBt, automode_AutoModeCompleteHourBt_event_cb, LV_EVENT_PRESSED, NULL);
             lv_obj_add_event_cb(bk_ui->automode_AutoModeCompleteMinBt, automode_AutoModeCompleteMinBt_event_cb, LV_EVENT_PRESSED, NULL);
+
             lv_obj_add_event_cb(bk_ui->automode_loadbt, automode_loadbt_event_cb, LV_EVENT_PRESSED, NULL);
             lv_obj_add_event_cb(bk_ui->automode_savebt, automode_savebt_event_cb, LV_EVENT_PRESSED, NULL);
+            
             lv_obj_add_event_cb(bk_ui->automode_AutoFreezeTempBt, automode_AutoFreezeTempBt_event_cb, LV_EVENT_PRESSED, NULL);
             lv_obj_add_event_cb(bk_ui->automode_AutoDefrostTempBt, automode_AutoDefrostTempBt_event_cb, LV_EVENT_PRESSED, NULL);
             lv_obj_add_event_cb(bk_ui->automode_AutoDefrostTimeHourBt, automode_AutoDefrostTimeHourBt_event_cb, LV_EVENT_PRESSED, NULL);
