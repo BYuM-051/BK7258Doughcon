@@ -6,6 +6,7 @@
 #include "ui_config.h"
 #include "queue.h"
 #include "FreeRTOS.h"
+#include "hardware_hal.h"
 
 #define TAG "[pageController.c] "
 // #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
@@ -121,7 +122,7 @@ void ui_page_change_ShowOption(pageId_t newPageID, bool showOption)
     if(!pageControllerInitialized)
     {
         bk_printf(TAG "[SCREEN] ui_page_change() called before ui_screen_event_init()\n");
-        return;
+        goto fatal;
     }
     if(!isPageIdValid(newPageID))
     {
@@ -195,29 +196,7 @@ void ui_page_change_ShowOption(pageId_t newPageID, bool showOption)
         lv_obj_send_event(oldPage, UI_EVENT_PAGE_HIDE_START, NULL);
         if(oldPageID != PAGE_NONE && oldPageID != newPageID)
         {
-#if MINIMIZE_HIDDEN_ALGORITHM
-            // for(int i = 0 ; i < PAGE_COUNT ; i++)
-            // {
-            //     lv_obj_t *page = *(preRenderPageState[i].page);
-            //     if(page == NULL || !lv_obj_is_valid(page) || i == newPageID)
-            //     {
-            //         bk_printf(TAG "[SCREEN] Skipping hide for pageId: %d\n", i);
-            //         continue;
-            //     }
-            //     lv_obj_add_flag(page, LV_OBJ_FLAG_HIDDEN);
-            //     bk_printf
-            //     (
-            //         TAG "[PTR] main=%p auto=%p manual=%p autodry=%p root=%p\n",
-            //         bk_lv_tool_ui.main,
-            //         bk_lv_tool_ui.automode,
-            //         bk_lv_tool_ui.manualmode,
-            //         bk_lv_tool_ui.autodrymode,
-            //         preRenderRoot
-            //     );
-            // }
-#else
             lv_obj_add_flag(oldPage, LV_OBJ_FLAG_HIDDEN);
-#endif
         }
         else
         {
@@ -288,6 +267,7 @@ void ui_page_change_ShowOption(pageId_t newPageID, bool showOption)
     currentPageID = newPageID;
     currentPage = *newPage;
     bk_printf(TAG "[SCREEN] ui_page_change completed Tick : %d\n", (unsigned long)lv_tick_get());
+    hal_touch_flush_queue();
     return;
 fatal :
     lv_delay_ms(2000);
