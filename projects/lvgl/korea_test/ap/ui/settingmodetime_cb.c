@@ -140,7 +140,7 @@ static void _keypad_on_smt(bk_lv_ui_t *bk_ui)
         int _lang = settings_get_int("LANGUAGE");
         const char *_lsuf = (_lang == 1) ? "_china" : (_lang == 2) ? "_english" : "";
         char _kp[64];
-        snprintf(_kp, sizeof(_kp), "/images/keypadn%s.jpg", _lsuf);
+        snprintf(_kp, sizeof(_kp), "/images/keypad%s.png", _lsuf);
         _img_set_src_timed(bk_ui->settingmodetime_keypadbaseim, _kp);
     }
     if (!bk_ui->settingmodetime_KeyPadBt[0]) {
