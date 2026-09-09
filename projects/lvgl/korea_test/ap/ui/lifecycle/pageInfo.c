@@ -206,7 +206,8 @@ static const preRenderImageInfo_t SettingmodetimePreRenderImages[] =
     { "/images/setting_time_clock", true, false, ".png" },
     { "/images/setting_time_date", true, false, ".png" },
     { "/images/detail_time_title", true, false, ".png" },
-    { "/images/exit_bt", true, false, ".png" }
+    { "/images/exit_bt", true, false, ".png" },
+    { "/images/keypad", true, false, ".png" }
 };
 static const preRenderImageInfo_t SettingmodelanguagePreRenderImages[] =
 {
