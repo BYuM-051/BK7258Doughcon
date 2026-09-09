@@ -45,6 +45,7 @@ void hal_system_restart(void);
  * 생성되어 항상 빈 상태로 시작하므로, 잠금 중 눌렸던 stale 터치가 해제 즉시
  * 처리되는 문제가 원천적으로 발생하지 않는다. */
 void hal_touch_set_enabled(bool enabled);
+void hal_touch_flush_queue(void);
 
 /* LEDs / outputs */
 void hal_led_lamp_set(bool on);      /* interior lamp */
