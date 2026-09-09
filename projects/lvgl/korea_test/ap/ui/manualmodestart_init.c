@@ -199,10 +199,12 @@ rendererFuncStatus_t init_page_manualmodestart_with_step(bk_lv_ui_t *bk_ui)
 
             // ImageView: bg (must be first child — lowest z-order)
             bk_ui->manualmodestart_bg = lv_image_create(bk_ui->manualmodestart);
+            // getImageFullPath("/images/manualmode_bg", true, false, ".png", fullPath, sizeof(fullPath));
+            // lv_image_set_src(bk_ui->manualmodestart_bg, fullPath);
             lv_obj_set_pos(bk_ui->manualmodestart_bg, 0, 0);
             lv_obj_set_size(bk_ui->manualmodestart_bg, 1024, 540);
             lv_obj_remove_flag(bk_ui->manualmodestart_bg, LV_OBJ_FLAG_CLICKABLE);
-            lv_obj_add_flag(bk_ui->manualmodestart_bg, LV_OBJ_FLAG_HIDDEN);
+            // lv_obj_add_flag(bk_ui->manualmodestart_bg, LV_OBJ_FLAG_HIDDEN);
 
             // ImageView: title
             bk_ui->manualmodestart_title = lv_image_create(bk_ui->manualmodestart);

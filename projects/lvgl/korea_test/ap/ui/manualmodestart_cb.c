@@ -624,79 +624,79 @@ static void _gif_anim_stop_mms(bk_lv_ui_t *bk_ui)
  * → arc 이동 시 구 위치가 bg_img_src raw픽셀로 덮임 → 찌꺼기 없음              */
 static void _ferm2_bg_load(bk_lv_ui_t *bk_ui, const char *bg_path, int lang)
 {
-    if (bk_ui == NULL || bg_path == NULL ||
-        bk_ui->manualmodestart == NULL || !lv_obj_is_valid(bk_ui->manualmodestart))
-    {
-        return;
-    }
+    // if (bk_ui == NULL || bg_path == NULL ||
+    //     bk_ui->manualmodestart == NULL || !lv_obj_is_valid(bk_ui->manualmodestart))
+    // {
+    //     return;
+    // }
 
-    lv_obj_t *scr = bk_ui->manualmodestart;
+    // lv_obj_t *scr = bk_ui->manualmodestart;
 
-    size_t freePsram = rtos_get_psram_free_heap_size();
-    bk_printf(TAG "[FERM2] psram free = %u B\n", (unsigned)freePsram);
+    // size_t freePsram = rtos_get_psram_free_heap_size();
+    // bk_printf(TAG "[FERM2] psram free = %u B\n", (unsigned)freePsram);
 
-    if (s_ferm2_canvas_buf == NULL)
-    {
-        if (freePsram < 1300 * 1024)
-        {
-            bk_printf(TAG "[FERM2] psram low, fallback to direct JPEG\n");
-            lv_obj_set_style_bg_img_src(scr, bg_path, 0);
-            lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
-            return;
-        }
+    // if (s_ferm2_canvas_buf == NULL)
+    // {
+    //     if (freePsram < 1300 * 1024)
+    //     {
+    //         bk_printf(TAG "[FERM2] psram low, fallback to direct JPEG\n");
+    //         lv_obj_set_style_bg_img_src(scr, bg_path, 0);
+    //         lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
+    //         return;
+    //     }
 
-        uint32_t bufSize = LV_CANVAS_BUF_SIZE(1024, 540, 16, LV_DRAW_BUF_ALIGN);
-        s_ferm2_canvas_buf = lv_malloc(bufSize);
-        if (s_ferm2_canvas_buf == NULL)
-        {
-            bk_printf(TAG "[FERM2] canvas buffer alloc failed, fallback to direct JPEG\n");
-            lv_obj_set_style_bg_img_src(scr, bg_path, 0);
-            lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
-            return;
-        }
-    }
+    //     uint32_t bufSize = LV_CANVAS_BUF_SIZE(1024, 540, 16, LV_DRAW_BUF_ALIGN);
+    //     s_ferm2_canvas_buf = lv_malloc(bufSize);
+    //     if (s_ferm2_canvas_buf == NULL)
+    //     {
+    //         bk_printf(TAG "[FERM2] canvas buffer alloc failed, fallback to direct JPEG\n");
+    //         lv_obj_set_style_bg_img_src(scr, bg_path, 0);
+    //         lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
+    //         return;
+    //     }
+    // }
 
-    /* canvas/image는 페이지가 살아 있는 동안 재사용한다. */
-    if (s_ferm2_bg_canvas == NULL || !lv_obj_is_valid(s_ferm2_bg_canvas))
-    {
-        s_ferm2_bg_canvas = lv_canvas_create(scr);
-        lv_canvas_set_buffer(s_ferm2_bg_canvas,
-                             s_ferm2_canvas_buf,
-                             1024,
-                             540,
-                             LV_COLOR_FORMAT_RGB565);
-        lv_obj_add_flag(s_ferm2_bg_canvas, LV_OBJ_FLAG_HIDDEN);
-        s_ferm2_buf_lang = -1;
-    }
+    // /* canvas/image는 페이지가 살아 있는 동안 재사용한다. */
+    // if (s_ferm2_bg_canvas == NULL || !lv_obj_is_valid(s_ferm2_bg_canvas))
+    // {
+    //     s_ferm2_bg_canvas = lv_canvas_create(scr);
+    //     lv_canvas_set_buffer(s_ferm2_bg_canvas,
+    //                          s_ferm2_canvas_buf,
+    //                          1024,
+    //                          540,
+    //                          LV_COLOR_FORMAT_RGB565);
+    //     lv_obj_add_flag(s_ferm2_bg_canvas, LV_OBJ_FLAG_HIDDEN);
+    //     s_ferm2_buf_lang = -1;
+    // }
 
-    if (s_ferm2_buf_lang != lang)
-    {
-        lv_layer_t layer;
-        lv_canvas_init_layer(s_ferm2_bg_canvas, &layer);
+    // if (s_ferm2_buf_lang != lang)
+    // {
+    //     lv_layer_t layer;
+    //     lv_canvas_init_layer(s_ferm2_bg_canvas, &layer);
 
-        lv_draw_image_dsc_t imgDsc;
-        lv_draw_image_dsc_init(&imgDsc);
-        imgDsc.src = bg_path;
+    //     lv_draw_image_dsc_t imgDsc;
+    //     lv_draw_image_dsc_init(&imgDsc);
+    //     imgDsc.src = bg_path;
 
-        lv_area_t area = {0, 0, 1023, 539};
-        lv_draw_image(&layer, &imgDsc, &area);
-        lv_canvas_finish_layer(s_ferm2_bg_canvas, &layer);
-        s_ferm2_buf_lang = lang;
-    }
+    //     lv_area_t area = {0, 0, 1023, 539};
+    //     lv_draw_image(&layer, &imgDsc, &area);
+    //     lv_canvas_finish_layer(s_ferm2_bg_canvas, &layer);
+    //     s_ferm2_buf_lang = lang;
+    // }
 
-    if (s_ferm2_bg_img == NULL || !lv_obj_is_valid(s_ferm2_bg_img))
-    {
-        s_ferm2_bg_img = lv_image_create(scr);
-        lv_obj_set_pos(s_ferm2_bg_img, 0, 0);
-        lv_obj_remove_flag(s_ferm2_bg_img, LV_OBJ_FLAG_CLICKABLE);
-    }
+    // if (s_ferm2_bg_img == NULL || !lv_obj_is_valid(s_ferm2_bg_img))
+    // {
+    //     s_ferm2_bg_img = lv_image_create(scr);
+    //     lv_obj_set_pos(s_ferm2_bg_img, 0, 0);
+    //     lv_obj_remove_flag(s_ferm2_bg_img, LV_OBJ_FLAG_CLICKABLE);
+    // }
 
-    lv_image_set_src(s_ferm2_bg_img, lv_canvas_get_image(s_ferm2_bg_canvas));
-    lv_obj_clear_flag(s_ferm2_bg_img, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_move_background(s_ferm2_bg_img);
+    // lv_image_set_src(s_ferm2_bg_img, lv_canvas_get_image(s_ferm2_bg_canvas));
+    // lv_obj_clear_flag(s_ferm2_bg_img, LV_OBJ_FLAG_HIDDEN);
+    // lv_obj_move_background(s_ferm2_bg_img);
 
-    /* raw canvas를 쓰는 경우 screen style의 direct JPEG fallback은 제거한다. */
-    lv_obj_set_style_bg_img_src(scr, NULL, 0);
+    // /* raw canvas를 쓰는 경우 screen style의 direct JPEG fallback은 제거한다. */
+    // lv_obj_set_style_bg_img_src(scr, NULL, 0);
 }
 
 
@@ -1454,19 +1454,17 @@ void manualmodestart_load_start_event_cb(lv_event_t *e)
         case MANUAL_MODE_FERM2:
         {
             int lang = settings_get_int("LANGUAGE");
-            const char *bgPath = (lang == 1) ? "/images/fermentation_bg_china.jpg" :
-                                 (lang == 2) ? "/images/fermentation_bg_english.jpg" :
-                                               "/images/fermentation_bg.jpg";
-
-            _ferm2_bg_load(bk_ui, bgPath, lang);
+            const char *bgPath = (lang == 1) ? "/images/fermentation_bg_china.png" :
+                                (lang == 2) ? "/images/fermentation_bg_english.png" :
+                                            "/images/fermentation_bg.png";
+            lv_image_set_src(bk_ui->manualmodestart_bg, bgPath);
+            lv_obj_move_background(bk_ui->manualmodestart_bg);
             arcColor = lv_color_hex(0xD4A020);
 
             lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_temp_txt, LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(bk_ui->manualmodestart_manual_fermentation_humidity_txt, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_set_style_text_color(bk_ui->manualmodestart_manual_fermentation_temp_txt,
-                                        arcColor, 0);
-            lv_obj_set_style_text_color(bk_ui->manualmodestart_manual_fermentation_humidity_txt,
-                                        arcColor, 0);
+            lv_obj_set_style_text_color(bk_ui->manualmodestart_manual_fermentation_temp_txt, arcColor, 0);
+            lv_obj_set_style_text_color(bk_ui->manualmodestart_manual_fermentation_humidity_txt, arcColor, 0);
 
             int overMin = atoi(settings_get_str("DetailOverFermentation"));
             if (overMin > 0)
