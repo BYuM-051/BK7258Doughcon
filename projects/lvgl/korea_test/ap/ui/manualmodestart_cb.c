@@ -1075,6 +1075,7 @@ void manualmodestart_backbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
+    if(s_tci_manualmodestart != 0) return;
     if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_manualmodestart) < 250) return;
     s_last_click_manualmodestart = lv_tick_get();
@@ -1129,6 +1130,7 @@ void manualmodestart_startbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
+    if(s_tci_manualmodestart != 0) return;
     if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_manualmodestart) < 250) return;
     s_last_click_manualmodestart = lv_tick_get();
