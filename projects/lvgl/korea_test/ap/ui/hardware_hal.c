@@ -558,6 +558,23 @@ void hal_buzzer_stop(void) {}
 void hal_buzzer_beep(void) { hal_buzzer_beep_forceOption(false); }
 #endif /* _BUZZER_ENABLED */
 
+void hal_touch_flush_queue(void)
+{
+    tp_point_infor_t p;
+    int dropped = 0;
+    int guard = TP_DATA_QUEUE_MAX_SIZE + 4;
+
+    while (guard-- > 0 && drv_tp_read(&p) == kNoErr)
+    {
+        dropped++;
+    }
+
+    if (dropped > 0)
+    {
+        bk_printf(TAG "[HAL] touch queue flushed: %d dropped\n", dropped);
+    }
+}
+
 /* 완료 부저: 250ms ON + 750ms OFF × 10회 (Android BuzzerCompleteRunnable 동일)
  * LVGL 타이머로 비동기 시퀀싱 — LVGL 태스크 블로킹 없음. */
 static lv_timer_t *s_bz_cpl_timer = NULL;

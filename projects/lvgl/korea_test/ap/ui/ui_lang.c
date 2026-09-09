@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "hardware_hal.h"
 #include "pageManager.h"
 #include "pageManager.h"
 #define TAG "[ui_lang.c] "
@@ -958,4 +959,5 @@ void ui_lang_invalidate_cached_screens(bk_lv_ui_t *bk_ui)
 
     lv_obj_invalidate(lv_screen_active());
     lv_refr_now(NULL);
+    hal_touch_flush_queue();
 }
