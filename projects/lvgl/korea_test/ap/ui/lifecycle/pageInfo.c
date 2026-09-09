@@ -63,8 +63,7 @@ static const preRenderImageInfo_t AutomodePreRenderImages[] =
     { "/images/exit_bt", true, false, ".png" },
     { "/images/save_bt", true, false, ".png" },
     { "/images/start_bt", true, false, ".png" },
-    { "/images/temp_f", false, false, ".png" },
-    { "/images/keypad", true, false, ".png" }
+    { "/images/temp_f", false, false, ".png" }
 };
 static const preRenderImageInfo_t SettingmodePreRenderImages[] =
 {
@@ -109,7 +108,9 @@ static const preRenderImageInfo_t AutodrymodePreRenderImages[] =
     { "/images/auto_dry_time_box", true, false, ".png" },
     { "/images/autodrymode_title", true, false, ".png" },
     { "/images/exit_bt", true, false, ".png" },
-    { "/images/start_bt", true, false, ".png" }
+    { "/images/start_bt", true, false, ".png" },
+    { "/images/keypad", true, false, ".png" },
+    { "/images/keypadback_close", true, false, ".png" },
 };
 static const preRenderImageInfo_t AutomodestartPreRenderImages[] =
 {
