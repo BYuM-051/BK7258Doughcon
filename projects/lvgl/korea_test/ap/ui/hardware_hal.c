@@ -545,13 +545,17 @@ void hal_buzzer_stop(void)
 
 void hal_buzzer_beep(void)
 {
-    if (g_device_state.mute) return;
+    hal_buzzer_beep_forceOption(false);
+}
+void hal_buzzer_beep_forceOption(bool force)
+{
+    if (!force && g_device_state.mute) return;
     hal_buzzer_start(3000,60);
 }
 #else /* _BUZZER_ENABLED */
 void hal_buzzer_start(int freq_hz, int duration_ms) { (void)freq_hz; (void)duration_ms; }
 void hal_buzzer_stop(void) {}
-void hal_buzzer_beep(void) {}
+void hal_buzzer_beep(void) { hal_buzzer_beep_forceOption(false); }
 #endif /* _BUZZER_ENABLED */
 
 /* 완료 부저: 250ms ON + 750ms OFF × 10회 (Android BuzzerCompleteRunnable 동일)
