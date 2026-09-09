@@ -24,6 +24,7 @@
 // #define bk_printf(fmt, ...) do {if(0) printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
 extern bk_lv_ui_t bk_lv_tool_ui;
 extern lv_obj_t *preRenderRoot;
+static volatile bool isValidDate = false;
 
 extern void memory_save_to_slot(int slot);
 
@@ -644,8 +645,8 @@ static void _rclr_automode(bk_lv_ui_t *bk_ui)
     long long max_mins  = rtc_mins + (long long)(10 * 24 * 60);  /* 10일 상한 */
 
     /* valid: 데드라인 이후 AND 10일 이내 */
-    bool _valid = (comp_mins > rtc_mins + (long long)op_min) && (comp_mins <= max_mins);
-    lv_color_t _clr = _valid ? lv_color_hex(0x3C3A3D) : lv_color_hex(0xFF0000);
+    isValidDate = (comp_mins > rtc_mins + (long long)op_min) && (comp_mins <= max_mins);
+    lv_color_t _clr = isValidDate ? lv_color_hex(0x3C3A3D) : lv_color_hex(0xFF0000);
     lv_obj_set_style_text_color(bk_ui->automode_AutoModeCompleteYear,  _clr, 0);
     lv_obj_set_style_text_color(bk_ui->automode_AutoModeCompleteMonth, _clr, 0);
     lv_obj_set_style_text_color(bk_ui->automode_AutoModeCompleteDay,   _clr, 0);
@@ -840,9 +841,9 @@ static void _keypad_hide_automode(bk_lv_ui_t *bk_ui)
     _underbar_all_hide_automode(bk_ui);
     _keypad_off_automode(bk_ui);
     settings_save_dirty();
-    _rclr_automode(bk_ui);   /* 완료시간 편집이었으면 최종 유효성 색상 반영 */
     s_tci_automode = 0;
     s_edit_buf_automode[0] = '\0';
+    _rclr_automode(bk_ui);   /* 완료시간 편집이었으면 최종 유효성 색상 반영 */
 }
 
 void automode_backbt_event_cb(lv_event_t *e)
@@ -850,6 +851,7 @@ void automode_backbt_event_cb(lv_event_t *e)
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_backbt) < 250) return;
+    if (s_tci_automode != 0) return;
     s_last_click_backbt = lv_tick_get();
     hal_buzzer_beep();
 
@@ -880,6 +882,8 @@ void automode_startbt_event_cb(lv_event_t *e)
 
     if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_automode) < 250) return;
+    if(s_tci_automode != 0) return;
+    if(!isValidDate) return;
     s_last_click_automode = lv_tick_get();
     hal_buzzer_beep();
     bk_printf(TAG "startbt_event_cb\n");
@@ -1397,6 +1401,7 @@ void automode_savebt_event_cb(lv_event_t *e)
 {
     if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_automode) < 250) return;
+    if(!isValidDate) return;
     s_last_click_automode = lv_tick_get();
     hal_buzzer_beep();
 
@@ -1658,6 +1663,7 @@ void automode_keypadhide_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     lv_event_code_t code = lv_event_get_code(e);
+    if(!isValidDate) return;
     if (code == LV_EVENT_PRESSED) 
     {
         if (bk_ui->automode_keypadhide_im) lv_obj_clear_flag(bk_ui->automode_keypadhide_im, LV_OBJ_FLAG_HIDDEN);
