@@ -30,6 +30,7 @@ void hal_notify_comm_error(void);                /* called when comm error thres
 void hal_buzzer_start(int freq_hz, int duration_ms);
 void hal_buzzer_stop(void);
 void hal_buzzer_beep(void);       /* standard 80ms key-click beep */
+void hal_buzzer_beep_forceOption(bool force); /* force beep even if muted */
 void hal_buzzer_complete(void);   /* 완료음: 250ms ON × 750ms OFF × 10회 */
 
 /* Backlight */

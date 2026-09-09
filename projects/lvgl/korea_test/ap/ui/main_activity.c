@@ -233,7 +233,7 @@ static void _load_screen(int screen_id)
 static void _toggle_lamp(void)
 {
     main_activity_t *ma = &g_main_activity;
-    hal_buzzer_beep();
+    hal_buzzer_beep_forceOption(true);
     if (ma->lamp == 0x01) {
         hal_led_lamp_set(false);
         ma->lamp = 0x00;
@@ -268,7 +268,7 @@ extern lv_indev_t *indev_touchpad;
 static void _toggle_lock(void)
 {
     main_activity_t *ma = &g_main_activity;
-    hal_buzzer_beep();
+    hal_buzzer_beep_forceOption(true);
     if (ma->lock) 
     {
         hal_led_lock_set(false);
@@ -313,9 +313,9 @@ static void _screen_toggle(void)
 {
     main_activity_t *ma = &g_main_activity;
     device_state_t *state = &g_device_state;
-    hal_buzzer_beep();
     if (ma->screen_on) 
     {
+        hal_buzzer_beep();
         /* OFF: 실제 운전(자동/수동/자동건조)도 정지시켜 MCU를 op=00(정지/메인메뉴)
          * 상태로 보낸다 — automodestart_startbt_event_cb()(실제 "정지" 버튼)와
          * 동일한 플래그 조합. uart_comm.c의 0x33 STATUS 송신 로직상
@@ -366,6 +366,7 @@ static void _screen_toggle(void)
     }
     else 
     {
+        hal_buzzer_beep_forceOption(true);
         /* ON: 백라이트만 켠다 — 화면 전환 없음 (OFF 때 이미 선택화면으로 가 있음) */
         hal_led_power_set(true);
         hal_backlight_set(100);
@@ -398,15 +399,21 @@ static void _screen_toggle(void)
 static void _power_long_reset(void)
 {
     bk_printf(TAG "[KEY] POWER long-press -> main screen + reboot\n");
+    hal_buzzer_beep_forceOption(true);
 
     /* 먼저 메인 화면으로 전환 — 정전 재가동(_blackout_recovery) 로직과 겹치지
      * 않게 한다. */
     hal_backlight_set(100);
-#if UI_PRENDERING_ENABLE
-    ui_page_change(PAGE_MAIN);
+    if(ui_get_current_page_id() != PAGE_MAIN)
+    {
+#define AsyncPageChange 1 // key thread stack은 콩만한데 ui_page_change를 돌리면 무거워서 ASSERT남
+#if AsyncPageChange
+        
+        lv_async_call(async_page_change, NULL);
 #else
-    _load_screen(SCR_MAIN);
+        ui_page_change(PAGE_MAIN);
 #endif
+    }
     /* saveChecking=0으로 정전복구 플래그를 끈다. settings_set_str()+
      * settings_save_dirty()는 실제 flash 쓰기를 uart_comm 백그라운드 태스크로
      * 미루므로(200ms 주기), reboot이 그 전에 실행되면 값이 flash에 반영되지
