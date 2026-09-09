@@ -121,7 +121,7 @@ static void _keypad_on_autodrymode(bk_lv_ui_t *bk_ui)
     const char *_lsuf = (_lang == 1) ? "_china" : (_lang == 2) ? "_english" : "";
     {
         char _kp[64];
-        snprintf(_kp, sizeof(_kp), "/images/keypadn%s.jpg", _lsuf);
+        snprintf(_kp, sizeof(_kp), "/images/keypad%s.png", _lsuf);
         _img_set_src_timed(bk_ui->autodrymode_keypadbaseim, _kp);
     }
     if (!bk_ui->autodrymode_KeyPadBt[0]) {
@@ -715,6 +715,7 @@ void autodrymode_auto_dry_start_event_cb(lv_event_t *e)
     device_state_t *state = &g_device_state;
     if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
     if (lv_tick_elaps(s_last_click_autodrymode) < 250) return;
+    if(s_tci_autodrymode != 0) return;
     s_last_click_autodrymode = lv_tick_get();
 
     hal_buzzer_beep();
