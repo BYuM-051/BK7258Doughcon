@@ -400,10 +400,12 @@ static void _power_long_reset(void)
 {
     bk_printf(TAG "[KEY] POWER long-press -> main screen + reboot\n");
     hal_buzzer_beep_forceOption(true);
+    
+    hal_backlight_set(100);
+    rtos_delay_milliseconds(200);
 
     /* 먼저 메인 화면으로 전환 — 정전 재가동(_blackout_recovery) 로직과 겹치지
      * 않게 한다. */
-    hal_backlight_set(100);
     if(ui_get_current_page_id() != PAGE_MAIN)
     {
 #define AsyncPageChange 1 // key thread stack은 콩만한데 ui_page_change를 돌리면 무거워서 ASSERT남

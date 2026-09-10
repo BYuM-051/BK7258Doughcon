@@ -114,25 +114,13 @@ bk_err_t lvgl_app_86box_init(void)
 #endif
 
     lv_vendor_disp_lock();
-#if 1
     beken_ui_init();
-
-#else
-    lv_obj_t  *jpg = lv_image_create(lv_screen_active());
-    lv_img_set_src(jpg, "/images/bg.jpg");
-
-    lv_obj_t  *png = lv_image_create(lv_screen_active());
-    lv_obj_set_pos(png, 0, 100);
-    lv_img_set_src(png, "/images/auto_mode_freeze_board_china.png");
-#endif
     lv_vendor_disp_unlock();
-
     lv_vendor_start();
 
-    /*  intro.jpg 첫 프레임 렌더링 대기 후 백라이트 ON — 깨진 화면 방지
-    *   근데왜 이렇게 딜레이를 하드코딩으로 넣었지? lv_refr를 하든가. 애초에 위쪽에서 블락이 될텐데 왜 여기서 한번 더 쉬어가는거지    */
-    rtos_delay_milliseconds(500);
-    lcd_backlight_open(GPIO_9);
+    /*  intro.jpg 첫 프레임 렌더링 대기 후 백라이트 ON — 깨진 화면 방지 */
+    // rtos_delay_milliseconds(500);
+    // lcd_backlight_open(GPIO_9);
 
     return BK_OK;
 }
