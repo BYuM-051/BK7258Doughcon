@@ -383,10 +383,12 @@ static void _handle_rx(const uart_packet_t *pkt)
         st->op_damper        = (err7 >> 0) & 1;
         /* 에러 아이콘: error_flags[2],[3] 비트 중 하나라도 set */
         st->op_error         = (err8 || err9) ? true : false;
-
-        bk_printf(TAG "[UART] RX 0x43 STATUS op=0x%02X err=%02X%02X%02X%02X remain=%dh%dm\n",
-                 st->saveoperation[5], err6, err7, err8, err9,
-                 st->saveoperation[10], st->saveoperation[11]);
+        bk_printf(TAG "[UART] RX 0x43 STATUS op=0x%02X err=%02X%02X%02X%02X remain=%dh%dm"
+                    " [14]=0x%02X bo=%d\n",
+                st->saveoperation[5], err6, err7, err8, err9,
+                st->saveoperation[10], st->saveoperation[11],
+                (uint8_t)st->saveoperation[14],
+                (int)st->black_out_checking);
 
 #if 0   /* [미구현-C] 기존: saveoperation[14]!=0 을 무조건 에러 처리
          * 문제: 정전복구 첫 STATUS RX에서 [14]=0x21(DEFROST X1 에코)이 오탐됨
