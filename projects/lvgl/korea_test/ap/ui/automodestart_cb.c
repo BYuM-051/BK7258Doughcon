@@ -1177,10 +1177,10 @@ void automodestart_load_start_event_cb(lv_event_t *e)
         g_device_state.send_complete_min   = atoi(_cmn);
         /* 완료시각 00:00 → MCU가 0x42(저온발효 자율) 진입 원인.
          * 설정이 기본값(미설정 00:00)이면 08:00으로 보정 */
-        if (g_device_state.send_complete_hour == 0 && g_device_state.send_complete_min == 0) {
-            g_device_state.send_complete_hour = 8;
-            lv_label_set_text(bk_ui->automodestart_AutoModeCompleteHour, "08");
-        }
+        // if (g_device_state.send_complete_hour == 0 && g_device_state.send_complete_min == 0) {
+        //     g_device_state.send_complete_hour = 8;
+        //     lv_label_set_text(bk_ui->automodestart_AutoModeCompleteHour, "08");
+        // }
     }
 
     /* 정전 복구: 이미 완료된 phase는 00:00으로 강제 표시.
