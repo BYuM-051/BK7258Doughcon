@@ -135,6 +135,49 @@ bool isPagePreloaded(pageId_t pageID)
 {
     return preRenderPageState[pageID].isRendered;
 }
+
+void uiPageUnloadImage(pageId_t pageID)
+{
+    if(pageID < PAGE_MAIN || pageID >= PAGE_COUNT)
+    {
+        bk_printf(TAG "[SCREEN] uiPageUnloadImage: invalid pageId %d\n", pageID);
+        return;
+    }
+
+    const uint32_t imageCount = preRenderPageConfig[pageID].preRenderImageCount;
+    const preRenderImageInfo_t *imageInfoList = preRenderPageConfig[pageID].preRenderImageInfo;
+    if(imageCount == 0 || imageInfoList == NULL)
+    {
+        return;
+    }
+
+    uint32_t dropped = 0;
+    for(uint32_t i = 0 ; i < imageCount ; i++)
+    {
+        const preRenderImageInfo_t *imageInfo = &imageInfoList[i];
+        char imagePath[128] = {0};
+
+        /* 경로 조립 규칙은 init 단계(getImageFullPath / prewarm)와 동일해야 한다.
+         * flat "/images/foo.png" 를 넘기면 lv_image_cache_drop() 이 내부에서
+         * 트리 경로 "/images/dNNN/foo.png" 로 변환해 찾는다. */
+        if(!getImageFullPath(imageInfo->imagePath,
+                             imageInfo->hasLanguageVariant,
+                             imageInfo->hasDegreeVariant,
+                             imageInfo->fileExtension,
+                             imagePath, sizeof(imagePath)))
+        {
+            bk_printf(TAG "[SCREEN] uiPageUnloadImage: path build failed page=%d idx=%lu\n",
+                      pageID, (unsigned long)i);
+            continue;
+        }
+
+        lv_image_cache_drop(imagePath);
+        dropped++;
+    }
+
+    bk_printf(TAG "[SCREEN] uiPageUnloadImage: page=%d dropped=%lu/%lu\n",
+              pageID, (unsigned long)dropped, (unsigned long)imageCount);
+}
 void uiPreloadPageForce(pageId_t pageID)
 {
     pageLifecycleFuncWithStep_t initFunc;

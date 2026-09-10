@@ -148,88 +148,16 @@ lv_obj_t * lv_image_create(lv_obj_t * parent)
  * Setter functions
  *====================*/
 #define _UI_USE_TREE_DIRECTORY 1
-#include "../../ui_image_tree_map.h"
 
 #include <string.h>
 #include <stdio.h>
 
-#define UI_IMAGE_PATH_PREFIX      "/images/"
-#define UI_IMAGE_PATH_PREFIX_LEN  8
-#define UI_IMAGE_TREE_PATH_MAX    256
+#include "../../ui_image_tree.h"
+
+/* flat "/images/foo.png" -> tree "/images/dNNN/foo.png" 변환은
+ * ui_image_tree.c 하나로 모았다. map 테이블도 그쪽에만 링크된다. */
+
 #if _UI_USE_TREE_DIRECTORY
-
-static const char *ui_image_tree_resolve_path(const char *src, char *pathBuffer, size_t pathBufferSize)
-{
-    if(src == NULL)
-    {
-        return NULL;
-    }
-
-    /*
-     * /images/ 로 시작하지 않으면 그대로.
-     */
-    if(strncmp(
-           src,
-           UI_IMAGE_PATH_PREFIX,
-           UI_IMAGE_PATH_PREFIX_LEN) != 0)
-    {
-        return src;
-    }
-
-    const char *fileName =
-        src + UI_IMAGE_PATH_PREFIX_LEN;
-
-    /*
-     * 이미:
-     *
-     * /images/d003/foo.png
-     *
-     * 같은 tree path라면 그대로.
-     */
-    if(strchr(fileName, '/') != NULL)
-    {
-        return src;
-    }
-
-    for(size_t i = 0;
-        i < UI_IMAGE_TREE_MAP_COUNT;
-        i++)
-    {
-        if(strcmp(
-               fileName,
-               uiImageTreeMap[i].fileName) == 0)
-        {
-            int len = lv_snprintf(
-                pathBuffer,
-                pathBufferSize,
-                "/images/d%03u/%s",
-                (unsigned int)uiImageTreeMap[i].dirIndex,
-                fileName
-            );
-
-            if(len < 0 ||
-               (size_t)len >= pathBufferSize)
-            {
-                LV_LOG_WARN(
-                    "tree image path buffer too small: %s",
-                    src
-                );
-
-                return src;
-            }
-
-            return pathBuffer;
-        }
-    }
-
-    LV_LOG_WARN(
-        "tree image map not found: %s",
-        src
-    );
-
-    return src;
-}
-
 
 void lv_image_set_src(lv_obj_t * obj, const void * src)
 {

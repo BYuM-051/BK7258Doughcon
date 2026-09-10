@@ -424,107 +424,12 @@ static lv_result_t try_cache(lv_image_decoder_dsc_t * dsc)
 
 #include <string.h>
 #include <stdio.h>
-#include "../ui_image_tree_map.h"
+#include "../ui_image_tree.h"
 
-#define UI_IMAGE_PATH_PREFIX      "/images/"
-#define UI_IMAGE_PATH_PREFIX_LEN  8
-#define UI_IMAGE_TREE_PATH_MAX    256
-
-
-static const char *uiImageTreeResolvePath(
-    const void *src,
-    char *pathBuffer,
-    size_t pathBufferSize)
-{
-    if(src == NULL)
-    {
-        return NULL;
-    }
-
-    /*
-     * 기존 prewarm 함수들이 file path를 전제로 만들어져 있지만,
-     * 혹시 variable image 등이 들어오는 경우에는 건드리지 않는다.
-     */
-    if(lv_image_src_get_type(src) != LV_IMAGE_SRC_FILE)
-    {
-        return (const char *)src;
-    }
-
-    const char *srcPath = (const char *)src;
-
-    /*
-     * /images/ 경로가 아니면 기존 경로 그대로.
-     */
-    if(strncmp(
-           srcPath,
-           UI_IMAGE_PATH_PREFIX,
-           UI_IMAGE_PATH_PREFIX_LEN) != 0)
-    {
-        return srcPath;
-    }
-
-    const char *fileName =
-        srcPath + UI_IMAGE_PATH_PREFIX_LEN;
-
-    /*
-     * 이미
-     *
-     * /images/d003/foo.png
-     *
-     * 같은 tree path가 들어왔다면 다시 변환하지 않는다.
-     */
-    if(strchr(fileName, '/') != NULL)
-    {
-        return srcPath;
-    }
-
-    /*
-     * Python이 생성한 map에서 filename -> dirIndex 검색.
-     */
-    for(size_t i = 0;
-        i < UI_IMAGE_TREE_MAP_COUNT;
-        i++)
-    {
-        if(strcmp(
-               fileName,
-               uiImageTreeMap[i].fileName) == 0)
-        {
-            int result = snprintf(
-                pathBuffer,
-                pathBufferSize,
-                "/images/d%03u/%s",
-                (unsigned int)uiImageTreeMap[i].dirIndex,
-                fileName
-            );
-
-            if(result < 0 ||
-               (size_t)result >= pathBufferSize)
-            {
-                bk_printf(
-                    TAG
-                    "[TREE] path buffer too small src=[%s]\n",
-                    srcPath
-                );
-
-                return srcPath;
-            }
-
-            return pathBuffer;
-        }
-    }
-
-    bk_printf(
-        TAG
-        "[TREE] image map not found src=[%s]\n",
-        srcPath
-    );
-
-    /*
-     * map에 없으면 기존 경로를 그대로 넘긴다.
-     * tree_file에 flat file이 없다면 decoder open에서 실패하게 됨.
-     */
-    return srcPath;
-}
+/* flat "/images/foo.png" -> tree "/images/dNNN/foo.png" 변환은
+ * ui_image_tree.c 하나로 모았다. map 테이블도 그쪽에만 링크된다. */
+#define uiImageTreeResolvePath(src, buf, size) \
+    ui_image_tree_resolve_path((src), (buf), (size))
 
 
 lv_result_t lv_image_decoder_prewarm(const void *src)

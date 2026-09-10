@@ -13,6 +13,7 @@
 
 #include "lv_image_header_cache.h"
 #include "../../lv_iter.h"
+#include "../../../ui_image_tree.h"
 
 /*********************
  *      DEFINES
@@ -83,9 +84,13 @@ void lv_image_header_cache_drop(const void * src)
         return;
     }
 
-    lv_image_header_cache_data_t search_key = {
-        .src = src,
-        .src_type = lv_image_src_get_type(src),
+    char treePath[UI_IMAGE_TREE_PATH_MAX];
+    const void * resolvedSrc = ui_image_tree_resolve_path_ex(src, treePath, sizeof(treePath), true);
+
+    lv_image_header_cache_data_t search_key = 
+    {
+        .src = resolvedSrc,
+        .src_type = lv_image_src_get_type(resolvedSrc),
     };
 
     lv_cache_drop(img_header_cache_p, &search_key, NULL);

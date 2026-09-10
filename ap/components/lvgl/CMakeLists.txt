@@ -425,6 +425,7 @@ if(CONFIG_LVGL)
 			lvgl_v9/src/widgets/tileview/lv_tileview.c
 			lvgl_v9/src/widgets/win/lv_win.c
 			lvgl_v9/src/lv_init.c
+			lvgl_v9/src/ui_image_tree.c
 			lvgl_v9/porting/lv_port_disp.c
 			lvgl_v9/porting/lv_port_indev.c
 		)
