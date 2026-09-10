@@ -851,11 +851,14 @@ static void _keypad_hide_automode(bk_lv_ui_t *bk_ui)
 void automode_backbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
-    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
+    if (lv_event_get_code(e) == LV_EVENT_PRESSED)
+    {
+        hal_buzzer_beep();
+    }
+    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
     if (lv_tick_elaps(s_last_click_backbt) < 250) return;
     if (s_tci_automode != 0) return;
     s_last_click_backbt = lv_tick_get();
-    hal_buzzer_beep();
 
     /* 키패드가 열려있으면 강제 닫기 */
     if (s_tci_automode != 0) {
@@ -882,12 +885,15 @@ void automode_startbt_event_cb(lv_event_t *e)
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
 
-    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
+    if(lv_event_get_code(e) == LV_EVENT_PRESSED)
+    {
+        hal_buzzer_beep();
+    }
+    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
     if (lv_tick_elaps(s_last_click_automode) < 250) return;
     if(s_tci_automode != 0) return;
     if(!isValidDate) return;
     s_last_click_automode = lv_tick_get();
-    hal_buzzer_beep();
     bk_printf(TAG "startbt_event_cb\n");
 
     /* first_freeze/first_defrost 플래그만 선행 설정. uart_comm_trigger_first_start()는
