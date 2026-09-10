@@ -100,14 +100,7 @@ void settingmodedegree_backbt_event_cb(lv_event_t *e)
 
     if (state->lock) return;
     hal_buzzer_beep();
-#if UI_PRENDERING_ENABLE
     ui_page_change(PAGE_SETTINGMODE);
-#else
-    if (bk_ui->settingmode == NULL || !lv_obj_is_valid(bk_ui->settingmode))
-        init_page_settingmode(bk_ui);
-    lv_scr_load(bk_ui->settingmode);
-    destroy_page_settingmodedegree(bk_ui);
-#endif /* UI_PRENDERING_ENABLE */
 }
 
 void settingmodedegree_degree_c_bt_event_cb(lv_event_t *e)
@@ -129,7 +122,6 @@ void settingmodedegree_degree_c_bt_event_cb(lv_event_t *e)
     settings_save_dirty();
     _update_images(bk_ui, 0);
     lv_obj_invalidate(bk_ui->settingmodedegree);
-    lv_refr_now(NULL);
     ui_lang_invalidate_cached_screens(bk_ui);
 }
 
@@ -152,6 +144,5 @@ void settingmodedegree_degree_f_bt_event_cb(lv_event_t *e)
     settings_save_dirty();
     _update_images(bk_ui, 1);
     lv_obj_invalidate(bk_ui->settingmodedegree);
-    lv_refr_now(NULL);
     ui_lang_invalidate_cached_screens(bk_ui);
 }
