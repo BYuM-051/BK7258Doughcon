@@ -131,6 +131,7 @@ static void _uart_comm_task(beken_thread_arg_t arg)
 
     _boot_t = lv_tick_get();
     init_page_timebar(&bk_lv_tool_ui);
+    lv_obj_move_foreground(bk_lv_tool_ui.introactivity);
     bk_printf(TAG "[BOOT] init_page_timebar: %lu ms\n", lv_tick_elaps(_boot_t));
 
     if (!g_device_state.black_out_checking) 
@@ -144,6 +145,8 @@ static void _uart_comm_task(beken_thread_arg_t arg)
         bk_printf(TAG "[BOOT] blackout recovery screen active\n");
     }
     lv_scr_load(preRenderRoot);
+    lv_obj_move_foreground(bk_lv_tool_ui.timebar);
+    lv_obj_add_flag(bk_lv_tool_ui.introactivity, LV_OBJ_FLAG_HIDDEN);
     lv_refr_now(NULL);
     destroy_page_introactivity(&bk_lv_tool_ui);
     lv_vendor_disp_unlock();
