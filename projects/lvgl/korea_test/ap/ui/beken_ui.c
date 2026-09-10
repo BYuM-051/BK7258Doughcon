@@ -28,6 +28,7 @@
 #include <os/os.h>
 #include "lv_vendor.h"
 #include "ui_lang.h"
+#include "hardware_hal.h"
 
 #include "pageManager.h"
 #define TAG "[beken_ui.c] "
@@ -181,7 +182,9 @@ void beken_ui_init(void)
     init_page_introactivity(&bk_lv_tool_ui);
     lv_scr_load(bk_lv_tool_ui.introactivity);
     bk_printf(TAG "[BOOT] boot screen displayed\n");
-
+    lv_refr_now(NULL);
+    rtos_delay_milliseconds(200); // 이런 하드코딩은 하고싶지 않았지만, 첫 프레임버퍼는 flush되었으나 parellel RGB를 타고 가는 시간이 필요한 경우가 10번중 2번정도 있음. 고로 기다려야지.
+    hal_backlight_set(100);
 #ifdef HAL_USE_EMULATOR
     settings_init();
     settings_load_from_flash();
