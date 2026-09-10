@@ -872,7 +872,8 @@ void automodestart_startbt_event_cb(lv_event_t *e)
 {
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     device_state_t *state = &g_device_state;
-    if (lv_event_get_code(e) != LV_EVENT_PRESSED) return;
+    if(lv_event_get_code(e) == LV_EVENT_PRESSED) {hal_buzzer_beep();}
+    if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
     if (lv_tick_elaps(last_click_time) < 250) return;
     last_click_time = lv_tick_get();
 
@@ -888,8 +889,6 @@ void automodestart_startbt_event_cb(lv_event_t *e)
         lv_timer_delete(s_ui_timer);
         s_ui_timer = NULL;
     }
-
-    hal_buzzer_beep();
 
     /* automode SCREEN_LOAD_START의 완료시간/day_period 리셋 로직이
      * !state->operation을 조건으로 하므로, 화면 전환(lv_scr_load) 전에
@@ -1102,8 +1101,6 @@ void automodestart_loaded_event_cb(lv_event_t *e)
     _refresh_running_ui(bk_ui);
     if (s_ui_timer) { lv_timer_delete(s_ui_timer); s_ui_timer = NULL; }
     s_ui_timer = lv_timer_create(_ui_timer_cb, 1000, NULL);
-
-    ui_lang_apply_automodestart(bk_ui);
 }
 
 void automodestart_unloaded_event_cb(lv_event_t *e)
@@ -1305,4 +1302,5 @@ clip_alloc_done:;
         lv_obj_add_flag(bk_ui->automodestart_blackout, LV_OBJ_FLAG_HIDDEN);
     }
     // _ams_bg_load(bk_ui);  /* canvas dsc로 JPEG 경로 덮어쓰기 → 이후 렌더 시 decode 없음 */
+    ui_lang_apply_automodestart(bk_ui);
 }
