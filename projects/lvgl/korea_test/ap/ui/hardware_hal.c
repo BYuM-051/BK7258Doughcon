@@ -560,19 +560,42 @@ void hal_buzzer_beep(void) { hal_buzzer_beep_forceOption(false); }
 
 void hal_touch_flush_queue(void)
 {
+    hal_touch_flush_queue_keepOption(true);
+}
+
+void hal_touch_flush_queue_keepOption(bool keep_last_pair)
+{
     tp_point_infor_t p;
-    int dropped = 0;
-    int guard = TP_DATA_QUEUE_MAX_SIZE + 4;
+    tp_point_infor_t last_press = {0}, last_rel = {0};
+    bool has_press = false, has_rel = false;
+    int  read_n = 0, kept = 0;
+    int  guard  = TP_DATA_QUEUE_MAX_SIZE + 4;
 
     while (guard-- > 0 && drv_tp_read(&p) == kNoErr)
     {
-        dropped++;
+        read_n++;
+        if (p.m_state) 
+        {
+            last_press = p; 
+            has_press = true; 
+            has_rel = false;
+        }
+        else           
+        {
+            last_rel   = p; 
+            has_rel   = true;
+        }
     }
 
-    if (dropped > 0)
+    if (read_n == 0) {return;}
+
+    if (keep_last_pair)
     {
-        bk_printf(TAG "[HAL] touch queue flushed: %d dropped\n", dropped);
+        if (has_press) {drv_tp_write(last_press.m_x, last_press.m_y, 1); kept++;}
+        if (has_rel)   {drv_tp_write(last_rel.m_x,   last_rel.m_y,   0); kept++;}
     }
+
+    bk_printf(TAG "[HAL] touch flush: read=%d kept=%d dropped=%d\n", read_n, kept, read_n - kept);
 }
 
 /* 완료 부저: 250ms ON + 750ms OFF × 10회 (Android BuzzerCompleteRunnable 동일)

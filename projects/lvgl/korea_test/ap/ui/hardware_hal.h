@@ -47,6 +47,7 @@ void hal_system_restart(void);
  * 처리되는 문제가 원천적으로 발생하지 않는다. */
 void hal_touch_set_enabled(bool enabled);
 void hal_touch_flush_queue(void);
+void hal_touch_flush_queue_keepOption(bool keep_last_pair);
 
 /* LEDs / outputs */
 void hal_led_lamp_set(bool on);      /* interior lamp */
