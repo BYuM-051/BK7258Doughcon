@@ -528,7 +528,7 @@ static void _maxmin_automode(bk_lv_ui_t *bk_ui)
     snprintf(_buf, sizeof(_buf), "%02d", _v);
     lv_label_set_text(bk_ui->automode_AutoFermentation2TimeMinTxt, _buf);
     _v = atoi(lv_label_get_text(bk_ui->automode_AutoModeCompleteYear));
-    if (_v < 2024) _v = 2024;
+    if (_v < 2020) _v = 2020;
     if (_v > 2099) _v = 2099;
     snprintf(_buf, sizeof(_buf), "%04d", _v);
     lv_label_set_text(bk_ui->automode_AutoModeCompleteYear, _buf);
@@ -588,6 +588,7 @@ static long long _datetime_to_mins(int y, int m, int d, int h, int mn)
  * Only acts when s_tci_automode is 14-18 (completion time editing). */
 static void _rclr_automode(bk_lv_ui_t *bk_ui)
 {
+    bk_printf(TAG "rclr_automode\n");
     /* 완료시간 유효성 검사 → 5개 레이블 색상 결정.
      * Android 동일 조건 (ButtonBroadcastReceiver.java:921):
      *   빨간: !(CompleteTime > DeadlineTime) || CurrentTime+10일 < CompleteTime
@@ -598,6 +599,7 @@ static void _rclr_automode(bk_lv_ui_t *bk_ui)
     int cd  = atoi(lv_label_get_text(bk_ui->automode_AutoModeCompleteDay));
     int ch  = atoi(lv_label_get_text(bk_ui->automode_AutoModeCompleteHour));
     int cmn = atoi(lv_label_get_text(bk_ui->automode_AutoModeCompleteMin));
+    bk_printf(TAG "Complete Time: %04d-%02d-%02d %02d:%02d\n", cy, cm, cd, ch, cmn);
 
     /* 초기 empty state(날짜 미입력): 색상 변경 없음 */
     if (cy < 2020 || cy > 2099 || cm < 1 || cm > 12 || cd < 1 || cd > 31) return;
@@ -646,6 +648,7 @@ static void _rclr_automode(bk_lv_ui_t *bk_ui)
 
     /* valid: 데드라인 이후 AND 10일 이내 */
     isValidDate = (comp_mins > rtc_mins + (long long)op_min) && (comp_mins <= max_mins);
+    bk_printf(TAG "_same_day: %d | isValidDate: %d | rtc_mins: %lld | comp_mins: %lld | max_mins: %lld\n", _same_day, isValidDate, rtc_mins, comp_mins, max_mins);
     lv_color_t _clr = isValidDate ? lv_color_hex(0x3C3A3D) : lv_color_hex(0xFF0000);
     lv_obj_set_style_text_color(bk_ui->automode_AutoModeCompleteYear,  _clr, 0);
     lv_obj_set_style_text_color(bk_ui->automode_AutoModeCompleteMonth, _clr, 0);
@@ -654,8 +657,7 @@ static void _rclr_automode(bk_lv_ui_t *bk_ui)
     lv_obj_set_style_text_color(bk_ui->automode_AutoModeCompleteMin,   _clr, 0);
 }
 
-static lv_obj_t *_make_underbar(lv_obj_t *parent, lv_color_t color,
-                                 int x, int y, int w, int h)
+static lv_obj_t *_make_underbar(lv_obj_t *parent, lv_color_t color, int x, int y, int w, int h)
 {
     lv_obj_t *obj = lv_obj_create(parent);
     lv_obj_set_pos(obj, x, y);
@@ -714,7 +716,7 @@ static void _common_click_automode(bk_lv_ui_t *bk_ui)
      * 입력 시작 시 _keypad_input_automode()가 s_edit_buf_automode로 교체한다. */
     /* 완료시간 색상: 강제 빨간 대신 유효성 검사(_rclr_automode)로 결정
      * 어느 필드를 선택하든 완료시간 유효성이 즉시 반영된다 (Android 동일). */
-    // _rclr_automode(bk_ui);
+    // _rclr_automode(bk_ui); // 각 키패드 콜백에서 호출해놨네. 이게맞나싶긴한데.
 }
 
 static void _keypad_input_automode(bk_lv_ui_t *bk_ui, char digit)
