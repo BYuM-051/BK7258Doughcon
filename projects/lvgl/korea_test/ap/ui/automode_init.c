@@ -93,16 +93,7 @@ void destroy_page_automode(bk_lv_ui_t *bk_ui)
     bk_ui->automode_AutoModeFermentation2TimeMinUnderBarIm   = NULL;
     bk_printf(TAG "[SCREEN] child pointers reset\n");
 
-    const uint32_t imageCount = preRenderPageConfig[PAGE_AUTOMODE].preRenderImageCount;
-    for(uint32_t i = 0; i < imageCount; i++)
-    {
-        const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_AUTOMODE].preRenderImageInfo[i];
-        char imagePath[128] = {0};
-        if(getImageFullPath(imageInfo->imagePath, imageInfo->hasLanguageVariant, imageInfo->hasDegreeVariant, imageInfo->fileExtension, imagePath, sizeof(imagePath)))
-        {
-            lv_image_cache_drop(imagePath);
-        }
-    }
+    uiPageUnloadImage(PAGE_AUTOMODE);
     lv_style_reset(&style_transp);
     for (int i = 0; i < 12; i++) 
     {

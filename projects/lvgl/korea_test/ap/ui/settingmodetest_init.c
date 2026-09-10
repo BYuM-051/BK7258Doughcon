@@ -148,22 +148,7 @@ void destroy_page_settingmodetest(bk_lv_ui_t *bk_ui)
     currentImageStep = 0;
     preRenderPageState[PAGE_SETTINGMODETEST].isRendered = false;
 
-    const uint32_t imageCount = preRenderPageConfig[PAGE_SETTINGMODETEST].preRenderImageCount;
-    for(uint32_t i = 0; i < imageCount; i++)
-    {
-        const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_SETTINGMODETEST].preRenderImageInfo[i];
-        const char *languageSuffix = imageInfo->hasLanguageVariant ?
-                                     (settings_get_int("LANGUAGE") == 1 ? "_china" :
-                                      settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
-        const char *degreeSuffix = imageInfo->hasDegreeVariant &&
-                                   strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
-        const char *extension = imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
-        char imagePath[128] = {0};
-
-        snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
-                 imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
-        lv_image_cache_drop(imagePath);
-    }
+    uiPageUnloadImage(PAGE_SETTINGMODETEST);
 }
 
 void init_page_settingmodetest(bk_lv_ui_t * bk_ui) {

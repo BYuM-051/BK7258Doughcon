@@ -43,16 +43,7 @@ void destroy_page_settingmodelanguage(bk_lv_ui_t *bk_ui)
         bk_ui->settingmodelanguage = NULL;
     }
 
-    const uint32_t imageCount = preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderImageCount;
-    for(uint32_t i = 0; i < imageCount; i++)
-    {
-        const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_SETTINGMODELANGUAGE].preRenderImageInfo[i];
-        char imagePath[128] = {0};
-        if(getImageFullPath(imageInfo->imagePath, imageInfo->hasLanguageVariant, imageInfo->hasDegreeVariant, imageInfo->fileExtension, imagePath, sizeof(imagePath)))
-        {
-            lv_image_cache_drop(imagePath);
-        }
-    }
+    uiPageUnloadImage(PAGE_SETTINGMODELANGUAGE);
 
     currentStep = RENDER_STEP_CREATE_PAGE;
     currentImageStep = 0;

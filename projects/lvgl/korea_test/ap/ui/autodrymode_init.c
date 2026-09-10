@@ -46,29 +46,7 @@ void destroy_page_autodrymode(bk_lv_ui_t *bk_ui)
     currentImageStep = 0;
     preRenderPageState[PAGE_AUTODRYMODE].isRendered = false;
 
-    const uint32_t imageCount = preRenderPageConfig[PAGE_AUTODRYMODE].preRenderImageCount;
-
-    bk_printf(TAG "[PREWARM][AUTODRYMODE] UNCACHE_CACHE_IMAGE start (%lu images)\n", (unsigned long)imageCount);
-
-    for(uint32_t i = 0; i < imageCount; i++)
-    {
-        const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_AUTODRYMODE].preRenderImageInfo[i];
-        char imagePath[128] = {0};
-        const char *languageSuffix = imageInfo->hasLanguageVariant ?
-                                     (settings_get_int("LANGUAGE") == 1 ? "_china" :
-                                      settings_get_int("LANGUAGE") == 2 ? "_english" : "") : "";
-        const char *degreeSuffix = imageInfo->hasDegreeVariant &&
-                                   strcmp(settings_get_str("Degree"), "\xc2\xb0""F") == 0 ? "_f" : "";
-        const char *extension = imageInfo->fileExtension != NULL ? imageInfo->fileExtension : ".png";
-        snprintf(imagePath, sizeof(imagePath), "%s%s%s%s",
-                 imageInfo->imagePath, degreeSuffix, languageSuffix, extension);
-
-        bk_printf(TAG "[PREWARM][AUTODRYMODE] uncaching image %lu/%lu path=%s\n",
-                    (unsigned long)(i + 1),
-                    (unsigned long)imageCount,
-                    imagePath);
-        lv_image_cache_drop(imagePath);
-    }
+    uiPageUnloadImage(PAGE_AUTODRYMODE);
     
 }
 

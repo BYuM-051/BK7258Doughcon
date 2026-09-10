@@ -57,16 +57,7 @@ void destroy_page_main(bk_lv_ui_t *bk_ui) {
     currentImageStep = 0;
     preRenderPageState[PAGE_MAIN].isRendered = false;
 
-    const uint32_t imageCount = preRenderPageConfig[PAGE_MAIN].preRenderImageCount;
-    for(uint32_t i = 0; i < imageCount; i++)
-    {
-        const preRenderImageInfo_t *imageInfo = &preRenderPageConfig[PAGE_MAIN].preRenderImageInfo[i];
-        char imagePath[128] = {0};
-        if(getImageFullPath(imageInfo->imagePath, imageInfo->hasLanguageVariant, imageInfo->hasDegreeVariant, imageInfo->fileExtension, imagePath, sizeof(imagePath)))
-        {
-            lv_image_cache_drop(imagePath);
-        }
-    }
+    uiPageUnloadImage(PAGE_MAIN);
 }
 
 // NOTE : deprecated, use pre-rendering mechanism instead
