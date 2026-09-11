@@ -43,8 +43,6 @@ static lv_obj_t   *s_anim_toggle_label = NULL;
 /* FERM2 완료 감지 statics — 파일 범위로 승격 (SCREEN_LOADED 에서 명시적 리셋 필요) */
 static bool     s_ferm2_nonzero    = false;
 static bool     s_end_triggered    = false;
-static uint32_t s_ferm2_start_tick = 0;
-static bool     s_ferm2_tick_valid = false;
 
 /* 모드 전환 감지용 */
 static int      s_arc_seen_mode    = -1;
@@ -59,13 +57,6 @@ static int      s_last_temp_val  = 0x7FFFFFFF;
 static int      s_last_hum_val   = 0x7FFFFFFF;
 static int      s_last_remain_h  = -1;
 static int      s_last_remain_m  = -1;
-/* AP fallback 단계 전환용 */
-static uint32_t s_mode_start_tick  = 0;
-/* 이 단계 진입 이후 MCU STATUS를 아직 한 번도 못 받았을 때(uart 통신 전) 쓸
- * rx_seq 기준값 — g_uart_rx_seq가 이 값과 같으면 saveoperation[10/11]이
- * 아직 이전 단계/초기값(0)이라는 뜻이므로 MCU raw 대신 자체 계산값을 표시한다. */
-static uint32_t s_rx_seq_at_mode_start = 0;
-
 /* ── bg JPEG 영구 canvas — 최초 1회 decode 후 raw RGB565 재사용 ─
  * 버퍼(s_ams_canvas_buf)는 main_activity_on_create()에서 부팅 극초반(단편화 전)
  * 1회만 malloc되고 이후 절대 free되지 않는다 — 이전엔 화면 나갈 때마다
@@ -348,15 +339,23 @@ static void _update_arc_ams(bk_lv_ui_t *bk_ui)
 #else
             static int      s_arc_mcu_ref_min  = -1;
             static uint32_t s_arc_mcu_ref_tick = 0;
+            static int      s_arc_mcu_ref_mode = -1;
 
             int total_min       = _total_min_for_mode(state, mode);
             int mcu_elapsed_min = (int)(uint8_t)state->saveoperation[12] * 60
                                 + (int)(uint8_t)state->saveoperation[13];
-            if (mcu_elapsed_min != s_arc_mcu_ref_min) {
+            if (state->black_out_checking)
+            {
+                mcu_elapsed_min = total_min - state->remain_hour * 60 - state->remain_min;
+                if (mcu_elapsed_min < 0) mcu_elapsed_min = 0;
+            }
+            if (mode != s_arc_mcu_ref_mode || mcu_elapsed_min != s_arc_mcu_ref_min) {
+                s_arc_mcu_ref_mode = mode;
                 s_arc_mcu_ref_min  = mcu_elapsed_min;
                 s_arc_mcu_ref_tick = lv_tick_get();
             }
             int interp_sec  = (int)(lv_tick_elaps(s_arc_mcu_ref_tick) / 1000u);
+            if (interp_sec > 59) interp_sec = 59;
             int elapsed_sec = mcu_elapsed_min * 60 + interp_sec;
             int total_sec   = total_min * 60;
             if (elapsed_sec < 0) elapsed_sec = 0;
@@ -582,7 +581,6 @@ static void _refresh_running_ui(bk_lv_ui_t *bk_ui)
         if (!state->auto_mode_start) {
             s_ferm2_nonzero       = false;
             s_end_triggered       = false;
-            s_ferm2_tick_valid    = false;
             s_over_ferm_triggered = false;
         }
 
@@ -592,24 +590,12 @@ static void _refresh_running_ui(bk_lv_ui_t *bk_ui)
                 (state->remain_hour > 0 || state->remain_min > 0))
                 s_ferm2_nonzero = true;
 
-            /* 벽시계 기반 FERM2 완료 감지 (remain이 항상 0인 경우 폴백) */
-            if (cur_op == OP_MODE_FERM2 && !s_ferm2_tick_valid) {
-                s_ferm2_start_tick = lv_tick_get();
-                s_ferm2_tick_valid = true;
-            }
-            bool ferm2_wall_done = false;
-            if (cur_op == OP_MODE_FERM2 && s_ferm2_tick_valid) {
-                int ferm2_min = state->send_ferm2_hour * 60 + state->send_ferm2_min;
-                uint32_t ferm2_ms = (uint32_t)ferm2_min * 60u * 1000u;
-                if (ferm2_ms > 0 && lv_tick_elaps(s_ferm2_start_tick) >= ferm2_ms)
-                    ferm2_wall_done = true;
-            }
-
+            /* Completion follows the controller, including after power recovery. */
             bool mcu_done   = (cur_op >= 7);
-            bool ferm2_done = (cur_op == OP_MODE_FERM2 && s_ferm2_nonzero &&
+            bool ferm2_done = (!state->first_receive && cur_op == OP_MODE_FERM2 && s_ferm2_nonzero &&
                                state->remain_hour == 0 && state->remain_min == 0);
 
-            if (mcu_done || ferm2_done || ferm2_wall_done) {
+            if (mcu_done || ferm2_done) {
                 /* Android AutoModeEndFragment 와 동일:
                  * 조건: DetailOverFermentationOnOff==ON AND day_period>1 AND over_min>0 AND 1회만 */
                 bool over_on  = (strcmp(settings_get_str("DetailOverFermentationOnOff"), "ON") == 0);
@@ -688,9 +674,7 @@ static void _refresh_running_ui(bk_lv_ui_t *bk_ui)
     /* 저온발효(op_mode 9=0x34, 10=0x44): Android AutoModeOver와 동일하게 FERM1 에셋으로 표시 */
     if (_ui_mode == 9 || _ui_mode == 10) _ui_mode = OP_MODE_FERM1;
 
-    /* 모드 전환 즉시 s_mode_start_tick 리셋 — 남은시간 계산보다 먼저 처리해야 함.
-     * _update_arc_ams 내부에서 리셋하면 남은시간 레이블이 한 프레임 동안
-     * '신모드_total - 구모드_elapsed' 로 잘못 계산됨(예: 1분 표시 버그). */
+    /* Reset display caches when the accepted controller phase changes. */
     if (_ui_mode != s_arc_seen_mode) {
         int prev_mode = s_arc_seen_mode;   /* 갱신 전 이전 모드 보존 */
 
@@ -715,10 +699,8 @@ static void _refresh_running_ui(bk_lv_ui_t *bk_ui)
         }
 
         s_arc_seen_mode   = _ui_mode;
-        s_mode_start_tick = lv_tick_get();
         s_last_remain_h   = -1;
         s_last_remain_m   = -1;
-        s_rx_seq_at_mode_start = g_uart_rx_seq;
     }
 
     /* 현재 온도 / 습도 — 값 변화 시에만 set (동일값 dirty 마킹 방지) */
@@ -737,39 +719,11 @@ static void _refresh_running_ui(bk_lv_ui_t *bk_ui)
         lv_label_set_text(bk_ui->automodestart_tempbox_current_humidity, buf);
     }
 
-    /* 잔여시간: MCU UART saveoperation[10/11]을 기본으로 쓰되, 이 단계 진입 후
-     * 아직 MCU STATUS를 한 번도 못 받았을 때(g_uart_rx_seq가 단계 진입 시점과
-     * 동일)는 saveoperation[10/11]이 이전 단계/초기값(0)이라 "0:00"이 1-2초간
-     * 잘못 표시된다 — 그 짧은 구간만 이 단계의 총 소요시간(_total_min_for_mode,
-     * automode_cb.c가 시작 시 이미 계산해 둔 send_*_hour/min 기반)을 "아직 하나도
-     * 경과 안 함" 상태로 대체 표시한다. day_period 계산 버그(24시간 부족)를 이미
-     * 수정했으므로, 이 자체 계산값은 MCU가 실제로 보내올 값과 일치해 전환 시
-     * 숫자가 급변하지 않는다. state->remain_hour/min(첫 단계에서만 유효)이 아니라
-     * _total_min_for_mode를 쓰는 이유: 해동/발효1/발효2로 단계가 넘어갈 때도
-     * (냉동 단계의 잔류값이 아니라) 그 단계 자신의 총 시간이 나와야 하기 때문. */
+    /* Use the same accepted remaining time as UART TX and the recovery snapshot.
+     * Recomputing from a reset MCU elapsed counter would restart the display. */
     {
-        int _rh, _rm;
-        {
-            int mcu_rem_h = (int)(uint8_t)state->saveoperation[10];
-            int mcu_rem_m = (int)(uint8_t)state->saveoperation[11];
-            if (state->black_out_checking) {
-                int total_min   = _total_min_for_mode(state, _ui_mode);
-                int elapsed_min = (int)(uint8_t)state->saveoperation[12] * 60
-                                + (int)(uint8_t)state->saveoperation[13];
-                int remain_min  = total_min - elapsed_min;
-                if (remain_min < 0) remain_min = 0;
-                _rh = remain_min / 60;
-                _rm = remain_min % 60;
-            } else if (g_uart_rx_seq == s_rx_seq_at_mode_start) {
-                /* 이 단계에서 아직 MCU STATUS 미수신 — 이 단계의 총 시간 표시 */
-                int total_min = _total_min_for_mode(state, _ui_mode);
-                _rh = total_min / 60;
-                _rm = total_min % 60;
-            } else {
-                _rh = mcu_rem_h;
-                _rm = mcu_rem_m;
-            }
-        }
+        int _rh = state->remain_hour;
+        int _rm = state->remain_min;
         if (_rh != s_last_remain_h || _rm != s_last_remain_m) {
             s_last_remain_h = _rh;
             s_last_remain_m = _rm;
@@ -795,17 +749,7 @@ static void _refresh_running_ui(bk_lv_ui_t *bk_ui)
                     break;
                 default: break;
             }
-            /* 정전복구용 flash 저장 — 분 변화 시 즉시
-             * black_out_checking=true(복구 중) 시 저장 금지:
-             *   _rh = (bo_*_total_min - MCU_elapsed) / 60
-             *       = (원래전체시간 - 0) / 60  ← MCU elapsed 버그로 항상 0
-             *       = 전체시간  →  이전 세션의 올바른 잔여시간을 덮어씌움.
-             * 복구 중 flash 저장은 uart_comm.c (벽시계 기반, 30s 주기)가 전담. */
-            if (state->auto_mode_start && !state->black_out_checking) {
-                settings_set_int("saveCurrentRemainHour", _rh);
-                settings_set_int("saveCurrentRemainMin",  _rm);
-                settings_save_dirty();
-            }
+            /* uart_comm owns the phase + remaining snapshot, including recovery. */
         }
     }
 
@@ -1067,6 +1011,7 @@ void automodestart_unload_start_event_cb(lv_event_t *e)
  * (SCREEN_LOAD_START는 이벤트 콜백 내부에서 호출 → 스택 오버플로우 위험) */
 void automodestart_loaded_event_cb(lv_event_t *e)
 {
+    uint32_t s_mode_start_tick = lv_tick_get();
     bk_lv_ui_t *bk_ui = &bk_lv_tool_ui;
     (void)e;
 
@@ -1076,8 +1021,6 @@ void automodestart_loaded_event_cb(lv_event_t *e)
      * !auto_mode_start 리셋 분기가 실행되지 않으므로 여기서 명시적으로 초기화 */
     s_ferm2_nonzero    = false;
     s_end_triggered    = false;
-    s_ferm2_start_tick = 0;
-    s_ferm2_tick_valid = false;
     s_over_ferm_triggered = false;
     /* 상태 캐시 초기화 — 매 로드 시 강제 적용 */
     s_ams_current_mode = -1;
@@ -1092,6 +1035,7 @@ void automodestart_loaded_event_cb(lv_event_t *e)
     s_last_hum_val  = 0x7FFFFFFF;
     s_last_remain_h = -1;
     s_last_remain_m = -1;
+    bk_printf(TAG "[INFO] automodestart loaded, mode start tick: %u\n", s_mode_start_tick);
 #if AUTO_MODE_TEST
     s_test_mode_tick = lv_tick_get();
     s_test_op_mode   = OP_MODE_FREEZE;
@@ -1172,12 +1116,8 @@ void automodestart_load_start_event_cb(lv_event_t *e)
         g_device_state.send_complete_day   = atoi(_cd);
         g_device_state.send_complete_hour  = atoi(_ch);
         g_device_state.send_complete_min   = atoi(_cmn);
-        /* 완료시각 00:00 → MCU가 0x42(저온발효 자율) 진입 원인.
-         * 설정이 기본값(미설정 00:00)이면 08:00으로 보정 */
-        // if (g_device_state.send_complete_hour == 0 && g_device_state.send_complete_min == 0) {
-        //     g_device_state.send_complete_hour = 8;
-        //     lv_label_set_text(bk_ui->automodestart_AutoModeCompleteHour, "08");
-        // }
+        /* 00:00 is a valid user deadline. Keep its date and hour unchanged;
+         * SerialComm also transmits midnight without replacing it with 08:00. */
     }
 
     /* 정전 복구: 이미 완료된 phase는 00:00으로 강제 표시.

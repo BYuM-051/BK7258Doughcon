@@ -22,7 +22,6 @@
 #include "rtc_sync.h"
 #include <driver/aon_rtc.h>
 #include "ui_config.h"
-#include "custom_func.h"
 
 #define TAG "[uart_comm.c] "
 // #define bk_printf(fmt, ...) do {if(0) bk_printf(fmt, ##__VA_ARGS__); } while(0) // disable printf
@@ -42,16 +41,7 @@ static const int k_comm_recover_threshold = 30; /* 무응답 30회 → 조용히
 static int s_reinit_count = 0;
 static const int k_reinit_cut_threshold = 3;  /* 재초기화 3회(약 90초) 연속 실패 시 오버레이 표시 */
 
-/* 단계 완료 감지: 벽시계(lv_tick) 기반
- * MCU가 X1(운전중) 코드를 처음 보낸 시점부터 설정시간 경과 시 current_op_mode 선행 갱신
- * saveoperation[10/11](remain)은 항상 0이므로 사용 불가 → lv_tick 폴백 사용 */
-static uint8_t  s_prev_op_byte     = 0;
-static uint32_t s_phase_start_tick = 0;
-static bool     s_phase_tick_valid = false;
-
-/* [미구현-B] 정전복구 X0 마커 플래그 (Android blackOutCheckingCmd 대응)
- * uart_comm_init()에서 true 설정 → 첫 STATUS TX에서 payload[21]=0x11 전송
- * saveoperation[14]==0x21 수신 시 false 해제 (미구현-C와 연동) */
+/* Recovery marker: send STATUS[21]=0x11 until STATUS response[14]=0x21. */
 static bool s_blackout_checking_cmd = false;
 
 static void _rebuild_send_save_value1(void);  /* forward decl — defined near uart_comm_trigger_change_setting */
@@ -228,40 +218,35 @@ static void _handle_rx(const uart_packet_t *pkt)
     }
 
     case CMD_RX_CONDATA_ACK: {  /* 0x21: current state + all op params (up to 20 bytes) */
-        /* byte[0]=curr_temp, [1]=curr_hum,
-         * [2..4]=freeze(temp/h/m), [5..7]=defrost(temp/h/m),
-         * [8..11]=ferm1(temp/hum/h/m), [12..15]=ferm2(temp/hum/h/m),
-         * [16..19]=dry(temp/hum/h/m) */
-        if (pkt->data_len >= 2) {
-            st->current_temp     = (int8_t)pkt->data[0];
+        /* SerialComm.SaveValue2: temp/h/m for freeze and defrost;
+         * temp/h/m/humidity for fermentation and optional dry stage. */
+        if (pkt->data_len >= 2)
+        {
+            st->current_temp = (int8_t)pkt->data[0];
             st->current_humidity = pkt->data[1];
         }
-        if (pkt->data_len >= 20) {
-            /* 설정 온도는 항상 갱신 (현재 측정 온도/습도는 위에서 이미 갱신) */
-            st->send_freeze_temp     = pkt->data[2];
-            st->send_defreeze_temp   = pkt->data[5];
-            st->send_ferm1_temp      = pkt->data[8];
-            st->send_ferm2_temp      = pkt->data[12];
-            st->send_dry_temp        = pkt->data[16];
-            /* 습도·시간: 정전 복구 중에는 덮어쓰지 않는다.
-             * MCU NVRAM 습도(ferm1=3%, ferm2=2% 등)가 설정값(70%,80%)과 다를 수 있으며,
-             * 이를 그대로 FIRST_START에 실어 보내면 MCU 검증 실패로 remain=0h0m이 된다.
-             * _blackout_recovery()가 flash에서 올바른 값(send_ferm1_humidity=70% 등)을
-             * 이미 복원해 두었으므로 보호한다. */
-            if (!st->black_out_checking) {
-                st->send_ferm1_humidity  = pkt->data[9];
-                st->send_ferm2_humidity  = pkt->data[13];
-                st->send_dry_humidity    = pkt->data[17];
-                st->send_freeze_hour     = pkt->data[3];
-                st->send_freeze_min      = pkt->data[4];
-                st->send_defreeze_hour   = pkt->data[6];
-                st->send_defreeze_min    = pkt->data[7];
-                st->send_ferm1_hour      = pkt->data[10];
-                st->send_ferm1_min       = pkt->data[11];
-                st->send_ferm2_hour      = pkt->data[14];
-                st->send_ferm2_min       = pkt->data[15];
-                st->send_dry_hour        = pkt->data[18];
-                st->send_dry_min         = pkt->data[19];
+        if (!st->black_out_checking && pkt->data_len >= 16)
+        {
+            st->send_freeze_temp    = (int8_t)pkt->data[2];
+            st->send_freeze_hour    = pkt->data[3];
+            st->send_freeze_min     = pkt->data[4];
+            st->send_defreeze_temp  = (int8_t)pkt->data[5];
+            st->send_defreeze_hour  = pkt->data[6];
+            st->send_defreeze_min   = pkt->data[7];
+            st->send_ferm1_temp     = (int8_t)pkt->data[8];
+            st->send_ferm1_hour     = pkt->data[9];
+            st->send_ferm1_min      = pkt->data[10];
+            st->send_ferm1_humidity = pkt->data[11];
+            st->send_ferm2_temp     = (int8_t)pkt->data[12];
+            st->send_ferm2_hour     = pkt->data[13];
+            st->send_ferm2_min      = pkt->data[14];
+            st->send_ferm2_humidity = pkt->data[15];
+            if (pkt->data_len >= 20)
+            {
+                st->send_dry_temp     = (int8_t)pkt->data[16];
+                st->send_dry_hour     = pkt->data[17];
+                st->send_dry_min      = pkt->data[18];
+                st->send_dry_humidity = pkt->data[19];
             }
         }
         st->start_run1 = false;
@@ -352,8 +337,18 @@ static void _handle_rx(const uart_packet_t *pkt)
     }
 
     case CMD_RX_STATUS: {        /* 0x43 */
-        /* data[0..13] → saveoperation[1..14]; protocol spec has 14 bytes */
+        /* Legacy STATUS has 13 data bytes, Turbo has the extra confirmation byte.
+         * Do not combine a short packet with stale fields from the last response. */
+        if (pkt->data_len < 13 || pkt->data[10] >= 60 || pkt->data[12] >= 60)
+        {
+            return;
+        }
+        int previousStatus[5] = {st->saveoperation[5], st->saveoperation[10],
+                                 st->saveoperation[11], st->saveoperation[12],
+                                 st->saveoperation[13]};
         int len = pkt->data_len < 14 ? pkt->data_len : 14;
+        st->saveoperation[0] = pkt->cmd;
+        st->saveoperation[14] = 0;
         for (int i = 0; i < len; i++) st->saveoperation[i + 1] = pkt->data[i];
 
         /* Extract named fields from saveoperation indices */
@@ -390,40 +385,14 @@ static void _handle_rx(const uart_packet_t *pkt)
                 (uint8_t)st->saveoperation[14],
                 (int)st->black_out_checking);
 
-#if 0   /* [미구현-C] 기존: saveoperation[14]!=0 을 무조건 에러 처리
-         * 문제: 정전복구 첫 STATUS RX에서 [14]=0x21(DEFROST X1 에코)이 오탐됨
-         * Android SerialComm.java: [14]==0x21 → blackOutCheckingCmd 해제(정상) */
-        if (st->saveoperation[14] != 0) {
-            s_error_counting++;
-            UART_LOG("RX 0x43 device error flag=%d err_cnt=%d",
-                     st->saveoperation[14], s_error_counting);
-            if (s_error_counting > 15) {
-                st->error_popup = true;
-                UART_LOG("RX 0x43 error_popup triggered");
-                if (s_error_counting > 34) {
-                    st->error_cut = true;
-                    UART_LOG("RX 0x43 error_cut triggered");
-                }
-            }
-        } else {
-            s_error_counting = 0;
-            st->error_popup  = false;
-            st->error_cut    = false;
-        }
-#endif  /* [미구현-C] 기존 끝 */
-
-        /* [미구현-C 구현] saveoperation[14]==0x21: 정전복구 정상 에코 — 에러 아님
-         * Android: if (saveoperation[14] == 0x21) { blackOutCheckingCmd=false; }
-         *          else if (saveoperation[14] != 0) { errorCounting++; } */
+        /* 0x21 confirms the recovery request; it is not a communication error. */
         if (st->black_out_checking && st->saveoperation[14] == 0x21) {
             /* 정전복구 MCU 에코: 이전 단계 X1 확인 코드 — 정상 */
-            #if 1
-            s_blackout_checking_cmd = false;  /* [미구현-B] X0 마커 해제 */
+            s_blackout_checking_cmd = false;
             s_error_counting = 0;
             st->error_popup  = false;
             st->error_cut    = false;
             UART_LOG("RX 0x43 blackout echo [14]=0x21 → normal confirm, cmd_flag cleared");
-            #endif
         } else if (st->saveoperation[14] != 0) {
             s_error_counting++;
             UART_LOG("RX 0x43 device error flag=%d err_cnt=%d",
@@ -442,151 +411,70 @@ static void _handle_rx(const uart_packet_t *pkt)
             st->error_cut    = false;
         }
 
-        /* Update operation mode from saveoperation[5]
-         * 벽시계로 이미 앞서 갱신된 current_op_mode를 MCU 지연 코드로 되돌리지 않음
-         * MCU 보고 모드 >= 현재 모드일 때만 갱신.
-         *
-         * 단, 새 운전을 막 시작한 직후(first_receive=true, first_start 전송 시 set)에는
-         * MCU가 아직 "이전" 사이클의 마지막 단계(예: 저온발효/FERM2) 코드를 잠깐 더
-         * 보내고 있을 수 있다. 이때 위 규칙을 그대로 적용하면 방금 FREEZE로 리셋한
-         * current_op_mode가 곧바로 이전 사이클의 단계로 되돌아가 버린다
-         * (재운전 시 저온발효로 바로 진입하는 버그). MCU가 실제로 새 단계를
-         * 보고할 때까지는 전진 동기화를 보류한다. */
-        if (st->saveoperation[5] != 0) {
-            int _mcu_mode = _mode_from_op_byte(st->saveoperation[5]);
-            if (st->first_receive) {
-                if (_mcu_mode == st->current_op_mode)
-                    st->first_receive = false;
-            } else if (_mcu_mode >= st->current_op_mode) {
-                st->current_op_mode = _mcu_mode;
+        /* The controller owns stage transitions. A local UI timer must not advance
+         * a phase or persist a phase paired with another phase's remaining time. */
+        uint8_t op = (uint8_t)st->saveoperation[5];
+        int previousMode = st->current_op_mode;
+        int reportedMode = _mode_from_op_byte(op);
+        bool accepted = (op >= 0x10 && op <= 0x12) ||
+                        (op >= 0x20 && op <= 0x22) ||
+                        (op >= 0x30 && op <= 0x34) ||
+                        (op >= 0x40 && op <= 0x44) ||
+                        (op >= 0x50 && op <= 0x52);
+        if (st->first_receive)
+        {
+            accepted = accepted && reportedMode == previousMode &&
+                       ((op & 0x0F) == 0 || (op & 0x0F) == 1);
+            if (accepted)
+            {
+                st->first_receive = false;
             }
         }
-        /* 과발효방지 override 해제:
-         *  0x34/0x44 : MCU 저온발효 시작 → over_ferm_active=false
-         *              automodeend 화면 → automodestart 복귀 → 저온발효 표시 */
-        if (st->over_ferm_active &&
-            (st->saveoperation[5] == 0x34 || st->saveoperation[5] == 0x44)) {
-            st->over_ferm_active       = false;
+        else if (st->auto_mode_start && reportedMode < previousMode)
+        {
+            accepted = false;
+        }
+
+        if (accepted)
+        {
+            st->current_op_mode = reportedMode;
+            bool initialEcho = st->black_out_checking && reportedMode == previousMode &&
+                               (op & 0x0F) == 0;
+            if (!initialEcho)
+            {
+                /* A new phase may have MORE remaining time than the old phase.
+                 * Preserve the controller's value instead of a global decrease-only guard. */
+                st->remain_hour = st->saveoperation[10];
+                st->remain_min  = st->saveoperation[11];
+            }
+            st->elapsed_hour = st->saveoperation[12];
+            st->elapsed_min  = st->saveoperation[13];
+
+            if (st->operation)
+            {
+                settings_set_int("saveOperationTemp", st->current_op_mode);
+                settings_set_int("saveCurrentRemainHour", st->remain_hour);
+                settings_set_int("saveCurrentRemainMin", st->remain_min);
+                static uint32_t statusSaveTick = 0;
+                if (previousMode != reportedMode || lv_tick_elaps(statusSaveTick) >= 30000)
+                {
+                    statusSaveTick = lv_tick_get();
+                    settings_save_dirty();
+                }
+            }
+        }
+        else
+        {
+            /* TX echoes these fields. Rejecting only the UI mode would still
+             * send a stale earlier phase back to the controller next cycle. */
+            st->saveoperation[5] = previousStatus[0];
+            for (int i = 0; i < 4; i++) st->saveoperation[10 + i] = previousStatus[1 + i];
+        }
+
+        if (accepted && st->over_ferm_active && (op == 0x34 || op == 0x44))
+        {
+            st->over_ferm_active = false;
             st->over_ferm_jeon_started = true;
-            bk_printf(TAG "[OVER_FERM] cleared: MCU op=0x%02X → jeon_started flag set\n", st->saveoperation[5]);
-        }
-
-        /* Remain time from saveoperation[10] and [11]
-         *
-         * 정전복구 가드 배경:
-         *   Android MCU: 배터리백업 NVRAM → 항상 정확한 flash 저장값(2h24m) 보고.
-         *   BK7258 MCU: NVRAM 없음 → 정전 후 두 가지 문제 발생:
-         *     ① MCU가 0h0m 보고: flash 복원값 유지 (기존 가드)
-         *     ② MCU가 NVRAM total(2h59m)로 복귀: 증가 방지 (신규 가드)
-         *
-         * 현상(②): 정전 전 마지막 TX payload[17/18]=0h35m, [19/20]=2h24m 수신.
-         *   MCU NVRAM: total = elapsed(35m) + remain(2h24m) = 2h59m 기록.
-         *   복구 후: X0 수신 시 2h24m 에코(1사이클) → 다음 사이클부터 NVRAM total(2h59m) 보고.
-         *   → remain_hour가 2h24m → 2h59m 으로 증가해 표시가 뒤바뀌는 문제 발생.
-         *
-         * 해결: 정전복구 중 MCU가 현재 remain보다 큰 값을 보고하면 갱신 거부.
-         *   MCU가 2h24m → 2h23m → ... 처럼 감소할 때만 갱신 허용.
-         *   35분 후 MCU가 2h24m까지 카운트다운되면 갱신 재개 → 정상 동작. */
-#if 0   /* 기존 가드: 0h0m 방지만 했으나 NVRAM total 역전(2h24m→2h59m) 미대응 */
-        if (!st->black_out_checking ||
-            st->saveoperation[10] != 0 || st->saveoperation[11] != 0) {
-            st->remain_hour = st->saveoperation[10];
-            st->remain_min  = st->saveoperation[11];
-        }
-#endif  /* 기존 가드 끝 */
-        if (!st->black_out_checking) {
-            /* 운전 시작 직후 MCU 미확인 단계(0x41 ACK 전): MCU가 0h0m 보고 시 설정값 유지.
-             * 0x41 ACK 수신 후 operation=true로 전환되면 MCU 보고값 그대로 갱신. */
-            bool _starting = (st->auto_dry_mode_start || st->auto_mode_start) && !st->operation;
-            if (_starting && st->saveoperation[10] == 0 && st->saveoperation[11] == 0) {
-                /* 시작 확인 전 MCU 초기 0h0m → 설정값 유지 (3:00→0:00→3:00 플리커 방지) */
-            } else {
-                st->remain_hour = st->saveoperation[10];
-                st->remain_min  = st->saveoperation[11];
-            }
-        } else if (st->saveoperation[10] == 0 && st->saveoperation[11] == 0) {
-            /* ① MCU가 0h0m: 완료 코드(X2)면 진짜 완료→remain 갱신, 아니면 X0 초기 에코→유지 */
-            uint8_t _mc = (uint8_t)st->saveoperation[5];
-            if (_mc == 0x12 || _mc == 0x22 || _mc == 0x32 || _mc == 0x42 || _mc == 0x52) {
-                st->remain_hour = 0;
-                st->remain_min  = 0;
-            }
-        } else {
-            int _mcu_rm = (int)st->saveoperation[10] * 60 + (int)st->saveoperation[11];
-            int _cur_rm = (int)st->remain_hour * 60 + (int)st->remain_min;
-            if (_mcu_rm <= _cur_rm) {
-                /* MCU가 현재 이하로 보고 → 정상 카운트다운, 갱신 허용 */
-                st->remain_hour = st->saveoperation[10];
-                st->remain_min  = st->saveoperation[11];
-            }
-            /* ② MCU가 현재보다 증가 보고(_mcu_rm > _cur_rm):
-             *    NVRAM total 복귀(2h59m > 2h24m) → flash 복원값 유지 */
-        }
-
-        /* ── 벽시계 기반 단계 완료 감지 → current_op_mode 선행 갱신 ─────────
-         * MCU가 X1(운전중) 코드를 처음 보낸 순간부터 설정시간이 경과하면 완료로 판단.
-         * saveoperation[10/11](remain)은 항상 0이어서 사용 불가.
-         * AUTO_MODE_TEST와 동일한 lv_tick 방식으로 처리 */
-        {
-            uint8_t _op  = (uint8_t)st->saveoperation[5];
-            bool _is_x01 = (_op == 0x10 || _op == 0x11 ||
-                            _op == 0x20 || _op == 0x21 ||
-                            _op == 0x30 || _op == 0x31 ||
-                            _op == 0x40 || _op == 0x41);
-            bool _is_x1  = (_op == 0x11 || _op == 0x21 ||
-                            _op == 0x31 || _op == 0x41);
-
-            /* 오피 바이트가 바뀌거나 X1이 처음 나타날 때 타이머 시작 */
-            if (_op != s_prev_op_byte) {
-                s_prev_op_byte = _op;
-                if (_is_x01) {
-                    s_phase_start_tick = lv_tick_get();
-                    s_phase_tick_valid = true;
-                } else {
-                    s_phase_tick_valid = false;
-                }
-            }
-            if (_is_x1 && !s_phase_tick_valid) {
-                s_phase_start_tick = lv_tick_get();
-                s_phase_tick_valid = true;
-            }
-
-            /* 설정시간 경과 → current_op_mode 선행 갱신
-             * MCU op 코드가 아닌 current_op_mode(UI 기준 현재 단계)로 설정시간 결정
-             * MCU가 계속 0x11을 보내도 defrost→ferm1→ferm2 단계 타이머가 올바르게 동작 */
-            if (_is_x1 && s_phase_tick_valid) {
-                int cfg_min = 0;
-                switch (st->current_op_mode) {
-                    case OP_MODE_FREEZE:  cfg_min = st->send_freeze_hour  * 60 + st->send_freeze_min;  break;
-                    case OP_MODE_DEFROST: cfg_min = st->send_defreeze_hour * 60 + st->send_defreeze_min; break;
-                    case OP_MODE_FERM1:   cfg_min = st->send_ferm1_hour   * 60 + st->send_ferm1_min;   break;
-                    case OP_MODE_FERM2:   cfg_min = st->send_ferm2_hour   * 60 + st->send_ferm2_min;   break;
-                    default: break;
-                }
-                uint32_t cfg_ms  = (uint32_t)cfg_min * 60u * 1000u;
-                uint32_t elapsed = lv_tick_elaps(s_phase_start_tick);
-                if (cfg_ms > 0 && elapsed >= cfg_ms &&
-                        st->current_op_mode < OP_MODE_FERM2) {
-                    int prev = st->current_op_mode;
-                    st->current_op_mode++;
-                    UART_LOG("wall-clock phase done: op=0x%02X cur_op %d→%d elapsed=%ums cfg=%ums",
-                             _op, prev, st->current_op_mode,
-                             (unsigned)elapsed, (unsigned)cfg_ms);
-                    s_phase_tick_valid = false;  /* 다음 X1 패킷에서 다음 단계 타이머 재시작 */
-                }
-            }
-        }
-
-        settings_set_int("saveOperationTemp",     st->current_op_mode);
-        settings_set_int("saveCurrentRemainHour", st->remain_hour);
-        settings_set_int("saveCurrentRemainMin",  st->remain_min);
-        /* Power-off recovery: save at most once per 30 s to avoid flash wear */
-        {
-            static uint32_t s_status_save_tick = 0;
-            if (lv_tick_elaps(s_status_save_tick) >= 30000) {
-                s_status_save_tick = lv_tick_get();
-                settings_save_dirty();
-            }
         }
         g_uart_rx_seq++;
         break;
@@ -633,7 +521,7 @@ static void _handle_rx(const uart_packet_t *pkt)
 static void _write_process(void)
 {
     device_state_t *st = &g_device_state;
-    uint8_t payload[UART_MAX_DATA];
+    uint8_t payload[UART_MAX_DATA] = {0};
     int yr2, mo, day, hr, mn, sc;
     _get_rtc(&yr2, &mo, &day, &hr, &mn, &sc);
 
@@ -751,10 +639,11 @@ static void _write_process(void)
                     drive_mode       = (uint8_t)st->first_operator_mode;
                     st->first_send   = false;
                     st->first_receive = true;
-                    /* 새 운전 시작: current_op_mode와 벽시계 타이머 초기화 */
                     st->current_op_mode = _mode_from_op_byte(st->first_operator_mode);
-                    s_prev_op_byte      = 0;
-                    s_phase_tick_valid  = false;
+                } else if (st->first_receive) {
+                    /* Retry the requested X0 until a matching stage is received.
+                     * A stale previous-run STATUS must not replace the recovery command. */
+                    drive_mode = (uint8_t)st->first_operator_mode;
                 } else {
                     /* Android 원본: saveoperation[5] 그대로 에코
                      * MCU는 0x11(냉동중), 0x21(해동중) 등 자신의 상태 코드를 받으면
@@ -799,139 +688,61 @@ static void _write_process(void)
         payload[9]  = (uint8_t)mn;
         payload[10] = (uint8_t)sc;
 
-        /* Complete time */
-        payload[11] = (uint8_t)(st->send_complete_year  % 100);
-        payload[12] = (uint8_t)st->send_complete_month;
-        payload[13] = (uint8_t)st->send_complete_day;
-        payload[14] = (uint8_t)st->send_complete_hour;
-        payload[15] = (uint8_t)st->send_complete_min;
-        payload[16] = (uint8_t)sc;   /* Android: currentTime.getSecond() — 현재 초를 완료시각 초 필드에 동일하게 */
-
-        /* payload[17/18]: 동작시간 (Android 주석: data7 시/분 동작시간) */
+        /* Midnight is valid: the full date distinguishes 00:00 from no deadline.
+         * Android uses the current seconds in both date/time fields. */
+        if (st->operation && !st->manual_start)
         {
-            int  _drive_phase = _mode_from_op_byte(drive_mode);
-            bool _phase_done  = (st->current_op_mode > _drive_phase);
+            payload[11] = (uint8_t)(st->send_complete_year % 100);
+            payload[12] = (uint8_t)st->send_complete_month;
+            payload[13] = (uint8_t)st->send_complete_day;
+            payload[14] = (uint8_t)st->send_complete_hour;
+            payload[15] = (uint8_t)st->send_complete_min;
+            payload[16] = (uint8_t)sc;
+        }
 
-            if (st->black_out_checking) {
-                if (st->manual_start) {
-                    /* 수동운전 정전복구: elapsed/total 미사용 (수동운전은 시간 설정 없음).
-                     * auto_mode_start 경로에서 로드된 send_ferm*_hour/min이 잔류하면
-                     * blackout 계산 경로에서 자동운전 발효시간이 payload에 혼입되므로
-                     * 명시적으로 0 전송. */
-                    payload[17] = 0; payload[18] = 0;
-                    payload[19] = 0; payload[20] = 0;
-                } else {
-                /* 완료 코드(X2): blackout 경로에서도 elapsed=0 전송 */
-                bool _is_done_code = (drive_mode == 0x12 || drive_mode == 0x22 ||
-                                      drive_mode == 0x32 || drive_mode == 0x42 ||
-                                      drive_mode == 0x52);
-                if (_is_done_code) {
-                    payload[17] = 0; payload[18] = 0;
-                    payload[19] = 0; payload[20] = 0;
-                } else {
-                /* 정전복구: elapsed = 원래 단계 설정시간 - 현재 잔여시간
-                 * send_freeze_hour = cur_remain(10h26m) 이므로 그대로 쓰면 elapsed=0.
-                 * bo_freeze_total_min = 원래 설정시간(14h1m)을 사용해야
-                 * elapsed=3h35m → MCU가 NVRAM(14h1m)-3h35m=10h26m 로 올바르게 echo. */
-                int _total_min = 0;
-                switch (_drive_phase) {
-                    case OP_MODE_FREEZE:
-                        _total_min = (st->bo_freeze_total_min  > 0) ? st->bo_freeze_total_min
-                                     : st->send_freeze_hour  * 60 + st->send_freeze_min;
-                        break;
-                    case OP_MODE_DEFROST:
-                        _total_min = (st->bo_defrost_total_min > 0) ? st->bo_defrost_total_min
-                                     : st->send_defreeze_hour * 60 + st->send_defreeze_min;
-                        break;
-                    case OP_MODE_FERM1:
-                        _total_min = (st->bo_ferm1_total_min   > 0) ? st->bo_ferm1_total_min
-                                     : st->send_ferm1_hour   * 60 + st->send_ferm1_min;
-                        break;
-                    case OP_MODE_FERM2:
-                        _total_min = (st->bo_ferm2_total_min   > 0) ? st->bo_ferm2_total_min
-                                     : st->send_ferm2_hour   * 60 + st->send_ferm2_min;
-                        break;
-                    case OP_MODE_DRY:
-                        _total_min = st->send_dry_hour * 60 + st->send_dry_min;
-                        break;
+        /* SerialComm.writeProcess: [17/18] elapsed, [19/20] remaining.
+         * Sending the original total as remaining extends the controller's run. */
+        bool phaseDone = drive_mode == 0x12 || drive_mode == 0x22 ||
+                         drive_mode == 0x32 || drive_mode == 0x42 ||
+                         drive_mode == 0x52;
+        if (st->operation && !phaseDone)
+        {
+            int elapsed = st->saveoperation[12] * 60 + st->saveoperation[13];
+            int remaining = st->remain_hour * 60 + st->remain_min;
+            if (st->black_out_checking && !st->manual_start)
+            {
+                int total = 0;
+                switch (_mode_from_op_byte(drive_mode))
+                {
+                    case OP_MODE_FREEZE: total = st->bo_freeze_total_min; break;
+                    case OP_MODE_DEFROST: total = st->bo_defrost_total_min; break;
+                    case OP_MODE_FERM1: total = st->bo_ferm1_total_min; break;
+                    case OP_MODE_FERM2: total = st->bo_ferm2_total_min; break;
+                    case OP_MODE_DRY: total = st->send_dry_hour * 60 + st->send_dry_min; break;
                     default: break;
                 }
-                int _remain_min = (int)st->remain_hour * 60 + (int)st->remain_min;
-                int _elap_min   = _total_min - _remain_min;
-                if (_elap_min < 0) _elap_min = 0;
-                payload[17] = (uint8_t)(_elap_min / 60);
-                payload[18] = (uint8_t)(_elap_min % 60);
-                /* Android: writebuffer[19/20] = blackOutSendFreezeHour/Min (원래 총 설정시간)
-                 * MCU가 NVRAM 재설정 시 total 기준: NVRAM_total - elapsed = remain */
-                payload[19] = (uint8_t)(_total_min / 60);
-                payload[20] = (uint8_t)(_total_min % 60);
-                } /* end else: _is_done_code */
-                } /* end else: auto blackout elapsed/total */
-            } else {
-#if 0   /* [미구현-A] 기존: X0=0, X1=saveoperation[12/13] 에코 — blackout 아닐 때만 사용하던 로직
-         * X0 시작 코드: 0 전송 → MCU echo loop 초기화
-         * X1 운전 중:  saveoperation[12/13] 에코 (Android SerialComm 동일)
-         * X2 완료 코드: 0 전송 */
-                (void)_drive_phase; (void)_phase_done;
-#endif  /* [미구현-A] 기존 끝 */
-                /* 정전복구 아닐 때 기존 로직 유지 */
-                if (drive_mode == 0x12 || drive_mode == 0x22 ||
-                        drive_mode == 0x32 || drive_mode == 0x42 ||
-                        drive_mode == 0x52) {
-                    /* 단계 완료 코드 (DRY 0x52 포함): 0 전송 → MCU 재시작 방지
-                     * 0x52에 non-zero payload[17/18]을 보내면 MCU가 DRY 재시작하는 버그 */
-                    payload[17] = 0;
-                    payload[18] = 0;
-                } else if (drive_mode == 0x10 || drive_mode == 0x20 ||
-                           drive_mode == 0x30 || drive_mode == 0x40) {
-                    /* X0 시작 코드: 0으로 echo loop 초기화 */
-                    payload[17] = 0;
-                    payload[18] = 0;
-                } else if (drive_mode == 0x11 || drive_mode == 0x21 ||
-                           drive_mode == 0x31 || drive_mode == 0x41) {
-                    /* X1 운전 중: 완료 감지되면 0, 아니면 [12/13] 에코 */
-                    payload[17] = _phase_done ? 0 : (uint8_t)st->saveoperation[12];
-                    payload[18] = _phase_done ? 0 : (uint8_t)st->saveoperation[13];
-                } else if (drive_mode >= 0x50) {
-                    /* 0x50(X0), 0x51(X1): elapsed = total - remain 계산 전송
-                     * DRY MCU는 saveoperation[12/13](elapsed)를 0으로 유지하고
-                     * saveoperation[10/11](remain)만 카운트다운함.
-                     * payload[17/18]는 운전 경과시간(동작시간)이어야 하므로
-                     * total - remain 으로 역산하여 전송. */
-                    {
-                        int _dry_total  = st->send_dry_hour * 60 + st->send_dry_min;
-                        int _dry_remain = (int)st->remain_hour * 60 + (int)st->remain_min;
-                        int _dry_elap   = _dry_total - _dry_remain;
-                        if (_dry_elap < 0) _dry_elap = 0;
-                        payload[17] = (uint8_t)(_dry_elap / 60);
-                        payload[18] = (uint8_t)(_dry_elap % 60);
-                    }
-                } else {
-                    payload[17] = (uint8_t)st->saveoperation[12];
-                    payload[18] = (uint8_t)st->saveoperation[13];
-                }
+                elapsed = total - remaining;
             }
+            else if (drive_mode == 0x50 || drive_mode == 0x51)
+            {
+                elapsed = st->send_dry_hour * 60 + st->send_dry_min - remaining;
+            }
+            else if (!st->manual_start && (drive_mode & 0x0F) == 0)
+            {
+                elapsed = 0;
+            }
+            if (st->manual_start)
+            {
+                remaining = 0;
+            }
+            if (elapsed < 0) elapsed = 0;
+            payload[17] = (uint8_t)(elapsed / 60);
+            payload[18] = (uint8_t)(elapsed % 60);
+            payload[19] = (uint8_t)(remaining / 60);
+            payload[20] = (uint8_t)(remaining % 60);
         }
-        if (!st->black_out_checking) {
-            /* 정상 운전: MCU remain 에코 (Android: writebuffer[19/20] = saveoperation[10/11]) */
-            payload[19] = (uint8_t)st->remain_hour;
-            payload[20] = (uint8_t)st->remain_min;
-        }
-        /* 정전복구 시: payload[19/20] = 원래 총 설정시간 → 위 black_out_checking 블록에서 설정 */
-
-#if 0   /* [미구현-B] 기존: error_popup 여부만으로 payload[21] 결정
-         * 문제: 정전복구 첫 X0 전송 시 payload[21]=0x11(이전 단계 X1 마커)이 전송되지 않음
-         * Android: blackOutCheckingCmd=true → payload[21]=0x11, false → 0x00 */
-        payload[21] = st->error_popup ? 0x11 : 0x00;
-#endif  /* [미구현-B] 기존 끝 */
-        /* [미구현-B 구현] 정전복구 첫 STATUS TX: payload[21]=0x11 (이전 단계 X1 마커)
-         * Android SerialComm.java: if (blackOutCheckingCmd) writebuffer[21]=0x11
-         * saveoperation[14]==0x21 수신 시 s_blackout_checking_cmd=false → 0x00 복귀 */
-        if (st->black_out_checking && s_blackout_checking_cmd) {
-            payload[21] = 0x11;
-        } else {
-            payload[21] = st->error_popup ? 0x11 : 0x00;
-        }
+        payload[21] = ((st->black_out_checking && s_blackout_checking_cmd) ||
+                       st->error_popup) ? 0x11 : 0x00;
         payload[22] = st->error_cut   ? 0x88 : 0x00;
 
         bk_printf(TAG "[UART] TX 0x33 payload[17/18]=%dh%dm [19/20]=%dh%dm (drive=0x%02X)\n",
@@ -999,15 +810,13 @@ void uart_comm_init(void)
     hal_uart_open();
 
     if (g_device_state.black_out_checking) {
-        /* 정전복구: SETDATA(0x10)는 MCU 상태를 IDLE로 초기화하므로 건너뜀.
-         * CONDATA(0x11)는 MCU 현재 상태를 조회하며 리셋하지 않으므로 유지.
-         * CONDATA_ACK(0x21) 수신 후 MCU가 remain을 정상 보고하기 시작한다. */
-        g_device_state.start_run1 = false;   /* SETDATA 건너뜀 */
-        g_device_state.start_run2 = false;    /* CONDATA → CONDATA_ACK → STATUS X0 */
-        g_device_state.start_run  = true;
-        s_blackout_checking_cmd   = true;    /* [미구현-B] 첫 X0에 payload[21]=0x11 마커 */
-        UART_LOG("init: blackout recovery — skip SETDATA, CONDATA direct → STATUS X0");
+        /* Resume directly with STATUS X0. Do not reset/reload saved parameters. */
+        g_device_state.start_run1 = false;
+        g_device_state.start_run2 = false;
+        g_device_state.start_run = true;
+        s_blackout_checking_cmd = true;
     } else {
+        s_blackout_checking_cmd = false;
         g_device_state.start_run1 = true;
         g_device_state.start_run2 = false;
         g_device_state.start_run  = false;

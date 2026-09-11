@@ -32,6 +32,7 @@
 #include "hardware_hal.h"
 #include "device_state.h"
 #include "uart_comm.h"
+#include "blackout_recovery.h"
 #include "lv_vendor.h"
 #include <os/os.h>
 
@@ -504,128 +505,85 @@ static void _blackout_recovery(void)
         sd->ferm2_hour     = _sget_int("CurrentSaveFermentation2TimeHour");
         sd->ferm2_min      = _sget_int("CurrentSaveFermentation2TimeMin");
 
-        int total_freeze = sd->freeze_hour * 60 + sd->freeze_min;
+        int total_freeze   = sd->freeze_hour * 60 + sd->freeze_min;
         int total_unfreeze = sd->unfreeze_hour * 60 + sd->unfreeze_min;
-        int total_ferm1    = sd->ferm1_hour  * 60 + sd->ferm1_min;
-        int total_ferm2    = sd->ferm2_hour  * 60 + sd->ferm2_min;
+        int total_ferm1    = sd->ferm1_hour * 60 + sd->ferm1_min;
+        int total_ferm2    = sd->ferm2_hour * 60 + sd->ferm2_min;
+        int cur_remain_h   = _sget_int("saveCurrentRemainHour");
+        int cur_remain_m   = _sget_int("saveCurrentRemainMin");
 
-        int cur_remain_h = _sget_int("saveCurrentRemainHour");
-        int cur_remain_m = _sget_int("saveCurrentRemainMin");
-        int cur_remain   = cur_remain_h * 60 + cur_remain_m; /* 현재 행정 잔여분 */
-
-        /* 재시작 시각 저장 */
         main_activity_save_current_calendar();
-        sd->remain_hour = _sget_int("saveRemainHour");
-        sd->remain_min  = _sget_int("saveRemainMin");
-        int total_remain = sd->remain_hour * 60 + sd->remain_min; /* 전체 잔여분 */
-
-        /* 재시작 시각 (struct tm) */
         struct tm t_now = {0};
-        t_now.tm_year  = ma->save_current_year  - 1900;
-        t_now.tm_mon   = ma->save_current_month - 1;
-        t_now.tm_mday  = ma->save_current_day;
-        t_now.tm_hour  = ma->save_current_hour;
-        t_now.tm_min   = ma->save_current_min;
-        t_now.tm_sec   = 0;
+        t_now.tm_year = ma->save_current_year - 1900;
+        t_now.tm_mon  = ma->save_current_month - 1;
+        t_now.tm_mday = ma->save_current_day;
+        t_now.tm_hour = ma->save_current_hour;
+        t_now.tm_min  = ma->save_current_min;
+        t_now.tm_isdst = -1;
         time_t t_restart = mktime(&t_now);
 
-        /* 원래 완료 시각 */
-        struct tm t_origin = {0};
-        t_origin.tm_year = _sget_int("originCompleteYear")  - 1900;
-        t_origin.tm_mon  = _sget_int("originCompleteMonth") - 1;
-        t_origin.tm_mday = _sget_int("originCompleteDay");
-        t_origin.tm_hour = _sget_int("originCompleteHour");
-        t_origin.tm_min  = _sget_int("originCompleteMin");
-        t_origin.tm_sec  = 0;
-        time_t t_orig = mktime(&t_origin);
-
-        /* 재시작 + 발효1 + 발효2 후 완료 시각 (초) */
-        time_t t_ferm_end = t_restart + (time_t)(total_ferm1 + total_ferm2) * 60;
-
-        /* 원래 완료 - (재시작+발효) = 해동 잔여 가능 시간 */
-        double diff_sec  = difftime(t_orig, t_ferm_end);
-        int    check_min = (int)(diff_sec / 60.0);
-
+        /* CurrentComplete* belongs to this run and includes earlier recoveries.
+         * Older firmware only wrote originComplete* on the END screen, so it
+         * can still describe a previous run (or the factory default). */
+        struct tm t_complete = {0};
+        t_complete.tm_year = _sget_int("CurrentCompleteYear") - 1900;
+        t_complete.tm_mon  = _sget_int("CurrentCompleteMonth") - 1;
+        t_complete.tm_mday = _sget_int("CurrentCompleteDay");
+        t_complete.tm_hour = _sget_int("CurrentCompleteHour");
+        t_complete.tm_min  = _sget_int("CurrentCompleteMin");
+        t_complete.tm_isdst = -1;
+        time_t target = mktime(&t_complete);
         ma_blackout_t *bo = &ma->blackout;
+        memset(bo, 0, sizeof(*bo));
 
-        if (save_op == 0) { /* 냉동 중 정전 */
-            total_remain += cur_remain - total_freeze;
-            bo->freeze_hour   = cur_remain_h;
-            bo->freeze_min    = cur_remain_m;
-            bo->unfreeze_hour = sd->unfreeze_hour;
-            bo->unfreeze_min  = sd->unfreeze_min;
-            bo->ferm1_hour    = sd->ferm1_hour;
-            bo->ferm1_min     = sd->ferm1_min;
-            bo->ferm2_hour    = sd->ferm2_hour;
-            bo->ferm2_min     = sd->ferm2_min;
-
-        } else if (save_op == 1) { /* 해동 중 정전 */
-            if (diff_sec < 0) {
-                /* 해동 시간조차 없음 → 냉동·해동 건너뜀 */
-                total_remain -= total_freeze + total_unfreeze;
-                ma->first_operator_mode = 0x30;  /* FERM1 X0: skip freeze/defrost */
-                bo->freeze_hour   = 0; bo->freeze_min   = 0;
-                bo->unfreeze_hour = 0; bo->unfreeze_min = 0;
-                bo->ferm1_hour    = sd->ferm1_hour; bo->ferm1_min = sd->ferm1_min;
-                bo->ferm2_hour    = sd->ferm2_hour; bo->ferm2_min = sd->ferm2_min;
-            } else {
-                total_remain += check_min - total_freeze - total_unfreeze;
-                bo->freeze_hour   = 0; bo->freeze_min   = 0;
-                bo->unfreeze_hour = (check_min / 60 < 0) ? 0 : check_min / 60;
-                bo->unfreeze_min  = (check_min % 60 < 0) ? 0 : check_min % 60;
-                bo->ferm1_hour    = sd->ferm1_hour; bo->ferm1_min = sd->ferm1_min;
-                bo->ferm2_hour    = sd->ferm2_hour; bo->ferm2_min = sd->ferm2_min;
+        if (ma->day_period != 0 && save_op >= OP_MODE_FREEZE && save_op <= OP_MODE_FERM2)
+        {
+            const int totals[4] = { total_freeze, total_unfreeze, total_ferm1, total_ferm2 };
+            blackoutPlan_t plan;
+            if (!blackoutBuildPlan(save_op, cur_remain_h * 60 + cur_remain_m,
+                                   totals, t_restart, target, &plan))
+            {
+                bk_printf(TAG "[BLACKOUT] invalid recovery times; saved snapshot retained\n");
+                g_device_state.operation = false;
+                return;
             }
-
-        } else if (save_op == 2) { /* 발효1 중 정전 */
-            total_remain += cur_remain - total_freeze - total_unfreeze - total_ferm1;
-            bo->freeze_hour = 0; bo->freeze_min = 0;
-            bo->unfreeze_hour = 0; bo->unfreeze_min = 0;
-            // bo->ferm1_hour = cur_remain_h; bo->ferm1_min = cur_remain_m;
-            bo->ferm1_hour = sd->ferm1_hour; bo->ferm1_min = sd->ferm1_min;
-
-            bo->ferm2_hour = sd->ferm2_hour; bo->ferm2_min = sd->ferm2_min;
-
-        } else if (save_op == 3) { /* 발효2 중 정전 */
-            total_remain += cur_remain - total_freeze - total_unfreeze - total_ferm1 - total_ferm2;
-            bo->freeze_hour = 0; bo->freeze_min = 0;
-            bo->unfreeze_hour = 0; bo->unfreeze_min = 0;
-            bo->ferm1_hour = 0; bo->ferm1_min = 0;
-            // bo->ferm2_hour = cur_remain_h; bo->ferm2_min = cur_remain_m;
-            bo->ferm2_hour = sd->ferm2_hour; bo->ferm2_min = sd->ferm2_min;
-
-        } else if (save_op == 7 || save_op == 8 ||
-                   save_op == 9 || save_op == 10) { /* 과발효방지 포함 완료 */
-            total_remain += cur_remain - total_freeze - total_unfreeze - total_ferm1 - total_ferm2;
-            bo->freeze_hour = 0; bo->freeze_min = 0;
-            bo->unfreeze_hour = 0; bo->unfreeze_min = 0;
-            bo->ferm1_hour = 0; bo->ferm1_min = 0;
-            bo->ferm2_hour = 0; bo->ferm2_min = 0;
+            bo->freeze_hour   = plan.remaining[0] / 60;
+            bo->freeze_min    = plan.remaining[0] % 60;
+            bo->unfreeze_hour = plan.remaining[1] / 60;
+            bo->unfreeze_min  = plan.remaining[1] % 60;
+            bo->ferm1_hour    = plan.remaining[2] / 60;
+            bo->ferm1_min     = plan.remaining[2] % 60;
+            bo->ferm2_hour    = plan.remaining[3] / 60;
+            bo->ferm2_min     = plan.remaining[3] % 60;
+            bo->complete = plan.complete;
+            if (plan.complete)
+            {
+                save_op = total_ferm2 > 0 ? 8 : 7;
+                ma->first_operator_mode = total_ferm2 > 0 ? 0x43 : 0x33;
+                cur_remain_h = cur_remain_m = 0;
+            }
+            else
+            {
+                save_op = plan.phase;
+                ma->first_operator_mode = (plan.phase + 1) << 4;
+                cur_remain_h = plan.remaining[plan.phase] / 60;
+                cur_remain_m = plan.remaining[plan.phase] % 60;
+            }
+            t_complete = *localtime(&plan.completeTime);
+        }
+        else if (save_op == 7 || save_op == 8 || save_op == 9 || save_op == 10)
+        {
             bo->complete = true;
+            cur_remain_h = cur_remain_m = 0;
         }
-
-        /* 새 완료 시각 계산 */
-        int tot_h, tot_m;
-        if (ma->day_period != 0) {
-            tot_h = total_remain / 60; if (tot_h < 0) tot_h = 0;
-            tot_m = total_remain % 60; if (tot_m < 0) tot_m = 0;
-        } else {
-            tot_h = cur_remain_h;
-            tot_m = cur_remain_m;
-        }
-        struct tm t_complete = t_now;
-        t_complete.tm_hour += tot_h;
-        t_complete.tm_min  += tot_m;
-        mktime(&t_complete); /* normalize */
 
         sd->complete_year  = t_complete.tm_year + 1900;
-        sd->complete_month = t_complete.tm_mon  + 1;
+        sd->complete_month = t_complete.tm_mon + 1;
         sd->complete_day   = t_complete.tm_mday;
         sd->complete_hour  = t_complete.tm_hour;
         sd->complete_min   = t_complete.tm_min;
-
-        bo->checking     = true;
-        bo->checking_cmd = false;
+        bo->checking = true;
+        bo->checking_cmd = true;
 
         /* ── device_state에 복구 파라미터 복사 ── */
         g_device_state.send_freeze_temp    = sd->freeze_temp;
@@ -642,10 +600,8 @@ static void _blackout_recovery(void)
         g_device_state.send_ferm2_humidity = sd->ferm2_hum;
         g_device_state.send_ferm2_hour     = bo->ferm2_hour;
         g_device_state.send_ferm2_min      = bo->ferm2_min;
-        /* TX payload[17/18] elapsed = bo_total - remain.
-         * send_freeze_hour = cur_remain(10h26m) ≠ orig_total(14h1m) → elapsed=0 이 되어
-         * MCU가 NVRAM total(14h1m)을 기준으로 0부터 카운트다운 → NVRAM 복귀 버그.
-         * 원래 설정시간을 별도 보관하여 TX에서 정확한 elapsed를 계산한다. */
+        /* Original stage totals are for elapsed = total - remaining and history.
+         * STATUS[19/20] carries remaining minutes, never these totals. */
         g_device_state.bo_freeze_total_min  = total_freeze;
         g_device_state.bo_defrost_total_min = total_unfreeze;
         g_device_state.bo_ferm1_total_min   = total_ferm1;
@@ -668,11 +624,19 @@ static void _blackout_recovery(void)
         }
         g_device_state.first_operator_mode = ma->first_operator_mode;
         g_device_state.black_out_checking  = true;
-        /* payload[19/20] 기준값: saveCurrentRemainHour/Min (현재 행정 잔여시간).
-         * 정전 후 완전 재부팅 시 RAM이 0으로 초기화되므로 명시적으로 설정해야 한다.
-         * (소프트 리셋은 이전 remain_hour 값이 RAM에 잔류해 우연히 동작하나, 비신뢰성) */
+        /* Use the selected recovery phase, including freeze/defrost skips. */
         g_device_state.remain_hour = cur_remain_h;
         g_device_state.remain_min  = cur_remain_m;
+        g_device_state.current_op_mode = save_op;
+        g_device_state.first_send = !bo->complete;
+        g_device_state.first_receive = false;
+        if (bo->complete)
+        {
+            g_device_state.saveoperation[5] = ma->first_operator_mode;
+        }
+        settings_set_int("saveOperationTemp", save_op);
+        settings_set_int("saveCurrentRemainHour", cur_remain_h);
+        settings_set_int("saveCurrentRemainMin", cur_remain_m);
         /* payload[1]=day_period: zero-init이면 0 → TX에서 수동모드로 분류(day=0).
          * saveDayPeriod 값을 명시적으로 복사해 오토모드 분기가 유지되도록 함 */
         g_device_state.day_period  = ma->day_period;
@@ -736,12 +700,13 @@ static void _blackout_recovery(void)
                 }
                 g_device_state.auto_mode_start = true;
                 g_device_state.operation       = true;
-                /* 정전복구 시퀀스: SETDATA(0x10) 건너뜀 → CONDATA(0x11) → STATUS X0.
-                 * uart_comm_init()이 start_run2=true 로 설정하여 CONDATA부터 시작.
-                 * CONDATA_ACK 후 start_run=true → STATUS X0 + payload[19/20]=cur_remain_h/m. */
-                uart_comm_trigger_start_run();  /* start_run=true; uart_comm_init()이 false로 덮어씀 */
-                bk_printf(TAG "[BLACKOUT] auto recovery: op=0x%02x CONDATA→STATUS X0\n",
-                       ma->first_operator_mode);
+                /* Resume with STATUS X0 + saved elapsed/remaining, as in SerialComm.
+                 * A fresh FIRST_START would reset the controller's stage durations. */
+                uart_comm_trigger_start_run();
+                bk_printf(TAG "[BLACKOUT] auto recovery: op=0x%02x remain=%dh%dm complete=%04d-%02d-%02d %02d:%02d\n",
+                          ma->first_operator_mode, cur_remain_h, cur_remain_m,
+                          sd->complete_year, sd->complete_month, sd->complete_day,
+                          sd->complete_hour, sd->complete_min);
                 _load_screen(SCR_AUTOMODE_START);
             }
         }
@@ -776,6 +741,9 @@ static void _blackout_recovery(void)
         g_device_state.remain_hour         = (uint8_t)bo->dry_hour;
         g_device_state.remain_min          = (uint8_t)bo->dry_min;
         g_device_state.first_operator_mode = 0x50;
+        g_device_state.first_send = true;
+        g_device_state.first_receive = false;
+        g_device_state.current_op_mode = OP_MODE_DRY;
         g_device_state.black_out_checking  = true;
         g_device_state.auto_dry_mode_start = true;
         g_device_state.operation           = true;

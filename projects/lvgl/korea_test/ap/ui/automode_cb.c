@@ -1101,9 +1101,7 @@ void automode_startbt_event_cb(lv_event_t *e)
         state->remain_min      = state->send_freeze_min;
     }
 
-    /* 정전 복구 대비: 전체 운전 총 시간을 저장
-     * _blackout_recovery()는 saveRemainHour/Min을 원래 총 운전 시간(냉동+해동+발효1+발효2)으로
-     * 가정하여 정전 시점별 잔여시간을 역산한다. 여기서 한 번만 저장하면 된다. */
+    // Total duration retained for records/compatibility; recovery uses each stage.
     {
         int total_op_min = (state->send_freeze_hour  + state->send_defreeze_hour +
                             state->send_ferm1_hour   + state->send_ferm2_hour) * 60 +
@@ -1112,6 +1110,14 @@ void automode_startbt_event_cb(lv_event_t *e)
         settings_set_int("saveRemainHour", total_op_min / 60);
         settings_set_int("saveRemainMin",  total_op_min % 60);
     }
+
+    // Capture this run's target before any UART command can start it.
+    settings_copy("originCompleteYear",  "CurrentCompleteYear");
+    settings_copy("originCompleteMonth", "CurrentCompleteMonth");
+    settings_copy("originCompleteDay",   "CurrentCompleteDay");
+    settings_copy("originCompleteHour",  "CurrentCompleteHour");
+    settings_copy("originCompleteMin",   "CurrentCompleteMin");
+    state->black_out_checking = false;
 
     settings_set_int("saveDayPeriod",         state->day_period);         /* 정전 복구 시 자동/수동 분기 식별 */
     settings_set_int("saveOperationTemp",     state->current_op_mode);    /* 첫 행정 (냉동 or 해동) */
