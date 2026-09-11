@@ -601,8 +601,8 @@ static void _rclr_automode(bk_lv_ui_t *bk_ui)
     int cmn = atoi(lv_label_get_text(bk_ui->automode_AutoModeCompleteMin));
     bk_printf(TAG "Complete Time: %04d-%02d-%02d %02d:%02d\n", cy, cm, cd, ch, cmn);
 
-    /* 초기 empty state(날짜 미입력): 색상 변경 없음 */
-    if (cy < 2020 || cy > 2099 || cm < 1 || cm > 12 || cd < 1 || cd > 31) return;
+    // 초기 empty state(날짜 미입력): 색상 변경 없음
+    // if (cy < 2020 || cy > 2099 || cm < 1 || cm > 12 || cd < 1 || cd > 31) return; // 조건 검사식으로 . 아래로.
 
     /* 현재 RTC 시각 */
     int ry, rm_r, rd_r, rh_r, rmn_r, rs_r;
@@ -647,7 +647,7 @@ static void _rclr_automode(bk_lv_ui_t *bk_ui)
     long long max_mins  = rtc_mins + (long long)(10 * 24 * 60);  /* 10일 상한 */
 
     /* valid: 데드라인 이후 AND 10일 이내 */
-    isValidDate = (comp_mins > rtc_mins + (long long)op_min) && (comp_mins <= max_mins);
+    isValidDate = (comp_mins > rtc_mins + (long long)op_min) && (comp_mins <= max_mins) && !(cy < 2020 || cy > 2099 || cm < 1 || cm > 12 || cd < 1 || cd > 31);
     bk_printf(TAG "_same_day: %d | isValidDate: %d | rtc_mins: %lld | comp_mins: %lld | max_mins: %lld\n", _same_day, isValidDate, rtc_mins, comp_mins, max_mins);
     lv_color_t _clr = isValidDate ? lv_color_hex(0x3C3A3D) : lv_color_hex(0xFF0000);
     lv_obj_set_style_text_color(bk_ui->automode_AutoModeCompleteYear,  _clr, 0);
